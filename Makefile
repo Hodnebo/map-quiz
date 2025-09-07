@@ -1,0 +1,49 @@
+.DEFAULT_GOAL := help
+
+WEB_DIR := web
+SCRIPTS_DIR := scripts
+ARCGIS_DELBYDELER := https://services-eu1.arcgis.com/Hky23fkHucfDZYMu/arcgis/rest/services/Delbydeler/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=geojson
+
+.PHONY: help install data data-delbydeler dev build start lint clean ci test e2e
+
+help: ## Show this help
+	@echo "Available targets:" ; \
+	awk 'BEGIN {FS = ":.*## "}; /^[a-zA-Z0-9_\-]+:.*## / { printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+
+install: ## Install dependencies for web and scripts
+	@npm ci --prefix $(WEB_DIR) || npm install --prefix $(WEB_DIR)
+	@npm ci --prefix $(SCRIPTS_DIR) || npm install --prefix $(SCRIPTS_DIR)
+
+data: ## Generate normalized and simplified GeoJSON (optional: DATA_URL=...)
+	@DATA_URL="$(DATA_URL)" npm run fetch:oslo --prefix $(SCRIPTS_DIR)
+
+data-delbydeler: ## Fetch Oslo delbydeler from ArcGIS and generate outputs
+	@DATA_URL="$(ARCGIS_DELBYDELER)" npm run fetch:oslo --prefix $(SCRIPTS_DIR)
+
+dev: ## Run Next.js dev server
+	@npm run dev --prefix $(WEB_DIR)
+
+build: ## Build the web app
+	@npm run build --prefix $(WEB_DIR)
+
+start: ## Start the production server
+	@npm run start --prefix $(WEB_DIR)
+
+lint: ## Run linter
+	@npm run lint --prefix $(WEB_DIR)
+
+clean: ## Remove build artifacts and generated data
+	@rm -rf $(WEB_DIR)/.next
+	@rm -f $(WEB_DIR)/public/data/bydeler.geo.json $(WEB_DIR)/public/data/bydeler_simplified.geo.json
+
+ci: ## Run CI steps (install, data, lint, build)
+	@$(MAKE) install
+	@$(MAKE) data
+	@$(MAKE) lint
+	@$(MAKE) build
+
+test: ## Run unit tests (if configured)
+	@-npm run test --prefix $(WEB_DIR)
+
+e2e: ## Run e2e tests (if configured)
+	@-npm run e2e --prefix $(WEB_DIR)
