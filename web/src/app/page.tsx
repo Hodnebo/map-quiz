@@ -7,6 +7,7 @@ import type { GameSettings, GameState } from "@/lib/types";
 import { createInitialState, startGame, answer } from "@/lib/game";
 import { load, save } from "@/lib/persistence";
 import { XorShift32 } from "@/lib/rng";
+import { playCorrectSound, playWrongSound, initializeAudio } from "@/lib/audio";
 
 const QuizMap = dynamic(() => import("@/components/Map"), { ssr: false });
 
@@ -16,6 +17,7 @@ const DEFAULT_SETTINGS: GameSettings = {
   difficulty: "normal",
   hintsEnabled: true,
   maxAttempts: 3,
+  audioEnabled: true,
 };
 
 function featureBBox(geojson: any, id: string | null): [[number, number], [number, number]] | null {
@@ -73,6 +75,7 @@ export default function Home() {
 
   useEffect(() => save("settings", settings), [settings]);
   useEffect(() => save("seed", seed), [seed]);
+  useEffect(() => initializeAudio(), []);
 
   const allIds = useMemo(() => (bydeler ? bydeler.map((b) => b.id) : []), [bydeler]);
   const canPlay = !!geojson && allIds.length > 0;
@@ -87,6 +90,16 @@ export default function Home() {
       if (answerLockRef.current) return;
       const res = answer(stateRef.current, id, allIds, seed);
       setFeedback(res.isCorrect ? "correct" : "wrong");
+
+      // Play audio feedback if enabled
+      if (settings.audioEnabled ?? true) {
+        if (res.isCorrect) {
+          playCorrectSound();
+        } else {
+          playWrongSound();
+        }
+      }
+
       answerLockRef.current = true;
       setTimeout(() => {
         setState(res.newState);
@@ -259,6 +272,10 @@ export default function Home() {
           <div className="flex items-center gap-2 mb-2">
             <label className="text-sm w-28">Hint</label>
             <input type="checkbox" checked={settings.hintsEnabled} onChange={(e) => setSettings((s) => ({ ...s, hintsEnabled: e.target.checked }))} />
+          </div>
+          <div className="flex items-center gap-2 mb-2">
+            <label className="text-sm w-28">Lyd</label>
+            <input type="checkbox" checked={settings.audioEnabled ?? true} onChange={(e) => setSettings((s) => ({ ...s, audioEnabled: e.target.checked }))} />
           </div>
           <div className="flex items-center gap-2 mb-2">
             <label className="text-sm w-28">Alternativer</label>

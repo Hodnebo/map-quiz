@@ -15,6 +15,7 @@ export interface GameSettings {
   hintsEnabled: boolean;
   maxAttempts?: number;
   alternativesCount?: number | null;
+  audioEnabled?: boolean;
 }
 
 export interface GameState {
