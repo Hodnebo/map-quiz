@@ -81,7 +81,9 @@ export default function Home() {
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
   const answerLockRef = useRef(false);
   const stateRef = useRef(state);
+  const settingsRef = useRef(settings);
   useEffect(() => { stateRef.current = state; }, [state]);
+  useEffect(() => { settingsRef.current = settings; }, [settings]);
 
   useEffect(() => save("settings", settings), [settings]);
   useEffect(() => save("seed", seed), [seed]);
@@ -94,6 +96,37 @@ export default function Home() {
     if (!canPlay) return;
     setState((s) => startGame({ ...s, settings }, allIds, seed));
   }, [allIds, canPlay, seed, settings]);
+
+  const doRestart = useCallback(() => {
+    if (!canPlay) return;
+    setState(createInitialState(settings, seed));
+    setTimeout(() => {
+      setState((s) => startGame(s, allIds, seed));
+    }, 0);
+  }, [allIds, canPlay, seed, settings]);
+
+  // Update game state settings dynamically when settings change
+  useEffect(() => {
+    if (state.status !== 'idle') {
+      setState(prevState => {
+        const newState = {
+          ...prevState,
+          settings: { ...prevState.settings, ...settings }
+        };
+
+        // If rounds changed and we're still playing, adjust if needed
+        if (settings.rounds !== prevState.settings.rounds && state.status === 'playing') {
+          // If new rounds is less than current round, end the game
+          if (settings.rounds < prevState.currentRound) {
+            newState.status = 'ended';
+            newState.currentTargetId = null;
+          }
+        }
+
+        return newState;
+      });
+    }
+  }, [settings, state.status, state.currentRound]);
 
   const onFeatureClick = useCallback(
     (id: string) => {
@@ -113,8 +146,8 @@ export default function Home() {
       }
       setSnackbarOpen(true);
 
-      // Play audio feedback if enabled
-      if (settings.audioEnabled ?? true) {
+      // Play audio feedback if enabled - use ref to get latest settings
+      if (settingsRef.current.audioEnabled ?? true) {
         if (res.isCorrect) {
           playCorrectSound();
         } else {
@@ -129,7 +162,7 @@ export default function Home() {
         answerLockRef.current = false;
       }, 450);
     },
-    [allIds, seed, bydeler, state.currentTargetId, settings.audioEnabled]
+    [allIds, seed, bydeler, state.currentTargetId]
   );
 
   const targetName = useMemo(() => bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? null, [bydeler, state.currentTargetId]);
@@ -189,28 +222,32 @@ export default function Home() {
             Oslo Bydel-Quiz
           </Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<PlayArrowIcon />}
-              onClick={doStart}
-              disabled={!canPlay || state.status === "playing"}
-            >
-              Start
-            </Button>
+            {state.status === "idle" ? (
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<PlayArrowIcon />}
+                onClick={doStart}
+                disabled={!canPlay}
+              >
+                Start
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<RefreshIcon />}
+                onClick={doRestart}
+              >
+                Restart
+              </Button>
+            )}
             <Button
               variant="outlined"
               startIcon={<ShuffleIcon />}
               onClick={() => setSeed(Math.floor(Math.random() * 2 ** 31))}
             >
               Ny seed
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<RefreshIcon />}
-              onClick={() => location.reload()}
-            >
-              Reset
             </Button>
           </Box>
         </Toolbar>

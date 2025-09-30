@@ -129,6 +129,7 @@ export default function GameOverlay({
           settings={settings}
           onSettingsChange={onSettingsChange}
           allIdsLength={allIdsLength}
+          isGameActive={state.status !== 'idle'}
         />
       </Drawer>
     </>

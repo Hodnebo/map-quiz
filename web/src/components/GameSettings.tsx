@@ -7,6 +7,7 @@ interface GameSettingsProps {
   settings: GameSettings;
   onSettingsChange: (settings: GameSettings) => void;
   allIdsLength: number;
+  isGameActive?: boolean;
 }
 
 export default function GameSettings({ settings, onSettingsChange, allIdsLength }: GameSettingsProps) {
