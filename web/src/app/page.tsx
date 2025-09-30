@@ -8,6 +8,8 @@ import { createInitialState, startGame, answer } from "@/lib/game";
 import { load, save } from "@/lib/persistence";
 import { XorShift32 } from "@/lib/rng";
 import { playCorrectSound, playWrongSound, initializeAudio } from "@/lib/audio";
+import { Button, AppBar, Toolbar, Typography, Card, CardContent, Grid, Box, FormControl, InputLabel, Select, MenuItem, FormControlLabel, Checkbox, TextField, Snackbar, Alert } from "@mui/material";
+import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, Shuffle as ShuffleIcon } from "@mui/icons-material";
 
 const QuizMap = dynamic(() => import("@/components/Map"), { ssr: false });
 
@@ -69,6 +71,9 @@ export default function Home() {
   const [seed, setSeed] = useState<number>(() => load("seed", Math.floor(Date.now() % 2 ** 31)));
   const [state, setState] = useState<GameState>(() => createInitialState(settings, seed));
   const [feedback, setFeedback] = useState<null | "correct" | "wrong">(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
   const answerLockRef = useRef(false);
   const stateRef = useRef(state);
   useEffect(() => { stateRef.current = state; }, [state]);
@@ -91,6 +96,18 @@ export default function Home() {
       const res = answer(stateRef.current, id, allIds, seed);
       setFeedback(res.isCorrect ? "correct" : "wrong");
 
+      // Show snackbar notification
+      const targetName = bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? "området";
+      if (res.isCorrect) {
+        setSnackbarMessage(`Riktig! Du fant ${targetName}! 🎉`);
+        setSnackbarSeverity("success");
+      } else {
+        const guessedName = bydeler?.find((b) => b.id === id)?.name ?? id;
+        setSnackbarMessage(`Feil! Det var ${guessedName}, ikke ${targetName}`);
+        setSnackbarSeverity("error");
+      }
+      setSnackbarOpen(true);
+
       // Play audio feedback if enabled
       if (settings.audioEnabled ?? true) {
         if (res.isCorrect) {
@@ -107,11 +124,18 @@ export default function Home() {
         answerLockRef.current = false;
       }, 450);
     },
-    [allIds, seed]
+    [allIds, seed, bydeler, state.currentTargetId, settings.audioEnabled]
   );
 
   const targetName = useMemo(() => bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? null, [bydeler, state.currentTargetId]);
   const attemptsLeft = useMemo(() => (settings.maxAttempts ?? 3) - (state.attemptsThisRound ?? 0), [settings.maxAttempts, state.attemptsThisRound]);
+
+  const handleSnackbarClose = useCallback((_event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbarOpen(false);
+  }, []);
 
   const focusBounds = useMemo(() => {
     if (!geojson) return null;
@@ -163,14 +187,38 @@ export default function Home() {
 
   return (
     <div className="min-h-screen grid grid-rows-[auto_1fr] grid-cols-1 md:grid-cols-[2fr_1fr]">
-      <header className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800 col-span-full">
-        <h1 className="text-lg font-semibold">Oslo Bydel-Quiz</h1>
-        <div className="flex gap-2 items-center">
-          <button className="px-3 py-2 rounded bg-blue-600 text-white disabled:opacity-50" onClick={doStart} disabled={!canPlay || state.status === "playing"}>Start</button>
-          <button className="px-3 py-2 rounded border" onClick={() => setSeed(Math.floor(Math.random() * 2 ** 31))}>Ny seed</button>
-          <button className="px-3 py-2 rounded border" onClick={() => location.reload()}>Reset</button>
-        </div>
-      </header>
+      <AppBar position="static" elevation={1} className="col-span-full">
+        <Toolbar>
+          <Typography variant="h1" component="h1" sx={{ flexGrow: 1 }}>
+            Oslo Bydel-Quiz
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<PlayArrowIcon />}
+              onClick={doStart}
+              disabled={!canPlay || state.status === "playing"}
+            >
+              Start
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<ShuffleIcon />}
+              onClick={() => setSeed(Math.floor(Math.random() * 2 ** 31))}
+            >
+              Ny seed
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<RefreshIcon />}
+              onClick={() => location.reload()}
+            >
+              Reset
+            </Button>
+          </Box>
+        </Toolbar>
+      </AppBar>
       <div className="relative h-[60vh] md:h-auto">
         {loading && <div className="absolute inset-0 flex items-center justify-center">Laster kart...</div>}
         {error && <div className="absolute inset-0 flex items-center justify-center text-red-600">{error}</div>}
@@ -198,7 +246,7 @@ export default function Home() {
             onFeatureClick={onFeatureClick}
             highlightFeatureId={null}
             disableHoverOutline={settings.difficulty === "hard"}
-            focusBounds={focusBounds as any}
+            focusBounds={focusBounds}
             focusPadding={focusPadding}
             revealedIds={state.revealedIds}
             candidateIds={state.candidateIds}
@@ -206,98 +254,183 @@ export default function Home() {
         )}
       </div>
       <aside className="border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-800 p-4 flex flex-col gap-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <div className="text-sm text-gray-500">Runde</div>
-            <div className="text-xl font-semibold">{state.currentRound}/{settings.rounds}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Poeng</div>
-            <div className="text-xl font-semibold">{state.score}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Streak</div>
-            <div className="text-xl font-semibold">{state.streak}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Finn område</div>
-            <div className="text-2xl font-bold h-10">{state.status === "playing" ? targetName : state.status === "ended" ? "Ferdig!" : "Trykk Start"}</div>
-            {state.status === "playing" && (
-              <div className="text-xs text-gray-500 mt-1">Forsøk igjen: {attemptsLeft} igjen</div>
-            )}
-          </div>
-        </div>
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <Card>
+              <CardContent sx={{ textAlign: 'center' }}>
+                <Typography color="text.secondary" gutterBottom variant="body2">
+                  Runde
+                </Typography>
+                <Typography variant="h2">
+                  {state.currentRound}/{settings.rounds}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={6}>
+            <Card>
+              <CardContent sx={{ textAlign: 'center' }}>
+                <Typography color="text.secondary" gutterBottom variant="body2">
+                  Poeng
+                </Typography>
+                <Typography variant="h2">
+                  {state.score}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={6}>
+            <Card>
+              <CardContent sx={{ textAlign: 'center' }}>
+                <Typography color="text.secondary" gutterBottom variant="body2">
+                  Streak
+                </Typography>
+                <Typography variant="h2">
+                  {state.streak}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={6}>
+            <Card>
+              <CardContent sx={{ textAlign: 'center' }}>
+                <Typography color="text.secondary" gutterBottom variant="body2">
+                  Finn område
+                </Typography>
+                <Typography variant="h2" sx={{ minHeight: '2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {state.status === "playing" ? targetName : state.status === "ended" ? "Ferdig!" : "Trykk Start"}
+                </Typography>
+                {state.status === "playing" && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                    Forsøk igjen: {attemptsLeft} igjen
+                  </Typography>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
         {!!(state.revealedIds?.length) && (
-          <div className="text-sm">
-            <div className="font-semibold mb-1">Riktige svar:</div>
-            <ul className="list-disc pl-5 space-y-1 max-h-36 overflow-auto">
-              {state.revealedIds!.map((id) => (
-                <li key={id}>{revealedNames.get(id) ?? id}</li>
-              ))}
-            </ul>
-          </div>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Riktige svar:
+              </Typography>
+              <Box sx={{ maxHeight: 144, overflow: 'auto' }}>
+                {state.revealedIds!.map((id) => (
+                  <Typography key={id} variant="body2" sx={{ py: 0.5 }}>
+                    • {revealedNames.get(id) ?? id}
+                  </Typography>
+                ))}
+              </Box>
+            </CardContent>
+          </Card>
         )}
-        <div className="mt-2">
-          <div className="text-sm font-semibold mb-2">Innstillinger</div>
-          <div className="flex items-center gap-2 mb-2">
-            <label className="text-sm w-28">Runder</label>
-            <select
-              className="border rounded px-2 py-1 w-32"
-              value={settings.rounds === allIds.length ? "full" : String(settings.rounds)}
-              onChange={(e) => {
-                const v = e.target.value;
-                setSettings((s) => ({
-                  ...s,
-                  rounds: v === "full" ? allIds.length : Math.max(5, Math.min(100, Number(v) || 0)),
-                }));
-              }}
-            >
-              <option value="10">10</option>
-              <option value="15">15</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="50">50</option>
-              <option value="full">Full ({allIds.length-1})</option>
-            </select>
-          </div>
-          <div className="flex items-center gap-2 mb-2">
-            <label className="text-sm w-28">Vanskelighet</label>
-            <select className="border rounded px-2 py-1" value={settings.difficulty} onChange={(e) => setSettings((s) => ({ ...s, difficulty: e.target.value as any }))}>
-              <option value="training">Trening</option>
-              <option value="easy">Lett</option>
-              <option value="normal">Normal</option>
-              <option value="hard">Vanskelig</option>
-            </select>
-          </div>
-          <div className="flex items-center gap-2 mb-2">
-            <label className="text-sm w-28">Hint</label>
-            <input type="checkbox" checked={settings.hintsEnabled} onChange={(e) => setSettings((s) => ({ ...s, hintsEnabled: e.target.checked }))} />
-          </div>
-          <div className="flex items-center gap-2 mb-2">
-            <label className="text-sm w-28">Lyd</label>
-            <input type="checkbox" checked={settings.audioEnabled ?? true} onChange={(e) => setSettings((s) => ({ ...s, audioEnabled: e.target.checked }))} />
-          </div>
-          <div className="flex items-center gap-2 mb-2">
-            <label className="text-sm w-28">Alternativer</label>
-            <select
-              className="border rounded px-2 py-1 w-32"
-              value={String(settings.alternativesCount ?? 0)}
-              onChange={(e) => setSettings((s) => ({ ...s, alternativesCount: Number(e.target.value) || null }))}
-            >
-              <option value="0">Av</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-            </select>
-          </div>
-          <div className="flex items-center gap-2 mb-2">
-            <label className="text-sm w-28">Maks forsøk</label>
-            <input type="number" min={1} max={6} className="border rounded px-2 py-1 w-24" value={settings.maxAttempts ?? 3}
-              onChange={(e) => setSettings((s) => ({ ...s, maxAttempts: Math.max(1, Math.min(6, Number(e.target.value) || 1)) }))} />
-          </div>
-        </div>
+        <Card>
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              Innstillinger
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <FormControl size="small" fullWidth>
+                <InputLabel>Runder</InputLabel>
+                <Select
+                  value={settings.rounds === allIds.length ? "full" : String(settings.rounds)}
+                  label="Runder"
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setSettings((s) => ({
+                      ...s,
+                      rounds: v === "full" ? allIds.length : Math.max(5, Math.min(100, Number(v) || 0)),
+                    }));
+                  }}
+                >
+                  <MenuItem value="10">10</MenuItem>
+                  <MenuItem value="15">15</MenuItem>
+                  <MenuItem value="20">20</MenuItem>
+                  <MenuItem value="30">30</MenuItem>
+                  <MenuItem value="50">50</MenuItem>
+                  <MenuItem value="full">Full ({allIds.length-1})</MenuItem>
+                </Select>
+              </FormControl>
+
+              <FormControl size="small" fullWidth>
+                <InputLabel>Vanskelighet</InputLabel>
+                <Select
+                  value={settings.difficulty}
+                  label="Vanskelighet"
+                  onChange={(e) => setSettings((s) => ({ ...s, difficulty: e.target.value as "training" | "easy" | "normal" | "hard" }))}
+                >
+                  <MenuItem value="training">Trening</MenuItem>
+                  <MenuItem value="easy">Lett</MenuItem>
+                  <MenuItem value="normal">Normal</MenuItem>
+                  <MenuItem value="hard">Vanskelig</MenuItem>
+                </Select>
+              </FormControl>
+
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={settings.hintsEnabled}
+                    onChange={(e) => setSettings((s) => ({ ...s, hintsEnabled: e.target.checked }))}
+                  />
+                }
+                label="Hint"
+              />
+
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={settings.audioEnabled ?? true}
+                    onChange={(e) => setSettings((s) => ({ ...s, audioEnabled: e.target.checked }))}
+                  />
+                }
+                label="Lyd"
+              />
+
+              <FormControl size="small" fullWidth>
+                <InputLabel>Alternativer</InputLabel>
+                <Select
+                  value={String(settings.alternativesCount ?? 0)}
+                  label="Alternativer"
+                  onChange={(e) => setSettings((s) => ({ ...s, alternativesCount: Number(e.target.value) || null }))}
+                >
+                  <MenuItem value="0">Av</MenuItem>
+                  <MenuItem value="2">2</MenuItem>
+                  <MenuItem value="3">3</MenuItem>
+                  <MenuItem value="4">4</MenuItem>
+                  <MenuItem value="5">5</MenuItem>
+                </Select>
+              </FormControl>
+
+              <TextField
+                label="Maks forsøk"
+                type="number"
+                size="small"
+                inputProps={{ min: 1, max: 6 }}
+                value={settings.maxAttempts ?? 3}
+                onChange={(e) => setSettings((s) => ({ ...s, maxAttempts: Math.max(1, Math.min(6, Number(e.target.value) || 1)) }))}
+              />
+            </Box>
+          </CardContent>
+        </Card>
       </aside>
+
+      {/* Snackbar for feedback notifications */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }
