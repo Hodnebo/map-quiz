@@ -8,8 +8,9 @@ import { createInitialState, startGame, answer } from "@/lib/game";
 import { load, save } from "@/lib/persistence";
 import { XorShift32 } from "@/lib/rng";
 import { playCorrectSound, playWrongSound, initializeAudio } from "@/lib/audio";
-import { Button, AppBar, Toolbar, Typography, Card, CardContent, Grid, Box, FormControl, InputLabel, Select, MenuItem, FormControlLabel, Checkbox, TextField, Snackbar, Alert } from "@mui/material";
+import { Button, AppBar, Toolbar, Typography, Snackbar, Alert, Box } from "@mui/material";
 import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, Shuffle as ShuffleIcon } from "@mui/icons-material";
+import GameOverlay from "@/components/GameOverlay";
 
 const QuizMap = dynamic(() => import("@/components/Map"), { ssr: false });
 
@@ -22,12 +23,16 @@ const DEFAULT_SETTINGS: GameSettings = {
   audioEnabled: true,
 };
 
-function featureBBox(geojson: any, id: string | null): [[number, number], [number, number]] | null {
+function featureBBox(geojson: unknown, id: string | null): [[number, number], [number, number]] | null {
   if (!geojson || !id) return null;
-  const feat = geojson.features?.find((f: any) => (f.id ?? f.properties?.id) === id);
+  const featuresArray = (geojson as { features?: unknown[] })?.features;
+  const feat = featuresArray?.find((f: unknown) => {
+    const feature = f as { id?: string; properties?: { id?: string } };
+    return (feature.id ?? feature.properties?.id) === id;
+  });
   if (!feat) return null;
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-  const walk = (coords: any) => {
+  const walk = (coords: unknown) => {
     if (typeof coords[0] === "number") {
       const [x, y] = coords as [number, number];
       if (x < minX) minX = x;
@@ -175,19 +180,10 @@ export default function Home() {
     }
   }, [settings.difficulty]);
 
-  const revealedNames = useMemo(() => {
-    const m = new globalThis.Map<string, string>();
-    for (const f of geojson?.features ?? []) {
-      const k = String(f.id ?? f.properties?.id);
-      const v = String(f.properties?.name ?? "");
-      m.set(k, v);
-    }
-    return m;
-  }, [geojson]);
 
   return (
-    <div className="min-h-screen grid grid-rows-[auto_1fr] grid-cols-1 md:grid-cols-[2fr_1fr]">
-      <AppBar position="static" elevation={1} className="col-span-full">
+    <div className="min-h-screen grid grid-rows-[auto_1fr]">
+      <AppBar position="static" elevation={1}>
         <Toolbar>
           <Typography variant="h1" component="h1" sx={{ flexGrow: 1 }}>
             Oslo Bydel-Quiz
@@ -219,7 +215,7 @@ export default function Home() {
           </Box>
         </Toolbar>
       </AppBar>
-      <div className="relative h-[60vh] md:h-auto">
+      <div className="relative h-full">
         {loading && <div className="absolute inset-0 flex items-center justify-center">Laster kart...</div>}
         {error && <div className="absolute inset-0 flex items-center justify-center text-red-600">{error}</div>}
         {state.status === "playing" && targetName && (
@@ -252,168 +248,16 @@ export default function Home() {
             candidateIds={state.candidateIds}
           />
         )}
+
+        <GameOverlay
+          state={state}
+          settings={settings}
+          onSettingsChange={setSettings}
+          allIdsLength={allIds.length}
+          targetName={targetName}
+          attemptsLeft={attemptsLeft}
+        />
       </div>
-      <aside className="border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-800 p-4 flex flex-col gap-4">
-        <Grid container spacing={2}>
-          <Grid item xs={6}>
-            <Card>
-              <CardContent sx={{ textAlign: 'center' }}>
-                <Typography color="text.secondary" gutterBottom variant="body2">
-                  Runde
-                </Typography>
-                <Typography variant="h2">
-                  {state.currentRound}/{settings.rounds}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={6}>
-            <Card>
-              <CardContent sx={{ textAlign: 'center' }}>
-                <Typography color="text.secondary" gutterBottom variant="body2">
-                  Poeng
-                </Typography>
-                <Typography variant="h2">
-                  {state.score}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={6}>
-            <Card>
-              <CardContent sx={{ textAlign: 'center' }}>
-                <Typography color="text.secondary" gutterBottom variant="body2">
-                  Streak
-                </Typography>
-                <Typography variant="h2">
-                  {state.streak}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={6}>
-            <Card>
-              <CardContent sx={{ textAlign: 'center' }}>
-                <Typography color="text.secondary" gutterBottom variant="body2">
-                  Finn område
-                </Typography>
-                <Typography variant="h2" sx={{ minHeight: '2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {state.status === "playing" ? targetName : state.status === "ended" ? "Ferdig!" : "Trykk Start"}
-                </Typography>
-                {state.status === "playing" && (
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                    Forsøk igjen: {attemptsLeft} igjen
-                  </Typography>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-        {!!(state.revealedIds?.length) && (
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Riktige svar:
-              </Typography>
-              <Box sx={{ maxHeight: 144, overflow: 'auto' }}>
-                {state.revealedIds!.map((id) => (
-                  <Typography key={id} variant="body2" sx={{ py: 0.5 }}>
-                    • {revealedNames.get(id) ?? id}
-                  </Typography>
-                ))}
-              </Box>
-            </CardContent>
-          </Card>
-        )}
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Innstillinger
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <FormControl size="small" fullWidth>
-                <InputLabel>Runder</InputLabel>
-                <Select
-                  value={settings.rounds === allIds.length ? "full" : String(settings.rounds)}
-                  label="Runder"
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    setSettings((s) => ({
-                      ...s,
-                      rounds: v === "full" ? allIds.length : Math.max(5, Math.min(100, Number(v) || 0)),
-                    }));
-                  }}
-                >
-                  <MenuItem value="10">10</MenuItem>
-                  <MenuItem value="15">15</MenuItem>
-                  <MenuItem value="20">20</MenuItem>
-                  <MenuItem value="30">30</MenuItem>
-                  <MenuItem value="50">50</MenuItem>
-                  <MenuItem value="full">Full ({allIds.length-1})</MenuItem>
-                </Select>
-              </FormControl>
-
-              <FormControl size="small" fullWidth>
-                <InputLabel>Vanskelighet</InputLabel>
-                <Select
-                  value={settings.difficulty}
-                  label="Vanskelighet"
-                  onChange={(e) => setSettings((s) => ({ ...s, difficulty: e.target.value as "training" | "easy" | "normal" | "hard" }))}
-                >
-                  <MenuItem value="training">Trening</MenuItem>
-                  <MenuItem value="easy">Lett</MenuItem>
-                  <MenuItem value="normal">Normal</MenuItem>
-                  <MenuItem value="hard">Vanskelig</MenuItem>
-                </Select>
-              </FormControl>
-
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={settings.hintsEnabled}
-                    onChange={(e) => setSettings((s) => ({ ...s, hintsEnabled: e.target.checked }))}
-                  />
-                }
-                label="Hint"
-              />
-
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={settings.audioEnabled ?? true}
-                    onChange={(e) => setSettings((s) => ({ ...s, audioEnabled: e.target.checked }))}
-                  />
-                }
-                label="Lyd"
-              />
-
-              <FormControl size="small" fullWidth>
-                <InputLabel>Alternativer</InputLabel>
-                <Select
-                  value={String(settings.alternativesCount ?? 0)}
-                  label="Alternativer"
-                  onChange={(e) => setSettings((s) => ({ ...s, alternativesCount: Number(e.target.value) || null }))}
-                >
-                  <MenuItem value="0">Av</MenuItem>
-                  <MenuItem value="2">2</MenuItem>
-                  <MenuItem value="3">3</MenuItem>
-                  <MenuItem value="4">4</MenuItem>
-                  <MenuItem value="5">5</MenuItem>
-                </Select>
-              </FormControl>
-
-              <TextField
-                label="Maks forsøk"
-                type="number"
-                size="small"
-                inputProps={{ min: 1, max: 6 }}
-                value={settings.maxAttempts ?? 3}
-                onChange={(e) => setSettings((s) => ({ ...s, maxAttempts: Math.max(1, Math.min(6, Number(e.target.value) || 1)) }))}
-              />
-            </Box>
-          </CardContent>
-        </Card>
-      </aside>
 
       {/* Snackbar for feedback notifications */}
       <Snackbar
