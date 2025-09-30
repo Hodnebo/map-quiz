@@ -80,6 +80,7 @@ export default function GameOverlay({
           </CardContent>
         </Card>
 
+
         {/* Current Target Info */}
         {state.status === "playing" && targetName && (
           <Card sx={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(8px)' }}>

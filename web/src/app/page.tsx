@@ -8,7 +8,7 @@ import { createInitialState, startGame, answer } from "@/lib/game";
 import { load, save } from "@/lib/persistence";
 import { XorShift32 } from "@/lib/rng";
 import { playCorrectSound, playWrongSound, initializeAudio } from "@/lib/audio";
-import { Button, AppBar, Toolbar, Typography, Snackbar, Alert, Box } from "@mui/material";
+import { Button, AppBar, Toolbar, Typography, Box } from "@mui/material";
 import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, Shuffle as ShuffleIcon } from "@mui/icons-material";
 import GameOverlay from "@/components/GameOverlay";
 
@@ -75,9 +75,7 @@ export default function Home() {
   const [seed, setSeed] = useState<number>(() => load("seed", Math.floor(Date.now() % 2 ** 31)));
   const [state, setState] = useState<GameState>(() => createInitialState(settings, seed));
   const [feedback, setFeedback] = useState<null | "correct" | "wrong">(null);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
+  const [feedbackMessage, setFeedbackMessage] = useState<string>("");
   const answerLockRef = useRef(false);
   const stateRef = useRef(state);
   const settingsRef = useRef(settings);
@@ -103,6 +101,13 @@ export default function Home() {
       setState((s) => startGame(s, allIds, seed));
     }, 0);
   }, [allIds, canPlay, seed, settings]);
+
+  // Clear feedback message when moving to next question
+  useEffect(() => {
+    if (state.status === 'playing' && state.currentTargetId) {
+      setFeedbackMessage("");
+    }
+  }, [state.currentTargetId, state.currentRound]);
 
   // Update game state settings dynamically when settings change
   useEffect(() => {
@@ -133,17 +138,12 @@ export default function Home() {
       const res = answer(stateRef.current, id, allIds, seed);
       setFeedback(res.isCorrect ? "correct" : "wrong");
 
-      // Show snackbar notification
-      const targetName = bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? "området";
-      if (res.isCorrect) {
-        setSnackbarMessage(`Riktig! Du fant ${targetName}! 🎉`);
-        setSnackbarSeverity("success");
-      } else {
+      // Set feedback message for overlay - only for wrong answers
+      if (!res.isCorrect) {
+        const targetName = bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? "området";
         const guessedName = bydeler?.find((b) => b.id === id)?.name ?? id;
-        setSnackbarMessage(`Feil! Det var ${guessedName}, ikke ${targetName}`);
-        setSnackbarSeverity("error");
+        setFeedbackMessage(`Det var ${guessedName}`);
       }
-      setSnackbarOpen(true);
 
       // Play audio feedback if enabled - use ref to get latest settings
       if (settingsRef.current.audioEnabled ?? true) {
@@ -158,6 +158,10 @@ export default function Home() {
       setTimeout(() => {
         setState(res.newState);
         setFeedback(null);
+        // Only clear feedback message for correct answers
+        if (res.isCorrect) {
+          setFeedbackMessage("");
+        }
         answerLockRef.current = false;
       }, 450);
     },
@@ -167,12 +171,6 @@ export default function Home() {
   const targetName = useMemo(() => bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? null, [bydeler, state.currentTargetId]);
   const attemptsLeft = useMemo(() => (settings.maxAttempts ?? 3) - (state.attemptsThisRound ?? 0), [settings.maxAttempts, state.attemptsThisRound]);
 
-  const handleSnackbarClose = useCallback((_event?: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setSnackbarOpen(false);
-  }, []);
 
   const focusBounds = useMemo(() => {
     if (!geojson) return null;
@@ -260,16 +258,23 @@ export default function Home() {
               "pointer-events-none absolute top-3 left-1/2 -translate-x-1/2 z-10 backdrop-blur px-4 py-2 rounded-full shadow-md border " +
               (feedback === "correct"
                  ? " feedback-correct"
-                 : feedback === "wrong"
+                 : feedback === "wrong" || feedbackMessage
                    ? " feedback-wrong"
                    : " bg-white/90 dark:bg-gray-900/90 border-gray-200 dark:border-gray-800")
             }
             aria-live="polite"
           >
             <span className={(feedback === "correct" ? "animate-correct " : feedback === "wrong" ? "animate-wrong " : "") + "inline-flex items-center gap-2"}>
-              <span className="text-xs text-gray-100" style={{ opacity: feedback ? 0.9 : 1 }}>{feedback ? (feedback === "correct" ? "Riktig" : "Feil") : "Finn"}</span>
+              <span className="text-xs text-gray-100" style={{ opacity: feedback ? 0.9 : 1 }}>
+                {feedback ? (feedback === "correct" ? "Riktig" : "Feil") : feedbackMessage ? "Feil" : "Finn"}
+              </span>
               <span className="font-semibold">{targetName}</span>
             </span>
+            {feedbackMessage && (
+              <div className="mt-1 text-xs text-white text-center" style={{ opacity: 0.95 }}>
+                {feedbackMessage}
+              </div>
+            )}
           </div>
         )}
         {canPlay && (
@@ -295,22 +300,6 @@ export default function Home() {
         />
       </div>
 
-      {/* Snackbar for feedback notifications */}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={handleSnackbarClose}
-          severity={snackbarSeverity}
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </div>
   );
 }
