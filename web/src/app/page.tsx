@@ -143,6 +143,9 @@ export default function Home() {
         const targetName = bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? "området";
         const guessedName = bydeler?.find((b) => b.id === id)?.name ?? id;
         setFeedbackMessage(`Det var ${guessedName}`);
+      } else {
+        // Clear feedback message immediately on correct answers
+        setFeedbackMessage("");
       }
 
       // Play audio feedback if enabled - use ref to get latest settings
