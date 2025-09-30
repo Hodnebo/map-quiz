@@ -43,20 +43,20 @@ export default function GameOverlay({
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Card sx={{ flex: 1, backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(8px)' }}>
             <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
-              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.7rem', lineHeight: 1 }}>
+              <Typography variant="body2" sx={{ fontSize: '0.7rem', lineHeight: 1, color: '#666', fontWeight: 500 }}>
                 Poeng
               </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 600, lineHeight: 1 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, lineHeight: 1, color: '#1a1a1a' }}>
                 {state.score}
               </Typography>
             </CardContent>
           </Card>
           <Card sx={{ flex: 1, backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(8px)' }}>
             <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
-              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.7rem', lineHeight: 1 }}>
+              <Typography variant="body2" sx={{ fontSize: '0.7rem', lineHeight: 1, color: '#666', fontWeight: 500 }}>
                 Streak
               </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 600, lineHeight: 1 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, lineHeight: 1, color: '#1a1a1a' }}>
                 {state.streak}
               </Typography>
             </CardContent>
@@ -66,7 +66,7 @@ export default function GameOverlay({
         <Card sx={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(8px)' }}>
           <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+              <Typography variant="body2" sx={{ fontSize: '0.7rem', color: '#666', fontWeight: 500 }}>
                 Runde {state.currentRound}/{settings.rounds}
               </Typography>
               <IconButton
@@ -84,14 +84,14 @@ export default function GameOverlay({
         {state.status === "playing" && targetName && (
           <Card sx={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(8px)' }}>
             <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.7rem', mb: 0.5 }}>
+              <Typography variant="body2" sx={{ fontSize: '0.7rem', mb: 0.5, color: '#666', fontWeight: 500 }}>
                 Finn område
               </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
+              <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5, color: '#1a1a1a' }}>
                 {targetName}
               </Typography>
               {attemptsLeft !== undefined && (
-                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                <Typography variant="body2" sx={{ fontSize: '0.7rem', color: '#666' }}>
                   Forsøk igjen: {attemptsLeft} igjen
                 </Typography>
               )}

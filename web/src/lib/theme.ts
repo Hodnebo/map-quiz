@@ -54,6 +54,16 @@ export const theme = createTheme({
           textTransform: 'none', // Keep original casing
           borderRadius: '6px', // Matches Tailwind rounded
           padding: '8px 12px', // Similar to your px-3 py-2
+          '&.Mui-disabled': {
+            backgroundColor: '#e0e0e0',
+            color: '#757575', // Better contrast for disabled state
+          },
+        },
+        contained: {
+          '&.Mui-disabled': {
+            backgroundColor: '#e0e0e0',
+            color: '#757575',
+          },
         },
       },
     },
@@ -88,6 +98,28 @@ export const darkTheme = createTheme({
     text: {
       primary: '#ededed',
       secondary: '#9ca3af',
+    },
+  },
+  components: {
+    ...theme.components,
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          borderRadius: '6px',
+          padding: '8px 12px',
+          '&.Mui-disabled': {
+            backgroundColor: '#404040',
+            color: '#b0b0b0', // Better contrast for disabled state in dark mode
+          },
+        },
+        contained: {
+          '&.Mui-disabled': {
+            backgroundColor: '#404040',
+            color: '#b0b0b0',
+          },
+        },
+      },
     },
   },
 });
