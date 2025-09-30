@@ -18,9 +18,6 @@ export default function GameSettings({ settings, onSettingsChange, allIdsLength 
   return (
     <Card>
       <CardContent>
-        <Typography variant="h6" gutterBottom>
-          Innstillinger
-        </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <FormControl size="small" fullWidth>
             <InputLabel>Runder</InputLabel>
@@ -55,15 +52,6 @@ export default function GameSettings({ settings, onSettingsChange, allIdsLength 
             </Select>
           </FormControl>
 
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={settings.hintsEnabled}
-                onChange={(e) => updateSetting('hintsEnabled', e.target.checked)}
-              />
-            }
-            label="Hint"
-          />
 
           <FormControlLabel
             control={

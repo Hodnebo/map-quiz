@@ -12,7 +12,6 @@ export interface GameSettings {
   rounds: number;
   timerSeconds: number | null;
   difficulty: "training" | "easy" | "normal" | "hard";
-  hintsEnabled: boolean;
   maxAttempts?: number;
   alternativesCount?: number | null;
   audioEnabled?: boolean;

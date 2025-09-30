@@ -18,7 +18,6 @@ const DEFAULT_SETTINGS: GameSettings = {
   rounds: 15,
   timerSeconds: null,
   difficulty: "normal",
-  hintsEnabled: true,
   maxAttempts: 3,
   audioEnabled: true,
 };
