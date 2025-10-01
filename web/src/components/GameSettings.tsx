@@ -129,6 +129,28 @@ export default function GameSettings({ settings, effectiveSettings, onSettingsCh
           />
         </CardContent>
       </Card>
+
+      {/* Map Settings */}
+      <Card>
+        <CardContent>
+          <Typography variant="h6" sx={{ mb: 2, fontSize: '1rem', fontWeight: 600 }}>
+            Kartinnstillinger
+          </Typography>
+          <FormControl size="small" fullWidth>
+            <InputLabel>Kartstil</InputLabel>
+            <Select
+              value={settings.mapStyle ?? "basic-v2"}
+              label="Kartstil"
+              onChange={(e) => updateSetting('mapStyle', e.target.value as "backdrop" | "dataviz" | "basic-v2")}
+            >
+              <MenuItem value="basic-v2">Basic</MenuItem>
+              <MenuItem value="backdrop">Backdrop</MenuItem>
+              <MenuItem value="dataviz">Dataviz</MenuItem>
+            </Select>
+            <FormHelperText>Velg kartstil (tilpasser seg automatisk til lys/mørk tema)</FormHelperText>
+          </FormControl>
+        </CardContent>
+      </Card>
     </Box>
   );
 }

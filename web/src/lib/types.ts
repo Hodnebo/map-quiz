@@ -21,10 +21,13 @@ export interface GameMode {
   };
 }
 
+export type MapStyle = "backdrop" | "dataviz" | "basic-v2";
+
 export interface GameSettings {
   gameMode: string;
   rounds: number;
   audioEnabled?: boolean;
+  mapStyle?: MapStyle;
   // Mode-specific overrides
   difficulty?: "training" | "easy" | "normal" | "hard";
   alternativesCount?: number | null;

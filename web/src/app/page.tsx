@@ -21,6 +21,7 @@ const DEFAULT_SETTINGS: GameSettings = {
   gameMode: "classic",
   rounds: 15,
   audioEnabled: true,
+  mapStyle: "basic-v2",
 };
 
 function featureBBox(geojson: unknown, id: string | null): [[number, number], [number, number]] | null {
@@ -308,6 +309,7 @@ export default function Home() {
             revealedIds={state.revealedIds}
             candidateIds={state.candidateIds}
             isDarkMode={isDarkMode}
+            mapStyle={settings.mapStyle}
           />
         )}
 

@@ -15,6 +15,7 @@ interface MapProps {
   hideBasemapLabels?: boolean;
   candidateIds?: string[];
   isDarkMode?: boolean;
+  mapStyle?: "backdrop" | "dataviz" | "basic-v2";
 }
 
 const OSLO_CENTER: LngLatLike = [10.7522, 59.9139];
@@ -31,6 +32,7 @@ export default function MapView(props: MapProps) {
     revealedIds = [],
     hideBasemapLabels = true,
     candidateIds = [],
+    mapStyle = "basic-v2",
   } = (props ?? ({} as MapProps));
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -51,7 +53,21 @@ export default function MapView(props: MapProps) {
     if (!containerRef.current || !geojsonUrl) return;
 
     const maptilerKey = process.env.NEXT_PUBLIC_MAPTILER_KEY;
-    const vectorStyleUrl = maptilerKey ? `https://api.maptiler.com/maps/streets-v2/style.json?key=${maptilerKey}` : undefined;
+
+    // Determine MapTiler style URL based on mapStyle prop and theme
+    let vectorStyleUrl: string | undefined;
+    if (maptilerKey) {
+      // For basic-v2, use base style for light mode (more colorful) and dark variant for dark mode
+      let styleUrl: string;
+      if (mapStyle === "basic-v2") {
+        styleUrl = isDarkMode ? `${mapStyle}-dark` : mapStyle;
+      } else {
+        // For other styles, use light/dark variants
+        const variant = isDarkMode ? "-dark" : "-light";
+        styleUrl = `${mapStyle}${variant}`;
+      }
+      vectorStyleUrl = `https://api.maptiler.com/maps/${styleUrl}/style.json?key=${maptilerKey}`;
+    }
 
     const tileUrl = isDarkMode
       ? "https://a.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png"
@@ -238,7 +254,7 @@ export default function MapView(props: MapProps) {
       map.remove();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [geojsonUrl, hideBasemapLabels]);
+  }, [geojsonUrl, hideBasemapLabels, mapStyle, isDarkMode]);
 
   // Update revealed filters when list changes
   useEffect(() => {
@@ -326,52 +342,6 @@ export default function MapView(props: MapProps) {
     map.fitBounds(focusBounds, { padding: focusPadding, duration: 300 });
   }, [focusBounds, focusPadding]);
 
-  // Update map tiles when theme changes
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    const maptilerKey = process.env.NEXT_PUBLIC_MAPTILER_KEY;
-    if (!maptilerKey) {
-      // Wait for the map to be fully loaded before modifying
-      const updateTiles = () => {
-        // Update the basemap for dark/light mode
-        const tileUrl = isDarkMode
-          ? "https://a.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png"
-          : "https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png";
-
-        // Remove existing layer and source if they exist
-        if (map.getLayer('carto')) {
-          map.removeLayer('carto');
-        }
-        if (map.getSource('carto')) {
-          map.removeSource('carto');
-        }
-
-        // Add new source
-        map.addSource('carto', {
-          type: 'raster',
-          tiles: [tileUrl],
-          tileSize: 256,
-          attribution: '© OpenStreetMap contributors, © CARTO',
-        });
-
-        // Add layer, checking if the target layer exists first
-        const beforeLayer = map.getLayer(fillLayerId) ? fillLayerId : undefined;
-        map.addLayer({
-          id: 'carto',
-          type: 'raster',
-          source: 'carto',
-        }, beforeLayer);
-      };
-
-      if (map.isStyleLoaded()) {
-        updateTiles();
-      } else {
-        map.once('styledata', updateTiles);
-      }
-    }
-  }, [isDarkMode, fillLayerId]);
 
   return <div ref={containerRef} className="w-full h-full" aria-label="Kart over Oslo bydeler" role="region" />;
 }
