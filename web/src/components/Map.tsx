@@ -54,15 +54,15 @@ export default function MapView(props: MapProps) {
     const fallbackRasterStyle: StyleSpecification = {
       version: 8,
       sources: {
-        osm: {
+        carto: {
           type: "raster",
-          tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+          tiles: ["https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"],
           tileSize: 256,
-          attribution: "© OpenStreetMap contributors",
+          attribution: "© OpenStreetMap contributors, © CARTO",
         },
       },
       layers: [
-        { id: "osm", type: "raster", source: "osm" },
+        { id: "carto", type: "raster", source: "carto" },
       ],
     } as any;
 

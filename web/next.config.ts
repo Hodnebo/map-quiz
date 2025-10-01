@@ -12,9 +12,11 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // GitHub Pages serves from a subdirectory
-  basePath: '/map-quiz',
-  assetPrefix: '/map-quiz/',
+  // GitHub Pages serves from a subdirectory (only in production)
+  ...(process.env.NODE_ENV === 'production' && {
+    basePath: '/map-quiz',
+    assetPrefix: '/map-quiz/',
+  }),
 };
 
 export default nextConfig;

@@ -93,3 +93,7 @@ psd
 thumb
 sketch
 
+# Environment variables
+.env.local
+.env.*.local
+
