@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardContent, Typography, Box, FormControl, InputLabel, Select, MenuItem, FormControlLabel, Checkbox, TextField } from '@mui/material';
+import { Card, CardContent, Typography, Box, FormControl, InputLabel, Select, MenuItem, FormControlLabel, Checkbox, TextField, FormHelperText } from '@mui/material';
 import type { GameSettings } from '@/lib/types';
 
 interface GameSettingsProps {
@@ -38,7 +38,7 @@ export default function GameSettings({ settings, onSettingsChange, allIdsLength 
             </Select>
           </FormControl>
 
-          <FormControl size="small" fullWidth>
+          <FormControl size="small" fullWidth disabled={(settings.alternativesCount ?? 0) > 1}>
             <InputLabel>Vanskelighet</InputLabel>
             <Select
               value={settings.difficulty}
@@ -50,6 +50,9 @@ export default function GameSettings({ settings, onSettingsChange, allIdsLength 
               <MenuItem value="normal">Normal</MenuItem>
               <MenuItem value="hard">Vanskelig</MenuItem>
             </Select>
+            {(settings.alternativesCount ?? 0) > 1 && (
+              <FormHelperText>Deaktivert når alternativer er på</FormHelperText>
+            )}
           </FormControl>
 
 
