@@ -2,32 +2,29 @@
 
 import { ThemeProvider as MuiThemeProvider, CssBaseline } from '@mui/material';
 import { theme, darkTheme } from '@/lib/theme';
-import { useEffect, useState } from 'react';
+import { ThemeContextProvider, useTheme } from '@/contexts/ThemeContext';
 
 interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
-export default function ThemeProvider({ children }: ThemeProviderProps) {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  useEffect(() => {
-    // Check for dark mode preference
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    setIsDarkMode(mediaQuery.matches);
-
-    const handleChange = (e: MediaQueryListEvent) => {
-      setIsDarkMode(e.matches);
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
+function MuiThemeWrapper({ children }: ThemeProviderProps) {
+  const { isDarkMode } = useTheme();
 
   return (
     <MuiThemeProvider theme={isDarkMode ? darkTheme : theme}>
       <CssBaseline />
       {children}
     </MuiThemeProvider>
+  );
+}
+
+export default function ThemeProvider({ children }: ThemeProviderProps) {
+  return (
+    <ThemeContextProvider>
+      <MuiThemeWrapper>
+        {children}
+      </MuiThemeWrapper>
+    </ThemeContextProvider>
   );
 }

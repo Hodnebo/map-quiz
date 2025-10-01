@@ -14,6 +14,7 @@ interface MapProps {
   revealedIds?: string[];
   hideBasemapLabels?: boolean;
   candidateIds?: string[];
+  isDarkMode?: boolean;
 }
 
 const OSLO_CENTER: LngLatLike = [10.7522, 59.9139];
@@ -23,6 +24,7 @@ export default function MapView(props: MapProps) {
     geojsonUrl,
     onFeatureClick,
     highlightFeatureId,
+    isDarkMode,
     disableHoverOutline,
     focusBounds,
     focusPadding = 24,
@@ -51,12 +53,16 @@ export default function MapView(props: MapProps) {
     const maptilerKey = process.env.NEXT_PUBLIC_MAPTILER_KEY;
     const vectorStyleUrl = maptilerKey ? `https://api.maptiler.com/maps/streets-v2/style.json?key=${maptilerKey}` : undefined;
 
+    const tileUrl = isDarkMode
+      ? "https://a.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png"
+      : "https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png";
+
     const fallbackRasterStyle: StyleSpecification = {
       version: 8,
       sources: {
         carto: {
           type: "raster",
-          tiles: ["https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"],
+          tiles: [tileUrl],
           tileSize: 256,
           attribution: "© OpenStreetMap contributors, © CARTO",
         },
@@ -319,6 +325,53 @@ export default function MapView(props: MapProps) {
     if (!map || !focusBounds) return;
     map.fitBounds(focusBounds, { padding: focusPadding, duration: 300 });
   }, [focusBounds, focusPadding]);
+
+  // Update map tiles when theme changes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const maptilerKey = process.env.NEXT_PUBLIC_MAPTILER_KEY;
+    if (!maptilerKey) {
+      // Wait for the map to be fully loaded before modifying
+      const updateTiles = () => {
+        // Update the basemap for dark/light mode
+        const tileUrl = isDarkMode
+          ? "https://a.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png"
+          : "https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png";
+
+        // Remove existing layer and source if they exist
+        if (map.getLayer('carto')) {
+          map.removeLayer('carto');
+        }
+        if (map.getSource('carto')) {
+          map.removeSource('carto');
+        }
+
+        // Add new source
+        map.addSource('carto', {
+          type: 'raster',
+          tiles: [tileUrl],
+          tileSize: 256,
+          attribution: '© OpenStreetMap contributors, © CARTO',
+        });
+
+        // Add layer, checking if the target layer exists first
+        const beforeLayer = map.getLayer(fillLayerId) ? fillLayerId : undefined;
+        map.addLayer({
+          id: 'carto',
+          type: 'raster',
+          source: 'carto',
+        }, beforeLayer);
+      };
+
+      if (map.isStyleLoaded()) {
+        updateTiles();
+      } else {
+        map.once('styledata', updateTiles);
+      }
+    }
+  }, [isDarkMode, fillLayerId]);
 
   return <div ref={containerRef} className="w-full h-full" aria-label="Kart over Oslo bydeler" role="region" />;
 }

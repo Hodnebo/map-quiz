@@ -10,8 +10,9 @@ import { XorShift32 } from "@/lib/rng";
 import { playCorrectSound, playWrongSound, initializeAudio } from "@/lib/audio";
 import { getEffectiveSettings } from "@/lib/gameModes";
 import { getAssetUrl } from "@/lib/basePath";
-import { Button, AppBar, Toolbar, Typography, Box } from "@mui/material";
-import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, Shuffle as ShuffleIcon } from "@mui/icons-material";
+import { Button, AppBar, Toolbar, Typography, Box, IconButton } from "@mui/material";
+import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, Shuffle as ShuffleIcon, DarkMode as DarkModeIcon, LightMode as LightModeIcon } from "@mui/icons-material";
+import { useTheme } from "@/contexts/ThemeContext";
 import GameOverlay from "@/components/GameOverlay";
 
 const QuizMap = dynamic(() => import("@/components/Map"), { ssr: false });
@@ -71,6 +72,7 @@ function shiftBounds(bbox: [[number, number], [number, number]], fracX: number, 
 
 export default function Home() {
   const { bydeler, geojson, loading, error } = useBydelerData();
+  const { isDarkMode, toggleTheme } = useTheme();
   const [settings, setSettings] = useState<GameSettings>(() => load("settings", DEFAULT_SETTINGS));
   const [seed, setSeed] = useState<number>(() => load("seed", Math.floor(Date.now() % 2 ** 31)));
   const [state, setState] = useState<GameState>(() => createInitialState(settings, seed));
@@ -257,6 +259,13 @@ export default function Home() {
             >
               Ny seed
             </Button>
+            <IconButton
+              onClick={toggleTheme}
+              color="inherit"
+              aria-label="toggle theme"
+            >
+              {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
           </Box>
         </Toolbar>
       </AppBar>
@@ -298,6 +307,7 @@ export default function Home() {
             focusPadding={focusPadding}
             revealedIds={state.revealedIds}
             candidateIds={state.candidateIds}
+            isDarkMode={isDarkMode}
           />
         )}
 
