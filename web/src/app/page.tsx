@@ -9,6 +9,7 @@ import { load, save } from "@/lib/persistence";
 import { XorShift32 } from "@/lib/rng";
 import { playCorrectSound, playWrongSound, initializeAudio } from "@/lib/audio";
 import { getEffectiveSettings } from "@/lib/gameModes";
+import { getAssetUrl } from "@/lib/basePath";
 import { Button, AppBar, Toolbar, Typography, Box } from "@mui/material";
 import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, Shuffle as ShuffleIcon } from "@mui/icons-material";
 import GameOverlay from "@/components/GameOverlay";
@@ -289,7 +290,7 @@ export default function Home() {
         )}
         {canPlay && (
           <QuizMap
-            geojsonUrl="/data/bydeler_simplified.geo.json"
+            geojsonUrl={getAssetUrl("/data/bydeler_simplified.geo.json")}
             onFeatureClick={onFeatureClick}
             highlightFeatureId={null}
             disableHoverOutline={effectiveSettings.difficulty === "hard"}

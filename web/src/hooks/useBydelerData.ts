@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Bydel } from "@/src/lib/types";
+import { getAssetUrl } from "@/lib/basePath";
 
 interface GeoFeatureProperties {
   id: string;
@@ -37,7 +38,7 @@ export function useBydelerData() {
     async function load() {
       try {
         setLoading(true);
-        const res = await fetch("/data/bydeler_simplified.geo.json", {
+        const res = await fetch(getAssetUrl("/data/bydeler_simplified.geo.json"), {
           cache: "force-cache",
         });
         if (!res.ok) throw new Error(`Failed to load data: ${res.status}`);

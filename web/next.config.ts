@@ -12,9 +12,9 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // GitHub Pages serves from a subdirectory, we'll set this if needed
-  // basePath: '/map-quiz',
-  // assetPrefix: '/map-quiz/',
+  // GitHub Pages serves from a subdirectory
+  basePath: '/map-quiz',
+  assetPrefix: '/map-quiz/',
 };
 
 export default nextConfig;
