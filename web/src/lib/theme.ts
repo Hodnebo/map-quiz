@@ -48,6 +48,13 @@ export const theme = createTheme({
     },
   },
   components: {
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#2563eb', // Solid blue background for light mode
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: {
@@ -63,6 +70,14 @@ export const theme = createTheme({
           '&.Mui-disabled': {
             backgroundColor: '#e0e0e0',
             color: '#757575',
+          },
+        },
+        outlined: {
+          borderColor: 'rgba(255, 255, 255, 0.7)', // Better contrast for outlined buttons on AppBar
+          color: '#ffffff',
+          '&:hover': {
+            borderColor: 'rgba(255, 255, 255, 0.9)',
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
           },
         },
       },
@@ -102,6 +117,13 @@ export const darkTheme = createTheme({
   },
   components: {
     ...theme.components,
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#1a1a1a', // Dark background for dark mode
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: {
@@ -117,6 +139,14 @@ export const darkTheme = createTheme({
           '&.Mui-disabled': {
             backgroundColor: '#404040',
             color: '#b0b0b0',
+          },
+        },
+        outlined: {
+          borderColor: 'rgba(255, 255, 255, 0.3)', // Subtle border for dark mode
+          color: '#ededed',
+          '&:hover': {
+            borderColor: 'rgba(255, 255, 255, 0.5)',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
           },
         },
       },

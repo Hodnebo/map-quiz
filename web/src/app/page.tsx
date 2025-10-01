@@ -227,7 +227,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen grid grid-rows-[auto_1fr]">
-      <AppBar position="static" elevation={1}>
+      <AppBar position="static" elevation={0} sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
         <Toolbar>
           <Typography variant="h1" component="h1" sx={{ flexGrow: 1 }}>
             Oslo Bydel-Quiz
@@ -256,7 +256,18 @@ export default function Home() {
             <Button
               variant="outlined"
               startIcon={<ShuffleIcon />}
-              onClick={() => setSeed(Math.floor(Math.random() * 2 ** 31))}
+              onClick={() => {
+                setSeed(Math.floor(Math.random() * 2 ** 31));
+                if (state.status !== "idle") {
+                  setTimeout(() => doRestart(), 0);
+                }
+              }}
+              sx={{
+                borderWidth: '2px',
+                '&:hover': {
+                  borderWidth: '2px',
+                },
+              }}
             >
               Ny seed
             </Button>
@@ -276,20 +287,20 @@ export default function Home() {
         {state.status === "playing" && targetName && (
           <div
             className={
-              "pointer-events-none absolute top-3 left-1/2 -translate-x-1/2 z-10 backdrop-blur px-4 py-2 rounded-full shadow-md border " +
+              "pointer-events-none absolute top-3 left-1/2 -translate-x-1/2 z-10 px-4 py-2 rounded-full shadow-md border " +
               (feedback === "correct"
                  ? " feedback-correct"
                  : feedback === "wrong" || feedbackMessage
                    ? " feedback-wrong"
-                   : " bg-white/90 dark:bg-gray-900/90 border-gray-200 dark:border-gray-800")
+                   : " bg-blue-600 border-blue-700 text-white")
             }
             aria-live="polite"
           >
             <span className={(feedback === "correct" ? "animate-correct " : feedback === "wrong" ? "animate-wrong " : "") + "inline-flex items-center gap-2"}>
-              <span className="text-xs text-gray-100" style={{ opacity: feedback ? 0.9 : 1 }}>
+              <span className="text-xs text-white" style={{ opacity: feedback ? 0.9 : 0.9 }}>
                 {feedback ? (feedback === "correct" ? "Riktig" : "Feil") : feedbackMessage ? "" : "Finn"}
               </span>
-              <span className="font-semibold">{targetName}</span>
+              <span className="font-semibold text-white">{targetName}</span>
             </span>
             {feedbackMessage && (
               <div className="mt-1 text-xs text-white text-center" style={{ opacity: 0.95 }}>
