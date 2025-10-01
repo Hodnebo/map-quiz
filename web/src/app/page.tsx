@@ -182,20 +182,23 @@ export default function Home() {
     if (!raw) return null;
 
     const rng = new XorShift32((seed + state.currentRound * 1337) >>> 0);
-    const jx = (rng.next() - 0.5) * 0.5;
-    const jy = (rng.next() - 0.5) * 0.5;
+    const jx = (rng.next() - 0.5) * 2; // Increased range from -1 to 1
+    const jy = (rng.next() - 0.5) * 2;
 
     if (settings.difficulty === "training") {
-      const padded = padBounds(raw, 1.2, 0.02, 0.015);
-      return shiftBounds(padded, jx * 0.2, jy * 0.2);
+      const padded = padBounds(raw, 1.8, 0.02, 0.015); // Slightly more padding
+      return shiftBounds(padded, jx * 0.3, jy * 0.3); // Increased shift
     }
     if (settings.difficulty === "easy") {
-      const padded = padBounds(raw, 1.6, 0.03, 0.02);
-      return shiftBounds(padded, jx * 0.3, jy * 0.3);
+      const padded = padBounds(raw, 2.5, 0.03, 0.02);
+      return shiftBounds(padded, jx * 0.6, jy * 0.6); // Much more shift
     }
     if (settings.difficulty === "normal") {
-      const padded = padBounds(raw, 2.2, 0.05, 0.035);
-      return shiftBounds(padded, jx * 0.4, jy * 0.4);
+      const padded = padBounds(raw, 3.5, 0.05, 0.035);
+      return shiftBounds(padded, jx * 0.8, jy * 0.8); // Even more shift
+    }
+    if (settings.difficulty === "hard") {
+      return null; // No zoom at all - show full map
     }
     return null;
   }, [geojson, settings.alternativesCount, settings.difficulty, state.currentTargetId, state.currentRound, seed]);
