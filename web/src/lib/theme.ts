@@ -52,6 +52,7 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundColor: '#2563eb', // Solid blue background for light mode
+          borderRadius: 0, // Remove rounded corners
         },
       },
     },
@@ -121,6 +122,7 @@ export const darkTheme = createTheme({
       styleOverrides: {
         root: {
           backgroundColor: '#1a1a1a', // Dark background for dark mode
+          borderRadius: 0, // Remove rounded corners
         },
       },
     },
