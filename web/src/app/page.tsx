@@ -269,7 +269,7 @@ export default function Home() {
           >
             <span className={(feedback === "correct" ? "animate-correct " : feedback === "wrong" ? "animate-wrong " : "") + "inline-flex items-center gap-2"}>
               <span className="text-xs text-gray-100" style={{ opacity: feedback ? 0.9 : 1 }}>
-                {feedback ? (feedback === "correct" ? "Riktig" : "Feil") : feedbackMessage ? "Feil" : "Finn"}
+                {feedback ? (feedback === "correct" ? "Riktig" : "Feil") : feedbackMessage ? "" : "Finn"}
               </span>
               <span className="font-semibold">{targetName}</span>
             </span>

@@ -22,11 +22,11 @@ export default function GameSettings({ settings, onSettingsChange, allIdsLength 
           <FormControl size="small" fullWidth>
             <InputLabel>Runder</InputLabel>
             <Select
-              value={settings.rounds === allIdsLength ? "full" : String(settings.rounds)}
+              value={settings.rounds === allIdsLength - 1 ? "full" : String(settings.rounds)}
               label="Runder"
               onChange={(e) => {
                 const v = e.target.value;
-                updateSetting('rounds', v === "full" ? allIdsLength : Math.max(5, Math.min(100, Number(v) || 0)));
+                updateSetting('rounds', v === "full" ? allIdsLength - 1 : Math.max(5, Math.min(100, Number(v) || 0)));
               }}
             >
               <MenuItem value="10">10</MenuItem>
