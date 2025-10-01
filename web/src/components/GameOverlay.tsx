@@ -5,10 +5,12 @@ import { Card, CardContent, Typography, Box, IconButton, Drawer } from '@mui/mat
 import { Settings as SettingsIcon, Close as CloseIcon } from '@mui/icons-material';
 import GameSettings from './GameSettings';
 import type { GameSettings as GameSettingsType, GameState } from '@/lib/types';
+import { getEffectiveSettings } from '@/lib/gameModes';
 
 interface GameOverlayProps {
   state: GameState;
   settings: GameSettingsType;
+  effectiveSettings: ReturnType<typeof getEffectiveSettings>;
   onSettingsChange: (settings: GameSettingsType) => void;
   allIdsLength: number;
   targetName?: string | null;
@@ -18,6 +20,7 @@ interface GameOverlayProps {
 export default function GameOverlay({
   state,
   settings,
+  effectiveSettings,
   onSettingsChange,
   allIdsLength,
   targetName,
@@ -128,6 +131,7 @@ export default function GameOverlay({
         </Box>
         <GameSettings
           settings={settings}
+          effectiveSettings={effectiveSettings}
           onSettingsChange={onSettingsChange}
           allIdsLength={allIdsLength}
           isGameActive={state.status !== 'idle'}

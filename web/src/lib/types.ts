@@ -8,13 +8,28 @@ export interface Bydel {
   slug: string;
 }
 
+export interface GameMode {
+  id: string;
+  name: string;
+  description: string;
+  settings: {
+    difficulty?: "training" | "easy" | "normal" | "hard";
+    alternativesCount?: number | null;
+    maxAttempts?: number;
+    zoomEnabled?: boolean;
+    timerSeconds?: number | null;
+  };
+}
+
 export interface GameSettings {
+  gameMode: string;
   rounds: number;
-  timerSeconds: number | null;
-  difficulty: "training" | "easy" | "normal" | "hard";
-  maxAttempts?: number;
-  alternativesCount?: number | null;
   audioEnabled?: boolean;
+  // Mode-specific overrides
+  difficulty?: "training" | "easy" | "normal" | "hard";
+  alternativesCount?: number | null;
+  maxAttempts?: number;
+  timerSeconds?: number | null;
 }
 
 export interface GameState {

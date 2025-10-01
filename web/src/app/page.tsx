@@ -8,6 +8,7 @@ import { createInitialState, startGame, answer } from "@/lib/game";
 import { load, save } from "@/lib/persistence";
 import { XorShift32 } from "@/lib/rng";
 import { playCorrectSound, playWrongSound, initializeAudio } from "@/lib/audio";
+import { getEffectiveSettings } from "@/lib/gameModes";
 import { Button, AppBar, Toolbar, Typography, Box } from "@mui/material";
 import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, Shuffle as ShuffleIcon } from "@mui/icons-material";
 import GameOverlay from "@/components/GameOverlay";
@@ -15,10 +16,8 @@ import GameOverlay from "@/components/GameOverlay";
 const QuizMap = dynamic(() => import("@/components/Map"), { ssr: false });
 
 const DEFAULT_SETTINGS: GameSettings = {
+  gameMode: "classic",
   rounds: 15,
-  timerSeconds: null,
-  difficulty: "normal",
-  maxAttempts: 3,
   audioEnabled: true,
 };
 
@@ -88,19 +87,22 @@ export default function Home() {
 
   const allIds = useMemo(() => (bydeler ? bydeler.map((b) => b.id) : []), [bydeler]);
   const canPlay = !!geojson && allIds.length > 0;
+  const effectiveSettings = useMemo(() => getEffectiveSettings(settings), [settings]);
 
   const doStart = useCallback(() => {
     if (!canPlay) return;
-    setState((s) => startGame({ ...s, settings }, allIds, seed));
-  }, [allIds, canPlay, seed, settings]);
+    const settingsWithEffective = { ...settings, ...effectiveSettings };
+    setState((s) => startGame({ ...s, settings: settingsWithEffective }, allIds, seed));
+  }, [allIds, canPlay, seed, settings, effectiveSettings]);
 
   const doRestart = useCallback(() => {
     if (!canPlay) return;
-    setState(createInitialState(settings, seed));
+    const settingsWithEffective = { ...settings, ...effectiveSettings };
+    setState(createInitialState(settingsWithEffective, seed));
     setTimeout(() => {
       setState((s) => startGame(s, allIds, seed));
     }, 0);
-  }, [allIds, canPlay, seed, settings]);
+  }, [allIds, canPlay, seed, settings, effectiveSettings]);
 
   // Clear feedback message when moving to next question
   useEffect(() => {
@@ -112,16 +114,17 @@ export default function Home() {
   // Update game state settings dynamically when settings change
   useEffect(() => {
     if (state.status !== 'idle') {
+      const settingsWithEffective = { ...settings, ...effectiveSettings };
       setState(prevState => {
         const newState = {
           ...prevState,
-          settings: { ...prevState.settings, ...settings }
+          settings: { ...prevState.settings, ...settingsWithEffective }
         };
 
         // If rounds changed and we're still playing, adjust if needed
-        if (settings.rounds !== prevState.settings.rounds && state.status === 'playing') {
+        if (settingsWithEffective.rounds !== prevState.settings.rounds && state.status === 'playing') {
           // If new rounds is less than current round, end the game
-          if (settings.rounds < prevState.currentRound) {
+          if (settingsWithEffective.rounds < prevState.currentRound) {
             newState.status = 'ended';
             newState.currentTargetId = null;
           }
@@ -130,7 +133,7 @@ export default function Home() {
         return newState;
       });
     }
-  }, [settings, state.status, state.currentRound]);
+  }, [settings, effectiveSettings, state.status, state.currentRound]);
 
   const onFeatureClick = useCallback(
     (id: string) => {
@@ -172,12 +175,13 @@ export default function Home() {
   );
 
   const targetName = useMemo(() => bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? null, [bydeler, state.currentTargetId]);
-  const attemptsLeft = useMemo(() => (settings.maxAttempts ?? 3) - (state.attemptsThisRound ?? 0), [settings.maxAttempts, state.attemptsThisRound]);
+  const attemptsLeft = useMemo(() => (effectiveSettings.maxAttempts ?? 3) - (state.attemptsThisRound ?? 0), [effectiveSettings.maxAttempts, state.attemptsThisRound]);
 
 
   const focusBounds = useMemo(() => {
     if (!geojson) return null;
-    if ((settings.alternativesCount ?? 0) > 1) return null; // don't zoom when showing alternatives
+    if (!effectiveSettings.zoomEnabled) return null; // don't zoom if disabled by mode
+    if ((effectiveSettings.alternativesCount ?? 0) > 1) return null; // don't zoom when showing alternatives
     const raw = featureBBox(geojson, state.currentTargetId);
     if (!raw) return null;
 
@@ -185,26 +189,26 @@ export default function Home() {
     const jx = (rng.next() - 0.5) * 2; // Increased range from -1 to 1
     const jy = (rng.next() - 0.5) * 2;
 
-    if (settings.difficulty === "training") {
+    if (effectiveSettings.difficulty === "training") {
       const padded = padBounds(raw, 1.8, 0.02, 0.015); // Slightly more padding
       return shiftBounds(padded, jx * 0.3, jy * 0.3); // Increased shift
     }
-    if (settings.difficulty === "easy") {
+    if (effectiveSettings.difficulty === "easy") {
       const padded = padBounds(raw, 2.5, 0.03, 0.02);
       return shiftBounds(padded, jx * 0.6, jy * 0.6); // Much more shift
     }
-    if (settings.difficulty === "normal") {
+    if (effectiveSettings.difficulty === "normal") {
       const padded = padBounds(raw, 3.5, 0.05, 0.035);
       return shiftBounds(padded, jx * 0.8, jy * 0.8); // Even more shift
     }
-    if (settings.difficulty === "hard") {
+    if (effectiveSettings.difficulty === "hard") {
       return null; // No zoom at all - show full map
     }
     return null;
-  }, [geojson, settings.alternativesCount, settings.difficulty, state.currentTargetId, state.currentRound, seed]);
+  }, [geojson, effectiveSettings.zoomEnabled, effectiveSettings.alternativesCount, effectiveSettings.difficulty, state.currentTargetId, state.currentRound, seed]);
 
   const focusPadding = useMemo(() => {
-    switch (settings.difficulty) {
+    switch (effectiveSettings.difficulty) {
       case "training":
         return 28;
       case "easy":
@@ -214,7 +218,7 @@ export default function Home() {
       default:
         return 24;
     }
-  }, [settings.difficulty]);
+  }, [effectiveSettings.difficulty]);
 
 
   return (
@@ -288,7 +292,7 @@ export default function Home() {
             geojsonUrl="/data/bydeler_simplified.geo.json"
             onFeatureClick={onFeatureClick}
             highlightFeatureId={null}
-            disableHoverOutline={settings.difficulty === "hard"}
+            disableHoverOutline={effectiveSettings.difficulty === "hard"}
             focusBounds={focusBounds}
             focusPadding={focusPadding}
             revealedIds={state.revealedIds}
@@ -299,6 +303,7 @@ export default function Home() {
         <GameOverlay
           state={state}
           settings={settings}
+          effectiveSettings={effectiveSettings}
           onSettingsChange={setSettings}
           allIdsLength={allIds.length}
           targetName={targetName}
