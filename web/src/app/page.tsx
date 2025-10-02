@@ -271,7 +271,7 @@ export default function Home() {
       <div className="relative h-full">
         {loading && <div className="absolute inset-0 flex items-center justify-center">Laster kart...</div>}
         {error && <div className="absolute inset-0 flex items-center justify-center text-red-600">{error}</div>}
-        {state.status === "playing" && targetName && (
+        {state.status === "playing" && targetName && settings.gameMode !== 'reverse_quiz' && (
           <div
             className={
               "pointer-events-none absolute top-3 left-1/2 -translate-x-1/2 z-10 px-4 py-2 rounded-full shadow-md border " +
@@ -300,7 +300,7 @@ export default function Home() {
           <QuizMap
             geojsonUrl={getAssetUrl("/data/bydeler_simplified.geo.json")}
             onFeatureClick={onFeatureClick}
-            highlightFeatureId={null}
+            highlightFeatureId={settings.gameMode === 'reverse_quiz' ? state.currentTargetId : null}
             disableHoverOutline={mapConfig.disableHoverOutline}
             focusBounds={mapConfig.focusBounds}
             focusPadding={mapConfig.focusPadding}

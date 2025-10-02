@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { TextField, Box, Paper, List, ListItem, ListItemText, Typography } from '@mui/material';
+import { TextField, Box, Paper, List, ListItem, ListItemText, Typography, useTheme } from '@mui/material';
 import type { Bydel } from '@/lib/types';
 
 interface AutocompleteInputProps {
@@ -27,6 +27,8 @@ export default function AutocompleteInput({
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
 
   // Filter suggestions based on input value
   const filteredSuggestions = suggestions
@@ -127,8 +129,24 @@ export default function AutocompleteInput({
         size="small"
         sx={{
           '& .MuiOutlinedInput-root': {
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(8px)',
+            color: isDarkMode ? '#ffffff' : '#000000',
+            '& fieldset': {
+              borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.23)',
+            },
+            '&:hover fieldset': {
+              borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.87)',
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: isDarkMode ? '#ffffff' : '#1976d2',
+            },
+          },
+          '& .MuiInputLabel-root': {
+            color: isDarkMode ? '#cccccc' : '#666666',
+          },
+          '& .MuiInputLabel-root.Mui-focused': {
+            color: isDarkMode ? '#ffffff' : '#1976d2',
           },
         }}
       />
@@ -139,16 +157,17 @@ export default function AutocompleteInput({
           elevation={3}
           sx={{
             position: 'absolute',
-            top: '100%',
+            bottom: '100%',
             left: 0,
             right: 0,
             zIndex: 1000,
             maxHeight: 200,
             overflow: 'auto',
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(8px)',
             border: '1px solid',
-            borderColor: 'divider',
+            borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.12)',
+            mb: 1,
           }}
         >
           <List dense>
@@ -181,18 +200,25 @@ export default function AutocompleteInput({
           elevation={3}
           sx={{
             position: 'absolute',
-            top: '100%',
+            bottom: '100%',
             left: 0,
             right: 0,
             zIndex: 1000,
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(8px)',
             border: '1px solid',
-            borderColor: 'divider',
+            borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.12)',
             p: 1,
+            mb: 1,
           }}
         >
-          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              fontSize: '0.75rem',
+              color: isDarkMode ? '#cccccc' : '#666666'
+            }}
+          >
             Ingen forslag funnet
           </Typography>
         </Paper>

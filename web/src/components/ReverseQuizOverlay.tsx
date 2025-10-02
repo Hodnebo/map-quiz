@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Box, Card, CardContent, Typography } from '@mui/material';
+import { Box, Card, CardContent, Typography, useTheme } from '@mui/material';
 import AutocompleteInput from './AutocompleteInput';
 import type { GameState, GameSettings, Bydel } from '@/lib/types';
 import type { AnswerResult } from '@/lib/gameModeStrategy';
@@ -24,6 +24,8 @@ export default function ReverseQuizOverlay({
   onAnswer
 }: ReverseQuizOverlayProps) {
   const [inputValue, setInputValue] = useState('');
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
 
   const handleSubmit = useCallback((value: string) => {
     if (value.trim() && targetName) {
@@ -51,9 +53,10 @@ export default function ReverseQuizOverlay({
     >
       <Card
         sx={{
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(8px)',
           boxShadow: 3,
+          border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
         }}
       >
         <CardContent sx={{ p: 2 }}>
@@ -64,7 +67,7 @@ export default function ReverseQuizOverlay({
               textAlign: 'center',
               fontSize: '1rem',
               fontWeight: 600,
-              color: '#1a1a1a'
+              color: isDarkMode ? '#ffffff' : '#1a1a1a'
             }}
           >
             Hva heter dette området?
@@ -87,7 +90,7 @@ export default function ReverseQuizOverlay({
                 mt: 1, 
                 textAlign: 'center',
                 fontSize: '0.75rem',
-                color: '#666'
+                color: isDarkMode ? '#cccccc' : '#666'
               }}
             >
               Forsøk igjen: {attemptsLeft} igjen

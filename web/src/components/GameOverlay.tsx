@@ -149,7 +149,7 @@ export default function GameOverlay({
 
 
         {/* Current Target Info */}
-        {state.status === "playing" && targetName && (
+        {state.status === "playing" && targetName && settings.gameMode !== 'reverse_quiz' && (
           <Card sx={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(8px)' }}>
             <CardContent sx={{ p: { xs: 1, sm: 1.5 }, '&:last-child': { pb: { xs: 1, sm: 1.5 } } }}>
               <Typography variant="body2" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' }, mb: 0.5, color: '#666', fontWeight: 500 }}>
