@@ -37,7 +37,7 @@ export function startGame(state: GameState, allIds: string[], seed: number): Gam
   };
 }
 
-export function answer(state: GameState, clickedId: string, allIds: string[], seed: number): AnswerResult {
+export function answer(state: GameState, clickedId: string, allIds: string[], seed: number, correctName?: string): AnswerResult {
   const mode = gameModeRegistry.getMode(state.settings.gameMode);
-  return mode.processAnswer(state, clickedId, allIds, seed);
+  return mode.processAnswer(state, clickedId, allIds, seed, correctName);
 }

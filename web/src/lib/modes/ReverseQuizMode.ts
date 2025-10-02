@@ -3,15 +3,13 @@ import type { GameState, GameSettings } from '../types';
 import type { QuestionData, AnswerResult, MapConfig } from '../gameModeStrategy';
 import { XorShift32 } from '../rng';
 
-export class ClassicMode extends BaseGameMode {
-  readonly id = 'classic';
-  readonly name = 'Klassisk';
-  readonly description = 'Finn områder på kartet med zoom-hint basert på vanskelighetsgrad';
+export class ReverseQuizMode extends BaseGameMode {
+  readonly id = 'reverse_quiz';
+  readonly name = 'Omvendt Quiz';
+  readonly description = 'Skriv navnet på det markerte området';
 
   getDefaultSettings(): Partial<GameSettings> {
     return {
-      difficulty: 'normal',
-      alternativesCount: null,
       maxAttempts: 3,
       timerSeconds: null,
     };
@@ -25,8 +23,15 @@ export class ClassicMode extends BaseGameMode {
 
     return {
       targetId,
-      type: 'click',
-      mapConfig: this.createMapConfig(true),
+      type: 'reverse_quiz',
+      mapConfig: this.createMapConfig(
+        true,  // Enable zoom
+        null,  // Will be calculated by getMapConfig
+        24,    // Default padding
+        false, // Don't show candidates
+        false, // Don't hide labels
+        false  // Don't disable hover outline
+      ),
     };
   }
 
@@ -41,7 +46,15 @@ export class ClassicMode extends BaseGameMode {
 
     const maxAttempts = state.settings.maxAttempts ?? 3;
     const targetId = state.currentTargetId;
-    const isCorrect = answer === targetId;
+    
+    // Normalize the answer for comparison (lowercase, trim whitespace)
+    const normalizedAnswer = answer.toLowerCase().trim();
+    const normalizedCorrectName = correctName?.toLowerCase().trim() || '';
+    
+    // Check if the answer matches (exact match or close enough)
+    const isCorrect = normalizedAnswer === normalizedCorrectName || 
+                     normalizedCorrectName.includes(normalizedAnswer) ||
+                     normalizedAnswer.includes(normalizedCorrectName);
 
     if (!isCorrect) {
       const nextAttempts = (state.attemptsThisRound ?? 0) + 1;
@@ -63,10 +76,11 @@ export class ClassicMode extends BaseGameMode {
   }
 
   getMapConfig(state: GameState, settings: GameSettings, geojson: any, seed: number): MapConfig {
+    // For reverse quiz, we want to show the highlighted area clearly
+    // We can use a moderate zoom level
     const difficulty = settings.difficulty ?? 'normal';
-    const zoomEnabled = true;
     
-    if (!zoomEnabled || !state.currentTargetId) {
+    if (!state.currentTargetId) {
       return this.createMapConfig(false);
     }
 
@@ -74,12 +88,12 @@ export class ClassicMode extends BaseGameMode {
     const focusPadding = this.getFocusPadding(difficulty);
 
     return this.createMapConfig(
-      zoomEnabled,
+      true,  // Enable zoom
       focusBounds,
       focusPadding,
-      false,
-      false,
-      difficulty === 'hard'
+      false, // Don't show candidates
+      false, // Don't hide labels
+      false  // Don't disable hover outline
     );
   }
 
@@ -158,6 +172,7 @@ export class ClassicMode extends BaseGameMode {
     if (minX === Infinity) return null;
 
     const rawBounds: [[number, number], [number, number]] = [[minX, minY], [maxX, maxY]];
+    // For reverse quiz, use less aggressive padding since we want to show the area clearly
     const paddedBounds = this.padBounds(rawBounds, this.getPaddingFactor(difficulty), 0.02, 0.015);
     
     const rng = new XorShift32((seed + round * 1337) >>> 0);
@@ -200,31 +215,31 @@ export class ClassicMode extends BaseGameMode {
 
   private getPaddingFactor(difficulty: string): number {
     switch (difficulty) {
-      case "training": return 1.8;
-      case "easy": return 2.5;
-      case "normal": return 3.5;
-      case "hard": return 5.0;
-      default: return 3.5;
+      case "training": return 1.2; // Less padding for reverse quiz
+      case "easy": return 1.5;
+      case "normal": return 2.0;
+      case "hard": return 2.5;
+      default: return 2.0;
     }
   }
 
   private getShiftFactor(difficulty: string): number {
     switch (difficulty) {
-      case "training": return 0.3;
-      case "easy": return 0.6;
-      case "normal": return 0.8;
-      case "hard": return 1.0;
-      default: return 0.8;
+      case "training": return 0.1; // Less shift for reverse quiz
+      case "easy": return 0.2;
+      case "normal": return 0.3;
+      case "hard": return 0.4;
+      default: return 0.3;
     }
   }
 
   private getFocusPadding(difficulty: string): number {
     switch (difficulty) {
-      case "training": return 28;
-      case "easy": return 32;
-      case "normal": return 40;
-      case "hard": return 24;
-      default: return 24;
+      case "training": return 20;
+      case "easy": return 24;
+      case "normal": return 28;
+      case "hard": return 32;
+      default: return 28;
     }
   }
 }

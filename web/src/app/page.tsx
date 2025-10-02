@@ -15,6 +15,7 @@ import { Button, AppBar, Toolbar, Typography, Box, IconButton } from "@mui/mater
 import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, Shuffle as ShuffleIcon, DarkMode as DarkModeIcon, LightMode as LightModeIcon } from "@mui/icons-material";
 import { useTheme } from "@/contexts/ThemeContext";
 import GameOverlay from "@/components/GameOverlay";
+import ReverseQuizOverlay from "@/components/ReverseQuizOverlay";
 
 const QuizMap = dynamic(() => import("@/components/Map"), { ssr: false });
 
@@ -123,6 +124,12 @@ export default function Home() {
   const onFeatureClick = useCallback(
     (id: string) => {
       if (answerLockRef.current) return;
+      
+      // Don't process map clicks in reverse quiz mode
+      if (stateRef.current.settings.gameMode === 'reverse_quiz') {
+        return;
+      }
+      
       const res = answer(stateRef.current, id, allIds, seed);
       setFeedback(res.isCorrect ? "correct" : "wrong");
 
@@ -157,6 +164,41 @@ export default function Home() {
       }, 450);
     },
     [allIds, seed, bydeler, state.currentTargetId]
+  );
+
+  const onReverseQuizAnswer = useCallback(
+    (userAnswer: string, correctName: string) => {
+      if (answerLockRef.current) return;
+      const res = answer(stateRef.current, userAnswer, allIds, seed, correctName);
+      setFeedback(res.isCorrect ? "correct" : "wrong");
+
+      // Set feedback message for wrong answers
+      if (!res.isCorrect) {
+        setFeedbackMessage(`Det var "${userAnswer}"`);
+      } else {
+        setFeedbackMessage("");
+      }
+
+      // Play audio feedback if enabled
+      if (settingsRef.current.audioEnabled ?? true) {
+        if (res.isCorrect) {
+          playCorrectSound();
+        } else {
+          playWrongSound();
+        }
+      }
+
+      answerLockRef.current = true;
+      setTimeout(() => {
+        setState(res.newState);
+        setFeedback(null);
+        if (res.isCorrect) {
+          setFeedbackMessage("");
+        }
+        answerLockRef.current = false;
+      }, 450);
+    },
+    [allIds, seed]
   );
 
   const targetName = useMemo(() => bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? null, [bydeler, state.currentTargetId]);
@@ -278,6 +320,18 @@ export default function Home() {
           targetName={targetName}
           attemptsLeft={attemptsLeft}
         />
+
+        {/* Reverse Quiz Overlay */}
+        {settings.gameMode === 'reverse_quiz' && bydeler && (
+          <ReverseQuizOverlay
+            state={state}
+            settings={settings}
+            targetName={targetName}
+            attemptsLeft={attemptsLeft}
+            bydeler={bydeler}
+            onAnswer={onReverseQuizAnswer}
+          />
+        )}
       </div>
 
     </div>

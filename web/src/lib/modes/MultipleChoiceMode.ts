@@ -34,7 +34,7 @@ export class MultipleChoiceMode extends BaseGameMode {
     };
   }
 
-  processAnswer(state: GameState, answer: string, allIds: string[], seed: number): AnswerResult {
+  processAnswer(state: GameState, answer: string, allIds: string[], seed: number, correctName?: string): AnswerResult {
     if (state.status !== "playing") {
       return { 
         isCorrect: false, 

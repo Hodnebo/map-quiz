@@ -11,7 +11,7 @@ export interface MapConfig {
 
 export interface QuestionData {
   targetId: string;
-  type: 'click' | 'multiple_choice' | 'timed' | 'memory';
+  type: 'click' | 'multiple_choice' | 'timed' | 'memory' | 'reverse_quiz';
   candidates?: string[];
   timeLimit?: number;
   hints?: string[];
@@ -38,7 +38,7 @@ export interface GameModeStrategy {
   
   // Core game behavior
   generateQuestion(state: GameState, allIds: string[], seed: number): QuestionData;
-  processAnswer(state: GameState, answer: string, allIds: string[], seed: number): AnswerResult;
+  processAnswer(state: GameState, answer: string, allIds: string[], seed: number, correctName?: string): AnswerResult;
   
   // Settings and validation
   getDefaultSettings(): Partial<GameSettings>;

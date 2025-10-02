@@ -1,8 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'export',
-  trailingSlash: true,
+  // Only use static export and base path for production builds
+  ...(process.env.NODE_ENV === 'production' && {
+    output: 'export',
+    trailingSlash: true,
+    basePath: '/map-quiz',
+    assetPrefix: '/map-quiz/',
+  }),
   images: {
     unoptimized: true,
   },
@@ -12,11 +17,6 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // GitHub Pages serves from a subdirectory (only in production)
-  ...(process.env.NODE_ENV === 'production' && {
-    basePath: '/map-quiz',
-    assetPrefix: '/map-quiz/',
-  }),
 };
 
 export default nextConfig;
