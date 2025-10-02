@@ -13,6 +13,8 @@ interface ReverseQuizOverlayProps {
   attemptsLeft: number;
   bydeler: Bydel[];
   onAnswer: (answer: string, correctName: string) => void;
+  feedback?: 'correct' | 'wrong' | null;
+  feedbackMessage?: string;
 }
 
 export default function ReverseQuizOverlay({
@@ -21,7 +23,9 @@ export default function ReverseQuizOverlay({
   targetName,
   attemptsLeft,
   bydeler,
-  onAnswer
+  onAnswer,
+  feedback,
+  feedbackMessage
 }: ReverseQuizOverlayProps) {
   const [inputValue, setInputValue] = useState('');
   const theme = useTheme();
@@ -45,7 +49,7 @@ export default function ReverseQuizOverlay({
         bottom: 16,
         left: '50%',
         transform: 'translateX(-50%)',
-        zIndex: 10,
+        zIndex: 1000,
         width: '100%',
         maxWidth: 400,
         px: 2,
@@ -53,10 +57,10 @@ export default function ReverseQuizOverlay({
     >
       <Card
         sx={{
-          backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(8px)',
-          boxShadow: 3,
-          border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+          backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+          backdropFilter: 'blur(12px)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+          border: isDarkMode ? '2px solid rgba(255, 255, 255, 0.3)' : '2px solid rgba(0, 0, 0, 0.2)',
         }}
       >
         <CardContent sx={{ p: 2 }}>
@@ -72,6 +76,41 @@ export default function ReverseQuizOverlay({
           >
             Hva heter dette området?
           </Typography>
+          
+          {/* Feedback Message */}
+          {feedback && (
+            <Box sx={{ mb: 2, textAlign: 'center' }}>
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  color: feedback === 'correct' ? '#4caf50' : '#f44336',
+                  backgroundColor: feedback === 'correct' 
+                    ? (isDarkMode ? 'rgba(76, 175, 80, 0.2)' : 'rgba(76, 175, 80, 0.1)')
+                    : (isDarkMode ? 'rgba(244, 67, 54, 0.2)' : 'rgba(244, 67, 54, 0.1)'),
+                  px: 2,
+                  py: 1,
+                  borderRadius: 1,
+                  border: `1px solid ${feedback === 'correct' ? '#4caf50' : '#f44336'}`,
+                }}
+              >
+                {feedback === 'correct' ? '🎉 Riktig!' : '❌ Feil'}
+              </Typography>
+              {feedbackMessage && (
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    mt: 1,
+                    fontSize: '0.75rem',
+                    color: isDarkMode ? '#cccccc' : '#666666'
+                  }}
+                >
+                  {feedbackMessage}
+                </Typography>
+              )}
+            </Box>
+          )}
           
           <AutocompleteInput
             value={inputValue}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { TextField, Box, Paper, List, ListItem, ListItemText, Typography, useTheme } from '@mui/material';
 import type { Bydel } from '@/lib/types';
 
@@ -71,6 +72,13 @@ export default function AutocompleteInput({
         event.preventDefault();
         if (highlightedIndex >= 0) {
           const selectedSuggestion = filteredSuggestions[highlightedIndex];
+          onChange(selectedSuggestion.name);
+          onSubmit(selectedSuggestion.name);
+          setIsOpen(false);
+          setHighlightedIndex(-1);
+        } else if (filteredSuggestions.length === 1) {
+          // If there's only one suggestion, auto-select it
+          const selectedSuggestion = filteredSuggestions[0];
           onChange(selectedSuggestion.name);
           onSubmit(selectedSuggestion.name);
           setIsOpen(false);
@@ -151,23 +159,26 @@ export default function AutocompleteInput({
         }}
       />
       
-      {isOpen && filteredSuggestions.length > 0 && (
+      {isOpen && filteredSuggestions.length > 0 && createPortal(
         <Paper
           ref={listRef}
           elevation={3}
           sx={{
-            position: 'absolute',
-            bottom: '100%',
-            left: 0,
-            right: 0,
-            zIndex: 1000,
+            position: 'fixed',
+            bottom: '120px', // Position above the input card
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '100%',
+            maxWidth: 400,
+            zIndex: 999999,
             maxHeight: 200,
             overflow: 'auto',
-            backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(8px)',
-            border: '1px solid',
-            borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.12)',
-            mb: 1,
+            backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+            backdropFilter: 'blur(12px)',
+            border: '2px solid',
+            borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.2)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+            mx: 2,
           }}
         >
           <List dense>
@@ -178,6 +189,7 @@ export default function AutocompleteInput({
                 sx={{
                   cursor: 'pointer',
                   backgroundColor: index === highlightedIndex ? 'action.hover' : 'transparent',
+                  transition: 'background-color 0.2s ease',
                   '&:hover': {
                     backgroundColor: 'action.hover',
                   },
@@ -192,24 +204,28 @@ export default function AutocompleteInput({
               </ListItem>
             ))}
           </List>
-        </Paper>
+        </Paper>,
+        document.body
       )}
       
-      {isOpen && filteredSuggestions.length === 0 && value.length > 0 && (
+      {isOpen && filteredSuggestions.length === 0 && value.length > 0 && createPortal(
         <Paper
           elevation={3}
           sx={{
-            position: 'absolute',
-            bottom: '100%',
-            left: 0,
-            right: 0,
-            zIndex: 1000,
-            backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(8px)',
-            border: '1px solid',
-            borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.12)',
+            position: 'fixed',
+            bottom: '120px', // Position above the input card
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '100%',
+            maxWidth: 400,
+            zIndex: 999999,
+            backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+            backdropFilter: 'blur(12px)',
+            border: '2px solid',
+            borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.2)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
             p: 1,
-            mb: 1,
+            mx: 2,
           }}
         >
           <Typography 
@@ -221,7 +237,8 @@ export default function AutocompleteInput({
           >
             Ingen forslag funnet
           </Typography>
-        </Paper>
+        </Paper>,
+        document.body
       )}
     </Box>
   );

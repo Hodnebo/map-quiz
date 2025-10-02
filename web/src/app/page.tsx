@@ -330,6 +330,8 @@ export default function Home() {
             attemptsLeft={attemptsLeft}
             bydeler={bydeler}
             onAnswer={onReverseQuizAnswer}
+            feedback={feedback}
+            feedbackMessage={feedbackMessage}
           />
         )}
       </div>
