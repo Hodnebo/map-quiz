@@ -191,9 +191,12 @@ export default function Home() {
       answerLockRef.current = true;
       setTimeout(() => {
         setState(res.newState);
-        setFeedback(null);
-        if (res.isCorrect) {
-          setFeedbackMessage("");
+        // For reverse quiz mode, keep feedback until next input
+        if (stateRef.current.settings.gameMode !== 'reverse_quiz') {
+          setFeedback(null);
+          if (res.isCorrect) {
+            setFeedbackMessage("");
+          }
         }
         answerLockRef.current = false;
       }, 450);
@@ -332,6 +335,10 @@ export default function Home() {
             onAnswer={onReverseQuizAnswer}
             feedback={feedback}
             feedbackMessage={feedbackMessage}
+            onClearFeedback={() => {
+              setFeedback(null);
+              setFeedbackMessage("");
+            }}
           />
         )}
       </div>

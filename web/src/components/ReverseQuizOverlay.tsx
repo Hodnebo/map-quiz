@@ -15,6 +15,7 @@ interface ReverseQuizOverlayProps {
   onAnswer: (answer: string, correctName: string) => void;
   feedback?: 'correct' | 'wrong' | null;
   feedbackMessage?: string;
+  onClearFeedback?: () => void;
 }
 
 export default function ReverseQuizOverlay({
@@ -25,7 +26,8 @@ export default function ReverseQuizOverlay({
   bydeler,
   onAnswer,
   feedback,
-  feedbackMessage
+  feedbackMessage,
+  onClearFeedback
 }: ReverseQuizOverlayProps) {
   const [inputValue, setInputValue] = useState('');
   const theme = useTheme();
@@ -37,6 +39,14 @@ export default function ReverseQuizOverlay({
       setInputValue(''); // Clear input after submission
     }
   }, [targetName, onAnswer]);
+
+  const handleInputChange = useCallback((value: string) => {
+    setInputValue(value);
+    // Clear feedback when user starts typing again
+    if (value.length > 0 && feedback && onClearFeedback) {
+      onClearFeedback();
+    }
+  }, [feedback, onClearFeedback]);
 
   if (state.status !== 'playing' || !targetName) {
     return null;
@@ -114,7 +124,7 @@ export default function ReverseQuizOverlay({
           
           <AutocompleteInput
             value={inputValue}
-            onChange={setInputValue}
+            onChange={handleInputChange}
             onSubmit={handleSubmit}
             suggestions={bydeler}
             placeholder="Skriv navnet på området..."

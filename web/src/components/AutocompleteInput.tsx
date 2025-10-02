@@ -168,30 +168,38 @@ export default function AutocompleteInput({
             bottom: '120px', // Position above the input card
             left: '50%',
             transform: 'translateX(-50%)',
-            width: '100%',
+            width: 'calc(100vw - 64px)', // Use viewport width minus padding
             maxWidth: 400,
             zIndex: 999999,
             maxHeight: 200,
-            overflow: 'auto',
+            overflowY: 'auto',
+            overflowX: 'hidden',
             backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.98)' : 'rgba(255, 255, 255, 0.98)',
             backdropFilter: 'blur(12px)',
             border: '2px solid',
             borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.2)',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-            mx: 2,
           }}
         >
           <List dense>
             {filteredSuggestions.map((suggestion, index) => (
               <ListItem
-                key={suggestion.id}
+                key={`${suggestion.id}-${index}`}
                 onClick={() => handleSuggestionClick(suggestion)}
                 sx={{
                   cursor: 'pointer',
-                  backgroundColor: index === highlightedIndex ? 'action.hover' : 'transparent',
-                  transition: 'background-color 0.2s ease',
+                  backgroundColor: index === highlightedIndex 
+                    ? (isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)')
+                    : 'transparent',
+                  transition: 'all 0.2s ease',
+                  borderRadius: '4px',
+                  margin: '2px 4px',
                   '&:hover': {
-                    backgroundColor: 'action.hover',
+                    backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)',
+                    transform: 'translateY(-1px)',
+                    boxShadow: isDarkMode 
+                      ? '0 2px 8px rgba(255, 255, 255, 0.1)' 
+                      : '0 2px 8px rgba(0, 0, 0, 0.1)',
                   },
                 }}
               >
@@ -216,7 +224,7 @@ export default function AutocompleteInput({
             bottom: '120px', // Position above the input card
             left: '50%',
             transform: 'translateX(-50%)',
-            width: '100%',
+            width: 'calc(100vw - 64px)', // Use viewport width minus padding
             maxWidth: 400,
             zIndex: 999999,
             backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.98)' : 'rgba(255, 255, 255, 0.98)',
@@ -225,7 +233,6 @@ export default function AutocompleteInput({
             borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.2)',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
             p: 1,
-            mx: 2,
           }}
         >
           <Typography 
