@@ -1,0 +1,230 @@
+import { BaseGameMode } from './BaseGameMode';
+import type { GameState, GameSettings } from '../types';
+import type { QuestionData, AnswerResult, MapConfig } from '../gameModeStrategy';
+import { XorShift32 } from '../rng';
+
+export class ClassicMode extends BaseGameMode {
+  readonly id = 'classic';
+  readonly name = 'Klassisk';
+  readonly description = 'Finn områder på kartet med zoom-hint basert på vanskelighet';
+
+  getDefaultSettings(): Partial<GameSettings> {
+    return {
+      difficulty: 'normal',
+      alternativesCount: null,
+      maxAttempts: 3,
+      timerSeconds: null,
+    };
+  }
+
+  generateQuestion(state: GameState, allIds: string[], seed: number): QuestionData {
+    const targetId = this.getNextTarget(allIds, state.answeredIds, seed, state.currentRound);
+    if (!targetId) {
+      throw new Error('No more targets available');
+    }
+
+    return {
+      targetId,
+      type: 'click',
+      mapConfig: this.createMapConfig(true),
+    };
+  }
+
+  processAnswer(state: GameState, answer: string, allIds: string[], seed: number): AnswerResult {
+    if (state.status !== "playing") {
+      return { 
+        isCorrect: false, 
+        newState: state, 
+        correctId: state.currentTargetId 
+      };
+    }
+
+    const maxAttempts = state.settings.maxAttempts ?? 3;
+    const targetId = state.currentTargetId;
+    const isCorrect = answer === targetId;
+
+    if (!isCorrect) {
+      const nextAttempts = (state.attemptsThisRound ?? 0) + 1;
+      if (nextAttempts < maxAttempts) {
+        const stayState: GameState = {
+          ...state,
+          attemptsThisRound: nextAttempts,
+          streak: 0,
+        };
+        return { isCorrect: false, newState: stayState, correctId: targetId };
+      }
+      
+      // Exceeded attempts: reveal correct and advance
+      return this.advanceToNextQuestion(state, allIds, seed, false);
+    }
+
+    // Correct answer flow
+    return this.advanceToNextQuestion(state, allIds, seed, true);
+  }
+
+  getMapConfig(state: GameState, settings: GameSettings, geojson: any, seed: number): MapConfig {
+    const difficulty = settings.difficulty ?? 'normal';
+    const zoomEnabled = true;
+    
+    if (!zoomEnabled || !state.currentTargetId) {
+      return this.createMapConfig(false);
+    }
+
+    const focusBounds = this.calculateFocusBounds(geojson, state.currentTargetId, seed, state.currentRound, difficulty);
+    const focusPadding = this.getFocusPadding(difficulty);
+
+    return this.createMapConfig(
+      zoomEnabled,
+      focusBounds,
+      focusPadding,
+      false,
+      false,
+      difficulty === 'hard'
+    );
+  }
+
+  getSettingsProps() {
+    return {
+      showDifficulty: true,
+      showAlternatives: false,
+      showMaxAttempts: true,
+      showTimer: false,
+    };
+  }
+
+  private advanceToNextQuestion(state: GameState, allIds: string[], seed: number, wasCorrect: boolean): AnswerResult {
+    const answeredTargets = [...state.answeredIds, state.currentTargetId!];
+    const revealed = [...(state.revealedIds ?? []), state.currentTargetId!];
+    const remaining = allIds.filter((id) => !answeredTargets.includes(id));
+    const hasMoreRounds = state.currentRound < state.settings.rounds;
+
+    let nextTarget: string | null = null;
+    if (hasMoreRounds && remaining.length > 0) {
+      nextTarget = this.getNextTarget(allIds, answeredTargets, seed, state.currentRound);
+    }
+
+    const newScore = wasCorrect ? this.calculateScore(state.score, state.streak) : state.score;
+    const newStreak = wasCorrect ? state.streak + 1 : 0;
+
+    const newState: GameState = {
+      ...state,
+      score: newScore,
+      streak: newStreak,
+      answeredIds: answeredTargets,
+      currentRound: hasMoreRounds && nextTarget ? state.currentRound + 1 : state.currentRound,
+      currentTargetId: nextTarget,
+      status: hasMoreRounds && nextTarget ? "playing" : "ended",
+      attemptsThisRound: 0,
+      revealedIds: revealed,
+      candidateIds: [],
+    };
+
+    return { 
+      isCorrect: wasCorrect, 
+      newState, 
+      correctId: state.currentTargetId,
+      revealedCorrect: !wasCorrect
+    };
+  }
+
+  private calculateFocusBounds(
+    geojson: any, 
+    targetId: string, 
+    seed: number, 
+    round: number, 
+    difficulty: string
+  ): [[number, number], [number, number]] | null {
+    if (!geojson || !targetId) return null;
+
+    const featuresArray = geojson?.features;
+    const feat = featuresArray?.find((f: any) => {
+      return (f.id ?? f.properties?.id) === targetId;
+    });
+    if (!feat) return null;
+
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    const walk = (coords: any) => {
+      if (typeof coords[0] === "number") {
+        const [x, y] = coords as [number, number];
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+      } else {
+        for (const c of coords) walk(c);
+      }
+    };
+    walk(feat.geometry.coordinates);
+    if (minX === Infinity) return null;
+
+    const rawBounds: [[number, number], [number, number]] = [[minX, minY], [maxX, maxY]];
+    const paddedBounds = this.padBounds(rawBounds, this.getPaddingFactor(difficulty), 0.02, 0.015);
+    
+    const rng = new XorShift32((seed + round * 1337) >>> 0);
+    const jx = (rng.next() - 0.5) * 2;
+    const jy = (rng.next() - 0.5) * 2;
+    
+    return this.shiftBounds(paddedBounds, jx * this.getShiftFactor(difficulty), jy * this.getShiftFactor(difficulty));
+  }
+
+  private padBounds(
+    bbox: [[number, number], [number, number]], 
+    factor: number, 
+    minW: number, 
+    minH: number
+  ): [[number, number], [number, number]] {
+    const [[minX, minY], [maxX, maxY]] = bbox;
+    const width = Math.max(maxX - minX, minW);
+    const height = Math.max(maxY - minY, minH);
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+    const halfW = (width * factor) / 2;
+    const halfH = (height * factor) / 2;
+    return [[cx - halfW, cy - halfH], [cx + halfW, cy + halfH]];
+  }
+
+  private shiftBounds(
+    bbox: [[number, number], [number, number]], 
+    fracX: number, 
+    fracY: number
+  ): [[number, number], [number, number]] {
+    const [[minX, minY], [maxX, maxY]] = bbox;
+    const width = maxX - minX;
+    const height = maxY - minY;
+    const cx = (minX + maxX) / 2 + width * fracX;
+    const cy = (minY + maxY) / 2 + height * fracY;
+    const halfW = width / 2;
+    const halfH = height / 2;
+    return [[cx - halfW, cy - halfH], [cx + halfW, cy + halfH]];
+  }
+
+  private getPaddingFactor(difficulty: string): number {
+    switch (difficulty) {
+      case "training": return 1.8;
+      case "easy": return 2.5;
+      case "normal": return 3.5;
+      case "hard": return 5.0;
+      default: return 3.5;
+    }
+  }
+
+  private getShiftFactor(difficulty: string): number {
+    switch (difficulty) {
+      case "training": return 0.3;
+      case "easy": return 0.6;
+      case "normal": return 0.8;
+      case "hard": return 1.0;
+      default: return 0.8;
+    }
+  }
+
+  private getFocusPadding(difficulty: string): number {
+    switch (difficulty) {
+      case "training": return 28;
+      case "easy": return 32;
+      case "normal": return 40;
+      case "hard": return 24;
+      default: return 24;
+    }
+  }
+}

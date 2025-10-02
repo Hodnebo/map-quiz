@@ -9,6 +9,7 @@ import { load, save } from "@/lib/persistence";
 import { XorShift32 } from "@/lib/rng";
 import { playCorrectSound, playWrongSound, initializeAudio } from "@/lib/audio";
 import { getEffectiveSettings } from "@/lib/gameModes";
+import { gameModeRegistry } from "@/lib/gameModeRegistry";
 import { getAssetUrl } from "@/lib/basePath";
 import { Button, AppBar, Toolbar, Typography, Box, IconButton } from "@mui/material";
 import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, Shuffle as ShuffleIcon, DarkMode as DarkModeIcon, LightMode as LightModeIcon } from "@mui/icons-material";
@@ -24,59 +25,13 @@ const DEFAULT_SETTINGS: GameSettings = {
   mapStyle: "basic-v2",
 };
 
-function featureBBox(geojson: unknown, id: string | null): [[number, number], [number, number]] | null {
-  if (!geojson || !id) return null;
-  const featuresArray = (geojson as { features?: unknown[] })?.features;
-  const feat = featuresArray?.find((f: unknown) => {
-    const feature = f as { id?: string; properties?: { id?: string } };
-    return (feature.id ?? feature.properties?.id) === id;
-  });
-  if (!feat) return null;
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-  const walk = (coords: unknown) => {
-    if (typeof coords[0] === "number") {
-      const [x, y] = coords as [number, number];
-      if (x < minX) minX = x;
-      if (y < minY) minY = y;
-      if (x > maxX) maxX = x;
-      if (y > maxY) maxY = y;
-    } else {
-      for (const c of coords) walk(c);
-    }
-  };
-  walk(feat.geometry.coordinates);
-  if (minX === Infinity) return null;
-  return [[minX, minY], [maxX, maxY]];
-}
-
-function padBounds(bbox: [[number, number], [number, number]], factor: number, minW: number, minH: number): [[number, number], [number, number]] {
-  const [[minX, minY], [maxX, maxY]] = bbox;
-  const width = Math.max(maxX - minX, minW);
-  const height = Math.max(maxY - minY, minH);
-  const cx = (minX + maxX) / 2;
-  const cy = (minY + maxY) / 2;
-  const halfW = (width * factor) / 2;
-  const halfH = (height * factor) / 2;
-  return [[cx - halfW, cy - halfH], [cx + halfW, cy + halfH]];
-}
-
-function shiftBounds(bbox: [[number, number], [number, number]], fracX: number, fracY: number): [[number, number], [number, number]] {
-  const [[minX, minY], [maxX, maxY]] = bbox;
-  const width = maxX - minX;
-  const height = maxY - minY;
-  const cx = (minX + maxX) / 2 + width * fracX;
-  const cy = (minY + maxY) / 2 + height * fracY;
-  const halfW = width / 2;
-  const halfH = height / 2;
-  return [[cx - halfW, cy - halfH], [cx + halfW, cy + halfH]];
-}
 
 export default function Home() {
   const { bydeler, geojson, loading, error } = useBydelerData();
   const { isDarkMode, toggleTheme } = useTheme();
   const [settings, setSettings] = useState<GameSettings>(() => load("settings", DEFAULT_SETTINGS));
   const [seed, setSeed] = useState<number>(() => load("seed", Math.floor(Date.now() % 2 ** 31)));
-  const [state, setState] = useState<GameState>(() => createInitialState(settings, seed));
+  const [state, setState] = useState<GameState>(() => createInitialState(settings));
   const [feedback, setFeedback] = useState<null | "correct" | "wrong">(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string>("");
   const answerLockRef = useRef(false);
@@ -88,6 +43,32 @@ export default function Home() {
   useEffect(() => save("settings", settings), [settings]);
   useEffect(() => save("seed", seed), [seed]);
   useEffect(() => initializeAudio(), []);
+
+  // Update settings with mode defaults when gameMode changes
+  const prevGameModeRef = useRef(settings.gameMode);
+  useEffect(() => {
+    if (prevGameModeRef.current !== settings.gameMode) {
+      const mode = gameModeRegistry.getMode(settings.gameMode);
+      const defaultSettings = mode.getDefaultSettings();
+      
+      // Only update if the setting is not already set
+      const updatedSettings = { ...settings };
+      let hasChanges = false;
+      
+      Object.entries(defaultSettings).forEach(([key, value]) => {
+        if (updatedSettings[key as keyof GameSettings] === undefined && value !== undefined) {
+          updatedSettings[key as keyof GameSettings] = value as any;
+          hasChanges = true;
+        }
+      });
+      
+      if (hasChanges) {
+        setSettings(updatedSettings);
+      }
+      
+      prevGameModeRef.current = settings.gameMode;
+    }
+  }, [settings.gameMode, settings]);
 
   const allIds = useMemo(() => (bydeler ? bydeler.map((b) => b.id) : []), [bydeler]);
   const canPlay = !!geojson && allIds.length > 0;
@@ -102,7 +83,7 @@ export default function Home() {
   const doRestart = useCallback(() => {
     if (!canPlay) return;
     const settingsWithEffective = { ...settings, ...effectiveSettings };
-    setState(createInitialState(settingsWithEffective, seed));
+    setState(createInitialState(settingsWithEffective));
     setTimeout(() => {
       setState((s) => startGame(s, allIds, seed));
     }, 0);
@@ -182,47 +163,11 @@ export default function Home() {
   const attemptsLeft = useMemo(() => (effectiveSettings.maxAttempts ?? 3) - (state.attemptsThisRound ?? 0), [effectiveSettings.maxAttempts, state.attemptsThisRound]);
 
 
-  const focusBounds = useMemo(() => {
+  const mapConfig = useMemo(() => {
     if (!geojson) return null;
-    if (!effectiveSettings.zoomEnabled) return null; // don't zoom if disabled by mode
-    if ((effectiveSettings.alternativesCount ?? 0) > 1) return null; // don't zoom when showing alternatives
-    const raw = featureBBox(geojson, state.currentTargetId);
-    if (!raw) return null;
-
-    const rng = new XorShift32((seed + state.currentRound * 1337) >>> 0);
-    const jx = (rng.next() - 0.5) * 2; // Increased range from -1 to 1
-    const jy = (rng.next() - 0.5) * 2;
-
-    if (effectiveSettings.difficulty === "training") {
-      const padded = padBounds(raw, 1.8, 0.02, 0.015); // Slightly more padding
-      return shiftBounds(padded, jx * 0.3, jy * 0.3); // Increased shift
-    }
-    if (effectiveSettings.difficulty === "easy") {
-      const padded = padBounds(raw, 2.5, 0.03, 0.02);
-      return shiftBounds(padded, jx * 0.6, jy * 0.6); // Much more shift
-    }
-    if (effectiveSettings.difficulty === "normal") {
-      const padded = padBounds(raw, 3.5, 0.05, 0.035);
-      return shiftBounds(padded, jx * 0.8, jy * 0.8); // Even more shift
-    }
-    if (effectiveSettings.difficulty === "hard") {
-      return null; // No zoom at all - show full map
-    }
-    return null;
-  }, [geojson, effectiveSettings.zoomEnabled, effectiveSettings.alternativesCount, effectiveSettings.difficulty, state.currentTargetId, state.currentRound, seed]);
-
-  const focusPadding = useMemo(() => {
-    switch (effectiveSettings.difficulty) {
-      case "training":
-        return 28;
-      case "easy":
-        return 32;
-      case "normal":
-        return 40;
-      default:
-        return 24;
-    }
-  }, [effectiveSettings.difficulty]);
+    const mode = gameModeRegistry.getMode(state.settings.gameMode);
+    return mode.getMapConfig(state, settings, geojson, seed);
+  }, [geojson, state, settings, seed]);
 
 
   return (
@@ -309,14 +254,14 @@ export default function Home() {
             )}
           </div>
         )}
-        {canPlay && (
+        {canPlay && mapConfig && (
           <QuizMap
             geojsonUrl={getAssetUrl("/data/bydeler_simplified.geo.json")}
             onFeatureClick={onFeatureClick}
             highlightFeatureId={null}
-            disableHoverOutline={effectiveSettings.difficulty === "hard"}
-            focusBounds={focusBounds}
-            focusPadding={focusPadding}
+            disableHoverOutline={mapConfig.disableHoverOutline}
+            focusBounds={mapConfig.focusBounds}
+            focusPadding={mapConfig.focusPadding}
             revealedIds={state.revealedIds}
             candidateIds={state.candidateIds}
             isDarkMode={isDarkMode}

@@ -3,6 +3,7 @@
 import { Card, CardContent, Typography, Box, FormControl, InputLabel, Select, MenuItem, FormControlLabel, Checkbox, TextField, FormHelperText, Divider } from '@mui/material';
 import type { GameSettings } from '@/lib/types';
 import { GAME_MODES, getGameMode, getEffectiveSettings } from '@/lib/gameModes';
+import { gameModeRegistry } from '@/lib/gameModeRegistry';
 
 interface GameSettingsProps {
   settings: GameSettings;
@@ -18,6 +19,8 @@ export default function GameSettings({ settings, effectiveSettings, onSettingsCh
   };
 
   const currentMode = getGameMode(settings.gameMode);
+  const modeStrategy = gameModeRegistry.getMode(settings.gameMode);
+  const settingsProps = modeStrategy.getSettingsProps();
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -66,7 +69,7 @@ export default function GameSettings({ settings, effectiveSettings, onSettingsCh
             </FormControl>
 
             {/* Mode-specific settings */}
-            {currentMode.settings.difficulty !== undefined && (
+            {settingsProps.showDifficulty && (
               <FormControl size="small" fullWidth>
                 <InputLabel>Vanskelighet</InputLabel>
                 <Select
@@ -82,7 +85,7 @@ export default function GameSettings({ settings, effectiveSettings, onSettingsCh
               </FormControl>
             )}
 
-            {currentMode.id === 'multiple_choice' && (
+            {settingsProps.showAlternatives && (
               <FormControl size="small" fullWidth>
                 <InputLabel>Alternativer</InputLabel>
                 <Select
@@ -98,7 +101,7 @@ export default function GameSettings({ settings, effectiveSettings, onSettingsCh
               </FormControl>
             )}
 
-            {currentMode.settings.maxAttempts !== undefined && (
+            {settingsProps.showMaxAttempts && (
               <TextField
                 label="Maks forsøk"
                 type="number"
@@ -106,6 +109,17 @@ export default function GameSettings({ settings, effectiveSettings, onSettingsCh
                 inputProps={{ min: 1, max: 6 }}
                 value={settings.maxAttempts ?? currentMode.settings.maxAttempts ?? 3}
                 onChange={(e) => updateSetting('maxAttempts', Math.max(1, Math.min(6, Number(e.target.value) || 1)))}
+              />
+            )}
+
+            {settingsProps.showTimer && (
+              <TextField
+                label="Tidsbegrensning (sekunder)"
+                type="number"
+                size="small"
+                inputProps={{ min: 5, max: 300 }}
+                value={settings.timerSeconds ?? currentMode.settings.timerSeconds ?? null}
+                onChange={(e) => updateSetting('timerSeconds', Number(e.target.value) || null)}
               />
             )}
           </Box>
