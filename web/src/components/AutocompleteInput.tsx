@@ -13,6 +13,7 @@ interface AutocompleteInputProps {
   placeholder?: string;
   disabled?: boolean;
   maxSuggestions?: number;
+  currentTargetId?: string | null;
 }
 
 export default function AutocompleteInput({
@@ -22,7 +23,8 @@ export default function AutocompleteInput({
   suggestions,
   placeholder = "Skriv navnet på området...",
   disabled = false,
-  maxSuggestions = 5
+  maxSuggestions = 5,
+  currentTargetId = null
 }: AutocompleteInputProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -31,13 +33,19 @@ export default function AutocompleteInput({
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
 
-  // Filter suggestions based on input value
-  const filteredSuggestions = suggestions
-    .filter(bydel => 
-      bydel.name.toLowerCase().includes(value.toLowerCase()) && 
-      bydel.name.toLowerCase() !== value.toLowerCase()
-    )
-    .slice(0, maxSuggestions);
+  // Filter suggestions based on input value - show suggestions that start with input, or contain it if no starts-with matches
+  const startsWithSuggestions = suggestions.filter(bydel => 
+    bydel.name.toLowerCase().startsWith(value.toLowerCase()) && 
+    bydel.name.toLowerCase() !== value.toLowerCase()
+  );
+  
+  const containsSuggestions = suggestions.filter(bydel => 
+    bydel.name.toLowerCase().includes(value.toLowerCase()) && 
+    bydel.name.toLowerCase() !== value.toLowerCase() &&
+    !startsWithSuggestions.some(s => s.id === bydel.id)
+  );
+  
+  const filteredSuggestions = [...startsWithSuggestions, ...containsSuggestions].slice(0, maxSuggestions);
 
   // Handle input change
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,11 +57,28 @@ export default function AutocompleteInput({
 
   // Handle key down events
   const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (!isOpen || filteredSuggestions.length === 0) {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        onSubmit(value);
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      
+      if (highlightedIndex >= 0) {
+        // Submit highlighted suggestion
+        const selectedSuggestion = filteredSuggestions[highlightedIndex];
+        onChange(selectedSuggestion.name);
+        onSubmit(selectedSuggestion.name);
+        setIsOpen(false);
+        setHighlightedIndex(-1);
+      } else if (filteredSuggestions.length > 0) {
+        // Auto-select the best match (first suggestion)
+        const selectedSuggestion = filteredSuggestions[0];
+        onChange(selectedSuggestion.name);
+        onSubmit(selectedSuggestion.name);
+        setIsOpen(false);
+        setHighlightedIndex(-1);
       }
+      return;
+    }
+
+    if (!isOpen || filteredSuggestions.length === 0) {
       return;
     }
 
@@ -67,25 +92,6 @@ export default function AutocompleteInput({
       case 'ArrowUp':
         event.preventDefault();
         setHighlightedIndex(prev => prev > 0 ? prev - 1 : -1);
-        break;
-      case 'Enter':
-        event.preventDefault();
-        if (highlightedIndex >= 0) {
-          const selectedSuggestion = filteredSuggestions[highlightedIndex];
-          onChange(selectedSuggestion.name);
-          onSubmit(selectedSuggestion.name);
-          setIsOpen(false);
-          setHighlightedIndex(-1);
-        } else if (filteredSuggestions.length === 1) {
-          // If there's only one suggestion, auto-select it
-          const selectedSuggestion = filteredSuggestions[0];
-          onChange(selectedSuggestion.name);
-          onSubmit(selectedSuggestion.name);
-          setIsOpen(false);
-          setHighlightedIndex(-1);
-        } else {
-          onSubmit(value);
-        }
         break;
       case 'Escape':
         setIsOpen(false);
@@ -182,35 +188,46 @@ export default function AutocompleteInput({
           }}
         >
           <List dense>
-            {filteredSuggestions.map((suggestion, index) => (
-              <ListItem
-                key={`${suggestion.id}-${index}`}
-                onClick={() => handleSuggestionClick(suggestion)}
-                sx={{
-                  cursor: 'pointer',
-                  backgroundColor: index === highlightedIndex 
-                    ? (isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)')
-                    : 'transparent',
-                  transition: 'all 0.2s ease',
-                  borderRadius: '4px',
-                  margin: '2px 4px',
-                  '&:hover': {
-                    backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)',
-                    transform: 'translateY(-1px)',
-                    boxShadow: isDarkMode 
-                      ? '0 2px 8px rgba(255, 255, 255, 0.1)' 
-                      : '0 2px 8px rgba(0, 0, 0, 0.1)',
-                  },
-                }}
-              >
+            {filteredSuggestions.map((suggestion, index) => {
+              const isCurrentTarget = suggestion.id === currentTargetId;
+              const isHighlighted = index === highlightedIndex;
+              
+              return (
+                <ListItem
+                  key={`${suggestion.id}-${index}`}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  sx={{
+                    cursor: 'pointer',
+                    backgroundColor: isHighlighted 
+                      ? (isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)')
+                      : isCurrentTarget
+                        ? (isDarkMode ? 'rgba(76, 175, 80, 0.3)' : 'rgba(76, 175, 80, 0.2)')
+                        : 'transparent',
+                    transition: 'all 0.2s ease',
+                    borderRadius: '4px',
+                    margin: '2px 4px',
+                    border: isCurrentTarget ? '2px solid' : 'none',
+                    borderColor: isCurrentTarget ? (isDarkMode ? '#4caf50' : '#2e7d32') : 'transparent',
+                    '&:hover': {
+                      backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)',
+                      transform: 'translateY(-1px)',
+                      boxShadow: isDarkMode 
+                        ? '0 2px 8px rgba(255, 255, 255, 0.1)' 
+                        : '0 2px 8px rgba(0, 0, 0, 0.1)',
+                    },
+                  }}
+                >
                 <ListItemText
                   primary={suggestion.name}
                   primaryTypographyProps={{
                     fontSize: '0.875rem',
+                    fontWeight: isCurrentTarget ? 600 : 400,
+                    color: isCurrentTarget ? (isDarkMode ? '#4caf50' : '#2e7d32') : 'inherit',
                   }}
                 />
               </ListItem>
-            ))}
+              );
+            })}
           </List>
         </Paper>,
         document.body
@@ -239,7 +256,8 @@ export default function AutocompleteInput({
             variant="body2" 
             sx={{ 
               fontSize: '0.75rem',
-              color: isDarkMode ? '#cccccc' : '#666666'
+              color: isDarkMode ? '#cccccc' : '#666666',
+              textAlign: 'center'
             }}
           >
             Ingen forslag funnet

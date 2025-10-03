@@ -8,6 +8,7 @@ interface MapProps {
   geojsonUrl: string;
   onFeatureClick?: (featureId: string) => void;
   highlightFeatureId?: string | null;
+  showRedHighlight?: boolean;
   disableHoverOutline?: boolean;
   focusBounds?: LngLatBoundsLike | null;
   focusPadding?: number;
@@ -25,6 +26,7 @@ export default function MapView(props: MapProps) {
     geojsonUrl,
     onFeatureClick,
     highlightFeatureId,
+    showRedHighlight = false,
     isDarkMode,
     disableHoverOutline,
     focusBounds,
@@ -133,7 +135,7 @@ export default function MapView(props: MapProps) {
             "fill-color": [
               "case",
               ["==", ["id"], highlightFeatureId ?? ""],
-              "#34d399",
+              showRedHighlight ? "#ef4444" : "#34d399", // Red when exhausted, green otherwise
               "#60a5fa",
             ],
             "fill-opacity": 0.3,
@@ -329,11 +331,11 @@ export default function MapView(props: MapProps) {
       map.setPaintProperty(fillLayerId, "fill-color", [
         "case",
         ["==", ["id"], highlightFeatureId ?? ""],
-        "#34d399",
+        showRedHighlight ? "#ef4444" : "#34d399", // Red when exhausted, green otherwise
         "#60a5fa",
       ]);
     }
-  }, [highlightFeatureId, fillLayerId]);
+  }, [highlightFeatureId, showRedHighlight, fillLayerId]);
 
   // Focus to provided bounds when it changes
   useEffect(() => {

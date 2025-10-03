@@ -10,6 +10,7 @@ interface ReverseQuizOverlayProps {
   state: GameState;
   settings: GameSettings;
   targetName: string | null;
+  targetId: string | null;
   attemptsLeft: number;
   bydeler: Bydel[];
   onAnswer: (answer: string, correctName: string) => void;
@@ -22,6 +23,7 @@ export default function ReverseQuizOverlay({
   state,
   settings,
   targetName,
+  targetId,
   attemptsLeft,
   bydeler,
   onAnswer,
@@ -130,6 +132,7 @@ export default function ReverseQuizOverlay({
             placeholder="Skriv navnet på området..."
             disabled={state.status !== 'playing'}
             maxSuggestions={5}
+            currentTargetId={targetId}
           />
           
           {attemptsLeft !== undefined && attemptsLeft > 0 && (

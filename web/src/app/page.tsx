@@ -35,6 +35,8 @@ export default function Home() {
   const [state, setState] = useState<GameState>(() => createInitialState(settings));
   const [feedback, setFeedback] = useState<null | "correct" | "wrong">(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string>("");
+  const [wrongAnswerIds, setWrongAnswerIds] = useState<string[]>([]);
+  const [showRedHighlight, setShowRedHighlight] = useState(false);
   const answerLockRef = useRef(false);
   const stateRef = useRef(state);
   const settingsRef = useRef(settings);
@@ -85,6 +87,8 @@ export default function Home() {
     if (!canPlay) return;
     const settingsWithEffective = { ...settings, ...effectiveSettings };
     setState(createInitialState(settingsWithEffective));
+    setWrongAnswerIds([]); // Clear wrong answer highlights
+    setShowRedHighlight(false); // Clear red highlight
     setTimeout(() => {
       setState((s) => startGame(s, allIds, seed));
     }, 0);
@@ -138,9 +142,14 @@ export default function Home() {
         const targetName = bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? "området";
         const guessedName = bydeler?.find((b) => b.id === id)?.name ?? id;
         setFeedbackMessage(`Det var ${guessedName}`);
+        // Add wrong answer to highlight list
+        setWrongAnswerIds(prev => [...prev, id]);
       } else {
         // Clear feedback message immediately on correct answers
         setFeedbackMessage("");
+        // Clear wrong answer highlights on correct answer
+        setWrongAnswerIds([]);
+        setShowRedHighlight(false);
       }
 
       // Play audio feedback if enabled - use ref to get latest settings
@@ -161,7 +170,7 @@ export default function Home() {
           setFeedbackMessage("");
         }
         answerLockRef.current = false;
-      }, 450);
+      }, res.isCorrect ? 450 : 2000); // Longer delay for wrong answers
     },
     [allIds, seed, bydeler, state.currentTargetId]
   );
@@ -175,8 +184,12 @@ export default function Home() {
       // Set feedback message for wrong answers
       if (!res.isCorrect) {
         setFeedbackMessage(`Det var "${userAnswer}"`);
+        // For reverse quiz, we don't track wrong answer IDs since we don't have the clicked area
       } else {
         setFeedbackMessage("");
+        // Clear wrong answer highlights on correct answer
+        setWrongAnswerIds([]);
+        setShowRedHighlight(false);
       }
 
       // Play audio feedback if enabled
@@ -199,13 +212,18 @@ export default function Home() {
           }
         }
         answerLockRef.current = false;
-      }, 450);
+      }, res.isCorrect ? 450 : 2000); // Longer delay for wrong answers
     },
     [allIds, seed]
   );
 
   const targetName = useMemo(() => bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? null, [bydeler, state.currentTargetId]);
   const attemptsLeft = useMemo(() => (effectiveSettings.maxAttempts ?? 3) - (state.attemptsThisRound ?? 0), [effectiveSettings.maxAttempts, state.attemptsThisRound]);
+  
+  // Show red highlight when attempts are exhausted
+  useEffect(() => {
+    setShowRedHighlight(attemptsLeft <= 0 && state.status === 'playing');
+  }, [attemptsLeft, state.status]);
 
 
   const mapConfig = useMemo(() => {
@@ -304,6 +322,7 @@ export default function Home() {
             geojsonUrl={getAssetUrl("/data/bydeler_simplified.geo.json")}
             onFeatureClick={onFeatureClick}
             highlightFeatureId={settings.gameMode === 'reverse_quiz' ? state.currentTargetId : null}
+            showRedHighlight={showRedHighlight}
             disableHoverOutline={mapConfig.disableHoverOutline}
             focusBounds={mapConfig.focusBounds}
             focusPadding={mapConfig.focusPadding}
@@ -330,6 +349,7 @@ export default function Home() {
             state={state}
             settings={settings}
             targetName={targetName}
+            targetId={state.currentTargetId}
             attemptsLeft={attemptsLeft}
             bydeler={bydeler}
             onAnswer={onReverseQuizAnswer}
