@@ -151,7 +151,7 @@ export default function Home() {
 
       // Add wrong answer to the list if answer was wrong and revealed
       if (res.revealedCorrect) {
-        setWrongAnswerIds(prev => [...prev, state.currentTargetId!]);
+        setWrongAnswerIds(prev => [...prev, id]);
       }
 
       // Play audio feedback if enabled - use ref to get latest settings
