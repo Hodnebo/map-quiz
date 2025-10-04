@@ -60,7 +60,7 @@ export default function Home() {
       
       Object.entries(defaultSettings).forEach(([key, value]) => {
         if (updatedSettings[key as keyof GameSettings] === undefined && value !== undefined) {
-          updatedSettings[key as keyof GameSettings] = value as any;
+          (updatedSettings as any)[key] = value;
           hasChanges = true;
         }
       });

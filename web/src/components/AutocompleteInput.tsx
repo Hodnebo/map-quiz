@@ -55,6 +55,13 @@ export default function AutocompleteInput({
     setHighlightedIndex(-1);
   };
 
+  // Auto-highlight first suggestion when suggestions change
+  useEffect(() => {
+    if (isOpen && filteredSuggestions.length > 0 && highlightedIndex === -1) {
+      setHighlightedIndex(0);
+    }
+  }, [isOpen, filteredSuggestions.length, highlightedIndex]);
+
   // Handle key down events
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
@@ -189,7 +196,6 @@ export default function AutocompleteInput({
         >
           <List dense>
             {filteredSuggestions.map((suggestion, index) => {
-              const isCurrentTarget = suggestion.id === currentTargetId;
               const isHighlighted = index === highlightedIndex;
               
               return (
@@ -200,14 +206,10 @@ export default function AutocompleteInput({
                     cursor: 'pointer',
                     backgroundColor: isHighlighted 
                       ? (isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)')
-                      : isCurrentTarget
-                        ? (isDarkMode ? 'rgba(76, 175, 80, 0.3)' : 'rgba(76, 175, 80, 0.2)')
-                        : 'transparent',
+                      : 'transparent',
                     transition: 'all 0.2s ease',
                     borderRadius: '4px',
                     margin: '2px 4px',
-                    border: isCurrentTarget ? '2px solid' : 'none',
-                    borderColor: isCurrentTarget ? (isDarkMode ? '#4caf50' : '#2e7d32') : 'transparent',
                     '&:hover': {
                       backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)',
                       transform: 'translateY(-1px)',
@@ -221,8 +223,6 @@ export default function AutocompleteInput({
                   primary={suggestion.name}
                   primaryTypographyProps={{
                     fontSize: '0.875rem',
-                    fontWeight: isCurrentTarget ? 600 : 400,
-                    color: isCurrentTarget ? (isDarkMode ? '#4caf50' : '#2e7d32') : 'inherit',
                   }}
                 />
               </ListItem>
