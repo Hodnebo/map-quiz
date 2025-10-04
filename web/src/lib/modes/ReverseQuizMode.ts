@@ -99,7 +99,7 @@ export class ReverseQuizMode extends BaseGameMode {
 
   getSettingsProps() {
     return {
-      showDifficulty: true,
+      showDifficulty: false,
       showAlternatives: false,
       showMaxAttempts: true,
       showTimer: false,

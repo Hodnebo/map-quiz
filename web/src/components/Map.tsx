@@ -318,7 +318,9 @@ export default function MapView(props: MapProps) {
       const centroid = f.properties?.centroid as [number, number] | undefined;
       if (!centroid || !Array.isArray(centroid)) continue;
       const el = document.createElement("div");
-      el.style.background = "#10b981";
+      // Use red background for wrong answers, green for correct ones
+      const isWrongAnswer = wrongAnswerIds.includes(id);
+      el.style.background = isWrongAnswer ? "#ef4444" : "#10b981";
       el.style.color = "white";
       el.style.padding = "2px 6px";
       el.style.borderRadius = "4px";
