@@ -290,6 +290,7 @@ export default function MapView(props: MapProps) {
     if (!map) return;
     const listStr: string[] = (revealedIds ?? []).map((x) => String(x));
     const wrongStr: string[] = (wrongAnswerIds ?? []).map((x) => String(x));
+    console.log('Map: Updating green filter with revealedIds:', revealedIds, 'wrongAnswerIds:', wrongAnswerIds);
     const filter: any = listStr.length > 0
       ? [
           "all",
@@ -297,6 +298,7 @@ export default function MapView(props: MapProps) {
           ["!", ["in", ["get", "id"], ["literal", wrongStr]]]
         ]
       : ["==", ["get", "id"], "__none__"];
+    console.log('Map: Green filter:', filter);
     if (map.getLayer(correctFillId)) {
       map.setFilter(correctFillId, filter);
     }
