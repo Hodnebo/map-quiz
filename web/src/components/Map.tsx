@@ -13,6 +13,7 @@ interface MapProps {
   focusBounds?: LngLatBoundsLike | null;
   focusPadding?: number;
   revealedIds?: string[];
+  wrongAnswerIds?: string[];
   hideBasemapLabels?: boolean;
   candidateIds?: string[];
   isDarkMode?: boolean;
@@ -32,6 +33,7 @@ export default function MapView(props: MapProps) {
     focusBounds,
     focusPadding = 24,
     revealedIds = [],
+    wrongAnswerIds = [],
     hideBasemapLabels = true,
     candidateIds = [],
     mapStyle = "basic-v2",
@@ -48,6 +50,7 @@ export default function MapView(props: MapProps) {
   const lineLayerId = useMemo(() => "bydeler-line", []);
   const hoverLineLayerId = useMemo(() => "bydeler-hover-line", []);
   const correctFillId = useMemo(() => "correct-fill", []);
+  const wrongFillId = useMemo(() => "wrong-fill", []);
   const candidatesFillId = useMemo(() => "candidates-fill", []);
 
   // Initialize map once
@@ -205,6 +208,24 @@ export default function MapView(props: MapProps) {
         }, lineLayerId);
       }
 
+      // Wrong fill layer (opaque red under lines)
+      if (!map.getLayer(wrongFillId)) {
+        const listStr: string[] = (wrongAnswerIds ?? []).map((x) => String(x));
+        const initialFilter: any = listStr.length > 0
+          ? ["in", ["get", "id"], ["literal", listStr]]
+          : ["==", ["get", "id"], "__none__"];
+        map.addLayer({
+          id: wrongFillId,
+          type: "fill",
+          source: sourceId,
+          paint: {
+            "fill-color": "#ef4444",
+            "fill-opacity": 0.55,
+          },
+          filter: initialFilter,
+        }, correctFillId);
+      }
+
       // Candidates fill layer (yellow, very light)
       if (!map.getLayer(candidatesFillId)) {
         const listStr: string[] = (candidateIds ?? []).map((x) => String(x));
@@ -300,6 +321,19 @@ export default function MapView(props: MapProps) {
       markersRef.current.push(marker);
     }
   }, [revealedIds, correctFillId]);
+
+  // Update wrong fill filters when list changes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const listStr: string[] = (wrongAnswerIds ?? []).map((x) => String(x));
+    const filter: any = listStr.length > 0
+      ? ["in", ["get", "id"], ["literal", listStr]]
+      : ["==", ["get", "id"], "__none__"];
+    if (map.getLayer(wrongFillId)) {
+      map.setFilter(wrongFillId, filter);
+    }
+  }, [wrongAnswerIds, wrongFillId]);
 
   // Update candidates filters when list changes
   useEffect(() => {

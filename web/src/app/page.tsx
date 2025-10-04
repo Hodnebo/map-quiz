@@ -36,7 +36,6 @@ export default function Home() {
   const [feedback, setFeedback] = useState<null | "correct" | "wrong">(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string>("");
   const [wrongAnswerIds, setWrongAnswerIds] = useState<string[]>([]);
-  const [showRedHighlight, setShowRedHighlight] = useState(false);
   const answerLockRef = useRef(false);
   const stateRef = useRef(state);
   const settingsRef = useRef(settings);
@@ -88,7 +87,6 @@ export default function Home() {
     const settingsWithEffective = { ...settings, ...effectiveSettings };
     setState(createInitialState(settingsWithEffective));
     setWrongAnswerIds([]); // Clear wrong answer highlights
-    setShowRedHighlight(false); // Clear red highlight
     setTimeout(() => {
       setState((s) => startGame(s, allIds, seed));
     }, 0);
@@ -149,16 +147,11 @@ export default function Home() {
         setFeedbackMessage("");
         // Clear wrong answer highlights on correct answer
         setWrongAnswerIds([]);
-        setShowRedHighlight(false);
       }
 
-      // Set red highlight if answer was wrong and revealed
+      // Add wrong answer to the list if answer was wrong and revealed
       if (res.revealedCorrect) {
-        setShowRedHighlight(true);
-        // Clear red highlight after a short delay to show the wrong answer
-        setTimeout(() => {
-          setShowRedHighlight(false);
-        }, 2000);
+        setWrongAnswerIds(prev => [...prev, state.currentTargetId!]);
       }
 
       // Play audio feedback if enabled - use ref to get latest settings
@@ -198,16 +191,11 @@ export default function Home() {
         setFeedbackMessage("");
         // Clear wrong answer highlights on correct answer
         setWrongAnswerIds([]);
-        setShowRedHighlight(false);
       }
 
-      // Set red highlight if answer was wrong and revealed
+      // Add wrong answer to the list if answer was wrong and revealed
       if (res.revealedCorrect) {
-        setShowRedHighlight(true);
-        // Clear red highlight after a short delay to show the wrong answer
-        setTimeout(() => {
-          setShowRedHighlight(false);
-        }, 2000);
+        setWrongAnswerIds(prev => [...prev, state.currentTargetId!]);
       }
 
       // Play audio feedback if enabled
@@ -238,10 +226,6 @@ export default function Home() {
   const targetName = useMemo(() => bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? null, [bydeler, state.currentTargetId]);
   const attemptsLeft = useMemo(() => (effectiveSettings.maxAttempts ?? 3) - (state.attemptsThisRound ?? 0), [effectiveSettings.maxAttempts, state.attemptsThisRound]);
   
-  // Show red highlight when answer was wrong and attempts are exhausted
-  useEffect(() => {
-    // This will be set by the answer handlers when revealedCorrect is true
-  }, []);
 
 
   const mapConfig = useMemo(() => {
@@ -340,11 +324,11 @@ export default function Home() {
             geojsonUrl={getAssetUrl("/data/bydeler_simplified.geo.json")}
             onFeatureClick={onFeatureClick}
             highlightFeatureId={settings.gameMode === 'reverse_quiz' ? state.currentTargetId : null}
-            showRedHighlight={showRedHighlight}
             disableHoverOutline={mapConfig.disableHoverOutline}
             focusBounds={mapConfig.focusBounds}
             focusPadding={mapConfig.focusPadding}
             revealedIds={state.revealedIds}
+            wrongAnswerIds={wrongAnswerIds}
             candidateIds={state.candidateIds}
             isDarkMode={isDarkMode}
             mapStyle={settings.mapStyle}
