@@ -41,8 +41,10 @@ export default function Home() {
   const answerLockRef = useRef(false);
   const stateRef = useRef(state);
   const settingsRef = useRef(settings);
+  const answerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => { stateRef.current = state; }, [state]);
   useEffect(() => { settingsRef.current = settings; }, [settings]);
+
 
   useEffect(() => save("settings", settings), [settings]);
   useEffect(() => save("seed", seed), [seed]);
@@ -127,7 +129,12 @@ export default function Home() {
 
   const onFeatureClick = useCallback(
     (id: string) => {
-      if (answerLockRef.current) return;
+      // Clear any existing timeout to allow immediate new answers
+      if (answerTimeoutRef.current) {
+        clearTimeout(answerTimeoutRef.current);
+        answerTimeoutRef.current = null;
+        answerLockRef.current = false;
+      }
       
       // Don't process map clicks in reverse quiz mode
       if (stateRef.current.settings.gameMode === 'reverse_quiz') {
@@ -163,7 +170,14 @@ export default function Home() {
       }
 
       answerLockRef.current = true;
-      setTimeout(() => {
+      
+      // Clear any existing timeout
+      if (answerTimeoutRef.current) {
+        clearTimeout(answerTimeoutRef.current);
+      }
+      
+      // Set new timeout
+      answerTimeoutRef.current = setTimeout(() => {
         setState(res.newState);
         setFeedback(null);
         // Only clear feedback message for correct answers
@@ -171,6 +185,7 @@ export default function Home() {
           setFeedbackMessage("");
         }
         answerLockRef.current = false;
+        answerTimeoutRef.current = null;
       }, res.isCorrect ? 450 : 2000); // Longer delay for wrong answers
     },
     [allIds, seed, bydeler, state.currentTargetId]
@@ -178,7 +193,12 @@ export default function Home() {
 
   const onReverseQuizAnswer = useCallback(
     (userAnswer: string, correctName: string) => {
-      if (answerLockRef.current) return;
+      // Clear any existing timeout to allow immediate new answers
+      if (answerTimeoutRef.current) {
+        clearTimeout(answerTimeoutRef.current);
+        answerTimeoutRef.current = null;
+        answerLockRef.current = false;
+      }
       const res = answer(stateRef.current, userAnswer, allIds, seed, correctName);
       setFeedback(res.isCorrect ? "correct" : "wrong");
       setLastAnswerExhaustedAttempts(res.revealedCorrect);
@@ -204,7 +224,14 @@ export default function Home() {
       }
 
       answerLockRef.current = true;
-      setTimeout(() => {
+      
+      // Clear any existing timeout
+      if (answerTimeoutRef.current) {
+        clearTimeout(answerTimeoutRef.current);
+      }
+      
+      // Set new timeout
+      answerTimeoutRef.current = setTimeout(() => {
         setState(res.newState);
         // For reverse quiz mode, keep feedback until next input
         if (stateRef.current.settings.gameMode !== 'reverse_quiz') {
@@ -214,6 +241,7 @@ export default function Home() {
           }
         }
         answerLockRef.current = false;
+        answerTimeoutRef.current = null;
       }, res.isCorrect ? 450 : 2000);
     },
     [allIds, seed]
