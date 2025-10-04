@@ -149,8 +149,8 @@ export default function Home() {
 
       // Add wrong answer to the list if answer was wrong and revealed
       if (res.revealedCorrect) {
-        console.log('Adding wrong answer (classic): clicked area', id, 'not correct answer', res.correctId);
-        setWrongAnswerIds(prev => [...prev, id]);
+        console.log('Adding wrong answer (classic): target area', res.correctId, 'that was answered incorrectly');
+        setWrongAnswerIds(prev => [...prev, res.correctId!]);
       }
 
       // Play audio feedback if enabled - use ref to get latest settings

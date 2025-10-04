@@ -14,8 +14,8 @@ function MockAnswerHandler() {
     };
     
     if (mockAnswerResult.revealedCorrect) {
-      // We should add the clicked area ID, not the correct answer ID
-      setWrongAnswerIds(prev => [...prev, clickedId]);
+      // We should add the target area ID (correct answer) to show what was answered incorrectly
+      setWrongAnswerIds(prev => [...prev, correctId]);
     }
   };
   
@@ -33,7 +33,7 @@ function MockAnswerHandler() {
 }
 
 describe('Wrong Answer Highlighting Logic', () => {
-  it('should add clicked area ID to wrongAnswerIds, not correct answer ID', () => {
+  it('should add target area ID to wrongAnswerIds to show what was answered incorrectly', () => {
     render(<MockAnswerHandler />);
     
     const button = screen.getByTestId('wrong-answer-btn');
@@ -45,9 +45,9 @@ describe('Wrong Answer Highlighting Logic', () => {
     // Simulate clicking wrong area
     button.click();
     
-    // Should add the clicked area ID, not the correct answer ID
-    expect(wrongAnswersDisplay.textContent).toBe('clicked-area-123');
-    expect(wrongAnswersDisplay.textContent).not.toBe('correct-area-456');
+    // Should add the target area ID (correct answer) to show what was answered incorrectly
+    expect(wrongAnswersDisplay.textContent).toBe('correct-area-456');
+    expect(wrongAnswersDisplay.textContent).not.toBe('clicked-area-123');
   });
   
   it('should handle multiple wrong answers correctly', () => {
@@ -60,7 +60,7 @@ describe('Wrong Answer Highlighting Logic', () => {
     button.click();
     button.click();
     
-    // Should have both clicked areas
-    expect(wrongAnswersDisplay.textContent).toBe('clicked-area-123,clicked-area-123');
+    // Should have both target areas (same target area answered incorrectly twice)
+    expect(wrongAnswersDisplay.textContent).toBe('correct-area-456,correct-area-456');
   });
 });
