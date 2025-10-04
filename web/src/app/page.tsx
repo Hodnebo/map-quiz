@@ -161,15 +161,23 @@ export default function Home() {
       }
 
       answerLockRef.current = true;
-      setTimeout(() => {
+      
+      // For wrong answers, update state immediately so labels appear right away
+      if (!res.isCorrect) {
         setState(res.newState);
-        setFeedback(null);
-        // Only clear feedback message for correct answers
-        if (res.isCorrect) {
+        setTimeout(() => {
+          setFeedback(null);
+          answerLockRef.current = false;
+        }, 2000);
+      } else {
+        // For correct answers, keep the original timing
+        setTimeout(() => {
+          setState(res.newState);
+          setFeedback(null);
           setFeedbackMessage("");
-        }
-        answerLockRef.current = false;
-      }, res.isCorrect ? 450 : 2000); // Longer delay for wrong answers
+          answerLockRef.current = false;
+        }, 450);
+      }
     },
     [allIds, seed, bydeler, state.currentTargetId]
   );
@@ -203,17 +211,23 @@ export default function Home() {
       }
 
       answerLockRef.current = true;
-      setTimeout(() => {
+      
+      // For wrong answers, update state immediately so labels appear right away
+      if (!res.isCorrect) {
         setState(res.newState);
-        // For reverse quiz mode, keep feedback until next input
-        if (stateRef.current.settings.gameMode !== 'reverse_quiz') {
+        setTimeout(() => {
           setFeedback(null);
-          if (res.isCorrect) {
-            setFeedbackMessage("");
-          }
-        }
-        answerLockRef.current = false;
-      }, res.isCorrect ? 450 : 2000); // Longer delay for wrong answers
+          answerLockRef.current = false;
+        }, 2000);
+      } else {
+        // For correct answers, keep the original timing
+        setTimeout(() => {
+          setState(res.newState);
+          setFeedback(null);
+          setFeedbackMessage("");
+          answerLockRef.current = false;
+        }, 450);
+      }
     },
     [allIds, seed]
   );
