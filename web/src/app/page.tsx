@@ -146,8 +146,6 @@ export default function Home() {
       } else {
         // Clear feedback message immediately on correct answers
         setFeedbackMessage("");
-        // Clear wrong answer highlights on correct answer
-        setWrongAnswerIds([]);
       }
 
       // Add wrong answer to the list if answer was wrong and revealed
@@ -196,8 +194,6 @@ export default function Home() {
         // For reverse quiz, we don't track wrong answer IDs since we don't have the clicked area
       } else {
         setFeedbackMessage("");
-        // Clear wrong answer highlights on correct answer
-        setWrongAnswerIds([]);
       }
 
       // Add wrong answer to the list if answer was wrong and revealed
