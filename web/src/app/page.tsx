@@ -133,7 +133,6 @@ export default function Home() {
       if (answerTimeoutRef.current) {
         clearTimeout(answerTimeoutRef.current);
         answerTimeoutRef.current = null;
-        answerLockRef.current = false;
       }
       
       // Don't process map clicks in reverse quiz mode
@@ -169,8 +168,6 @@ export default function Home() {
         }
       }
 
-      answerLockRef.current = true;
-      
       // Clear any existing timeout
       if (answerTimeoutRef.current) {
         clearTimeout(answerTimeoutRef.current);
@@ -184,7 +181,6 @@ export default function Home() {
         if (res.isCorrect) {
           setFeedbackMessage("");
         }
-        answerLockRef.current = false;
         answerTimeoutRef.current = null;
       }, res.isCorrect ? 450 : 2000); // Longer delay for wrong answers
     },
@@ -197,7 +193,6 @@ export default function Home() {
       if (answerTimeoutRef.current) {
         clearTimeout(answerTimeoutRef.current);
         answerTimeoutRef.current = null;
-        answerLockRef.current = false;
       }
       const res = answer(stateRef.current, userAnswer, allIds, seed, correctName);
       setFeedback(res.isCorrect ? "correct" : "wrong");
@@ -223,8 +218,6 @@ export default function Home() {
         }
       }
 
-      answerLockRef.current = true;
-      
       // Clear any existing timeout
       if (answerTimeoutRef.current) {
         clearTimeout(answerTimeoutRef.current);
@@ -240,7 +233,6 @@ export default function Home() {
             setFeedbackMessage("");
           }
         }
-        answerLockRef.current = false;
         answerTimeoutRef.current = null;
       }, res.isCorrect ? 450 : 2000);
     },
