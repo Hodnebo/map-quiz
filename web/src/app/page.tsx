@@ -152,10 +152,10 @@ export default function Home() {
 
       // Add wrong answer to the list if answer was wrong and revealed
       if (res.revealedCorrect) {
-        console.log('Adding wrong answer:', id, 'to wrongAnswerIds');
+        console.log('Adding wrong answer (classic):', res.correctId, 'to wrongAnswerIds');
         setWrongAnswerIds(prev => {
-          const newList = [...prev, id];
-          console.log('New wrongAnswerIds:', newList);
+          const newList = [...prev, res.correctId!];
+          console.log('New wrongAnswerIds (classic):', newList);
           return newList;
         });
       }
@@ -202,9 +202,9 @@ export default function Home() {
 
       // Add wrong answer to the list if answer was wrong and revealed
       if (res.revealedCorrect) {
-        console.log('Adding wrong answer (reverse quiz):', state.currentTargetId, 'to wrongAnswerIds');
+        console.log('Adding wrong answer (reverse quiz):', res.correctId, 'to wrongAnswerIds');
         setWrongAnswerIds(prev => {
-          const newList = [...prev, state.currentTargetId!];
+          const newList = [...prev, res.correctId!];
           console.log('New wrongAnswerIds (reverse quiz):', newList);
           return newList;
         });
