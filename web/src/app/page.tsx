@@ -36,6 +36,8 @@ export default function Home() {
   const [feedback, setFeedback] = useState<null | "correct" | "wrong">(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string>("");
   const [wrongAnswerIds, setWrongAnswerIds] = useState<string[]>([]);
+  const [lastAnswerExhaustedAttempts, setLastAnswerExhaustedAttempts] = useState<boolean>(false);
+  const [lastCorrectAnswerName, setLastCorrectAnswerName] = useState<string>('');
   const answerLockRef = useRef(false);
   const stateRef = useRef(state);
   const settingsRef = useRef(settings);
@@ -179,14 +181,13 @@ export default function Home() {
       if (answerLockRef.current) return;
       const res = answer(stateRef.current, userAnswer, allIds, seed, correctName);
       setFeedback(res.isCorrect ? "correct" : "wrong");
-
-      // Set feedback message for wrong answers
-      if (!res.isCorrect) {
-        setFeedbackMessage(`Det var "${userAnswer}"`);
-        // For reverse quiz, we don't track wrong answer IDs since we don't have the clicked area
-      } else {
-        setFeedbackMessage("");
+      setLastAnswerExhaustedAttempts(res.revealedCorrect);
+      if (res.revealedCorrect) {
+        setLastCorrectAnswerName(correctName);
       }
+
+      // Clear feedback message for reverse quiz
+      setFeedbackMessage("");
 
       // Add wrong answer to the list if answer was wrong and revealed
       if (res.revealedCorrect) {
@@ -219,7 +220,10 @@ export default function Home() {
   );
 
   const targetName = useMemo(() => bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? null, [bydeler, state.currentTargetId]);
-  const attemptsLeft = useMemo(() => (effectiveSettings.maxAttempts ?? 3) - (state.attemptsThisRound ?? 0), [effectiveSettings.maxAttempts, state.attemptsThisRound]);
+  const attemptsLeft = useMemo(() => {
+    // For reverse quiz feedback, calculate based on current state
+    return (effectiveSettings.maxAttempts ?? 3) - (state.attemptsThisRound ?? 0);
+  }, [effectiveSettings.maxAttempts, state.attemptsThisRound]);
   
 
 
@@ -349,7 +353,8 @@ export default function Home() {
             settings={settings}
             targetName={targetName}
             targetId={state.currentTargetId}
-            attemptsLeft={attemptsLeft}
+            attemptsLeft={lastAnswerExhaustedAttempts ? 0 : attemptsLeft}
+            lastCorrectAnswerName={lastCorrectAnswerName}
             bydeler={bydeler}
             onAnswer={onReverseQuizAnswer}
             feedback={feedback}
@@ -357,6 +362,8 @@ export default function Home() {
             onClearFeedback={() => {
               setFeedback(null);
               setFeedbackMessage("");
+              setLastAnswerExhaustedAttempts(false);
+              setLastCorrectAnswerName("");
             }}
           />
         )}

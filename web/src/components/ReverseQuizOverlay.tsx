@@ -12,6 +12,7 @@ interface ReverseQuizOverlayProps {
   targetName: string | null;
   targetId: string | null;
   attemptsLeft: number;
+  lastCorrectAnswerName: string;
   bydeler: Bydel[];
   onAnswer: (answer: string, correctName: string) => void;
   feedback?: 'correct' | 'wrong' | null;
@@ -25,6 +26,7 @@ export default function ReverseQuizOverlay({
   targetName,
   targetId,
   attemptsLeft,
+  lastCorrectAnswerName,
   bydeler,
   onAnswer,
   feedback,
@@ -107,20 +109,13 @@ export default function ReverseQuizOverlay({
                   border: `1px solid ${feedback === 'correct' ? '#4caf50' : '#f44336'}`,
                 }}
               >
-                {feedback === 'correct' ? '🎉 Riktig!' : '❌ Feil'}
+                {feedback === 'correct' 
+                  ? '🎉 Riktig!' 
+                  : attemptsLeft <= 0 
+                    ? `❌ Feil - Riktig svar var ${lastCorrectAnswerName}`
+                    : '❌ Feil'
+                }
               </Typography>
-              {feedbackMessage && (
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    mt: 1,
-                    fontSize: '0.75rem',
-                    color: isDarkMode ? '#cccccc' : '#666666'
-                  }}
-                >
-                  {feedbackMessage}
-                </Typography>
-              )}
             </Box>
           )}
           
