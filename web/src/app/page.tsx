@@ -173,9 +173,11 @@ export default function Home() {
         clearTimeout(answerTimeoutRef.current);
       }
       
-      // Set new timeout
+      // Update state immediately for instant feedback (attempts counter, etc.)
+      setState(res.newState);
+      
+      // Set timeout only for clearing visual feedback
       answerTimeoutRef.current = setTimeout(() => {
-        setState(res.newState);
         setFeedback(null);
         // Only clear feedback message for correct answers
         if (res.isCorrect) {
@@ -223,9 +225,11 @@ export default function Home() {
         clearTimeout(answerTimeoutRef.current);
       }
       
-      // Set new timeout
+      // Update state immediately for instant feedback (attempts counter, etc.)
+      setState(res.newState);
+      
+      // Set timeout only for clearing visual feedback
       answerTimeoutRef.current = setTimeout(() => {
-        setState(res.newState);
         // For reverse quiz mode, keep feedback until next input
         if (stateRef.current.settings.gameMode !== 'reverse_quiz') {
           setFeedback(null);
