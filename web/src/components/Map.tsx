@@ -193,8 +193,13 @@ export default function MapView(props: MapProps) {
       // Correct fill layer (opaque green under lines)
       if (!map.getLayer(correctFillId)) {
         const listStr: string[] = (revealedIds ?? []).map((x) => String(x));
+        const wrongStr: string[] = (wrongAnswerIds ?? []).map((x) => String(x));
         const initialFilter: any = listStr.length > 0
-          ? ["in", ["get", "id"], ["literal", listStr]]
+          ? [
+              "all",
+              ["in", ["get", "id"], ["literal", listStr]],
+              ["!", ["in", ["get", "id"], ["literal", wrongStr]]]
+            ]
           : ["==", ["get", "id"], "__none__"];
         map.addLayer({
           id: correctFillId,
@@ -284,8 +289,13 @@ export default function MapView(props: MapProps) {
     const map = mapRef.current;
     if (!map) return;
     const listStr: string[] = (revealedIds ?? []).map((x) => String(x));
+    const wrongStr: string[] = (wrongAnswerIds ?? []).map((x) => String(x));
     const filter: any = listStr.length > 0
-      ? ["in", ["get", "id"], ["literal", listStr]]
+      ? [
+          "all",
+          ["in", ["get", "id"], ["literal", listStr]],
+          ["!", ["in", ["get", "id"], ["literal", wrongStr]]]
+        ]
       : ["==", ["get", "id"], "__none__"];
     if (map.getLayer(correctFillId)) {
       map.setFilter(correctFillId, filter);
@@ -320,7 +330,7 @@ export default function MapView(props: MapProps) {
         .addTo(map);
       markersRef.current.push(marker);
     }
-  }, [revealedIds, correctFillId]);
+  }, [revealedIds, wrongAnswerIds, correctFillId]);
 
   // Update wrong fill filters when list changes
   useEffect(() => {
