@@ -148,7 +148,6 @@ export default function Home() {
 
       // Add wrong answer to the list if answer was wrong and revealed
       if (res.revealedCorrect) {
-        console.log('Adding wrong answer (classic): target area', res.correctId, 'that was answered incorrectly');
         setWrongAnswerIds(prev => [...prev, res.correctId!]);
       }
 
