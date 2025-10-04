@@ -152,6 +152,15 @@ export default function Home() {
         setShowRedHighlight(false);
       }
 
+      // Set red highlight if answer was wrong and revealed
+      if (res.revealedCorrect) {
+        setShowRedHighlight(true);
+        // Clear red highlight after a short delay to show the wrong answer
+        setTimeout(() => {
+          setShowRedHighlight(false);
+        }, 2000);
+      }
+
       // Play audio feedback if enabled - use ref to get latest settings
       if (settingsRef.current.audioEnabled ?? true) {
         if (res.isCorrect) {
@@ -192,6 +201,15 @@ export default function Home() {
         setShowRedHighlight(false);
       }
 
+      // Set red highlight if answer was wrong and revealed
+      if (res.revealedCorrect) {
+        setShowRedHighlight(true);
+        // Clear red highlight after a short delay to show the wrong answer
+        setTimeout(() => {
+          setShowRedHighlight(false);
+        }, 2000);
+      }
+
       // Play audio feedback if enabled
       if (settingsRef.current.audioEnabled ?? true) {
         if (res.isCorrect) {
@@ -220,10 +238,10 @@ export default function Home() {
   const targetName = useMemo(() => bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? null, [bydeler, state.currentTargetId]);
   const attemptsLeft = useMemo(() => (effectiveSettings.maxAttempts ?? 3) - (state.attemptsThisRound ?? 0), [effectiveSettings.maxAttempts, state.attemptsThisRound]);
   
-  // Show red highlight when attempts are exhausted
+  // Show red highlight when answer was wrong and attempts are exhausted
   useEffect(() => {
-    setShowRedHighlight(attemptsLeft <= 0 && state.status === 'playing');
-  }, [attemptsLeft, state.status]);
+    // This will be set by the answer handlers when revealedCorrect is true
+  }, []);
 
 
   const mapConfig = useMemo(() => {
