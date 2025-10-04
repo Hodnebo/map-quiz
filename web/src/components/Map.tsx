@@ -327,11 +327,15 @@ export default function MapView(props: MapProps) {
     const map = mapRef.current;
     if (!map) return;
     const listStr: string[] = (wrongAnswerIds ?? []).map((x) => String(x));
+    console.log('Map: Updating wrong fill filter with wrongAnswerIds:', wrongAnswerIds, 'listStr:', listStr);
     const filter: any = listStr.length > 0
       ? ["in", ["get", "id"], ["literal", listStr]]
       : ["==", ["get", "id"], "__none__"];
+    console.log('Map: Setting wrong fill filter:', filter);
     if (map.getLayer(wrongFillId)) {
       map.setFilter(wrongFillId, filter);
+    } else {
+      console.log('Map: wrongFillId layer not found:', wrongFillId);
     }
   }, [wrongAnswerIds, wrongFillId]);
 
