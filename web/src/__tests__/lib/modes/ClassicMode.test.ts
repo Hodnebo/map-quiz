@@ -96,6 +96,25 @@ describe('ClassicMode', () => {
       expect(result.newState.answeredIds).toContain('0508');
       expect(result.newState.revealedIds).toContain('0508');
     });
+
+    it('should return correctId as the target area, not the clicked area', () => {
+      const stateWithAttempts = {
+        ...mockState,
+        attemptsThisRound: 2,
+      };
+
+      const result = classicMode.processAnswer(
+        stateWithAttempts,
+        'wrong-clicked-area', // This is what the user clicked
+        ['0508', 'wrong-clicked-area'],
+        12345
+      );
+
+      // The correctId should be the target area (0508), not the clicked area
+      expect(result.correctId).toBe('0508');
+      expect(result.correctId).not.toBe('wrong-clicked-area');
+      expect(result.revealedCorrect).toBe(true);
+    });
   });
 
   describe('getDefaultSettings', () => {
