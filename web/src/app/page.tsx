@@ -133,7 +133,6 @@ export default function Home() {
       }
       
       const res = answer(stateRef.current, id, allIds, seed);
-      console.log('Answer result:', res);
       setFeedback(res.isCorrect ? "correct" : "wrong");
 
       // Set feedback message for overlay - only for wrong answers
@@ -150,12 +149,7 @@ export default function Home() {
 
       // Add wrong answer to the list if answer was wrong and revealed
       if (res.revealedCorrect) {
-        console.log('Adding wrong answer (classic):', res.correctId, 'to wrongAnswerIds');
-        setWrongAnswerIds(prev => {
-          const newList = [...prev, res.correctId!];
-          console.log('New wrongAnswerIds (classic):', newList);
-          return newList;
-        });
+        setWrongAnswerIds(prev => [...prev, res.correctId!]);
       }
 
       // Play audio feedback if enabled - use ref to get latest settings
@@ -185,7 +179,6 @@ export default function Home() {
     (userAnswer: string, correctName: string) => {
       if (answerLockRef.current) return;
       const res = answer(stateRef.current, userAnswer, allIds, seed, correctName);
-      console.log('Answer result (reverse quiz):', res);
       setFeedback(res.isCorrect ? "correct" : "wrong");
 
       // Set feedback message for wrong answers
@@ -198,12 +191,7 @@ export default function Home() {
 
       // Add wrong answer to the list if answer was wrong and revealed
       if (res.revealedCorrect) {
-        console.log('Adding wrong answer (reverse quiz):', res.correctId, 'to wrongAnswerIds');
-        setWrongAnswerIds(prev => {
-          const newList = [...prev, res.correctId!];
-          console.log('New wrongAnswerIds (reverse quiz):', newList);
-          return newList;
-        });
+        setWrongAnswerIds(prev => [...prev, res.correctId!]);
       }
 
       // Play audio feedback if enabled
