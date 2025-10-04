@@ -337,6 +337,7 @@ export default function MapView(props: MapProps) {
     const map = mapRef.current;
     if (!map) return;
     const listStr: string[] = (wrongAnswerIds ?? []).map((x) => String(x));
+    console.log('Map: wrongAnswerIds received:', wrongAnswerIds, 'listStr:', listStr);
     const filter: any = listStr.length > 0
       ? ["in", ["get", "id"], ["literal", listStr]]
       : ["==", ["get", "id"], "__none__"];
