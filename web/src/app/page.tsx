@@ -11,7 +11,7 @@ import { playCorrectSound, playWrongSound, initializeAudio } from "@/lib/audio";
 import { getEffectiveSettings } from "@/lib/gameModes";
 import { gameModeRegistry } from "@/lib/gameModeRegistry";
 import { getAssetUrl } from "@/lib/basePath";
-import { Button, AppBar, Toolbar, Typography, Box, IconButton } from "@mui/material";
+import { Button, AppBar, Toolbar, Typography, Box, IconButton, Snackbar, Alert } from "@mui/material";
 import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, Shuffle as ShuffleIcon, DarkMode as DarkModeIcon, LightMode as LightModeIcon } from "@mui/icons-material";
 import { useTheme } from "@/contexts/ThemeContext";
 import GameOverlay from "@/components/GameOverlay";
@@ -36,6 +36,8 @@ export default function Home() {
   const [feedback, setFeedback] = useState<null | "correct" | "wrong">(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string>("");
   const [wrongAnswerIds, setWrongAnswerIds] = useState<string[]>([]);
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string>("");
   const answerLockRef = useRef(false);
   const stateRef = useRef(state);
   const settingsRef = useRef(settings);
@@ -149,6 +151,10 @@ export default function Home() {
       // Add wrong answer to the list if answer was wrong and revealed
       if (res.revealedCorrect) {
         setWrongAnswerIds(prev => [...prev, res.correctId!]);
+        // Show toast with correct answer
+        const correctName = bydeler?.find((b) => b.id === res.correctId)?.name ?? "området";
+        setToastMessage(`Riktig svar: ${correctName}`);
+        setToastOpen(true);
       }
 
       // Play audio feedback if enabled - use ref to get latest settings
@@ -161,23 +167,15 @@ export default function Home() {
       }
 
       answerLockRef.current = true;
-      
-      // For wrong answers, update state immediately so labels appear right away
-      if (!res.isCorrect) {
+      setTimeout(() => {
         setState(res.newState);
-        setTimeout(() => {
-          setFeedback(null);
-          answerLockRef.current = false;
-        }, 2000);
-      } else {
-        // For correct answers, keep the original timing
-        setTimeout(() => {
-          setState(res.newState);
-          setFeedback(null);
+        setFeedback(null);
+        // Only clear feedback message for correct answers
+        if (res.isCorrect) {
           setFeedbackMessage("");
-          answerLockRef.current = false;
-        }, 450);
-      }
+        }
+        answerLockRef.current = false;
+      }, res.isCorrect ? 450 : 2000); // Longer delay for wrong answers
     },
     [allIds, seed, bydeler, state.currentTargetId]
   );
@@ -199,6 +197,9 @@ export default function Home() {
       // Add wrong answer to the list if answer was wrong and revealed
       if (res.revealedCorrect) {
         setWrongAnswerIds(prev => [...prev, res.correctId!]);
+        // Show toast with correct answer
+        setToastMessage(`Riktig svar: ${correctName}`);
+        setToastOpen(true);
       }
 
       // Play audio feedback if enabled
@@ -211,23 +212,17 @@ export default function Home() {
       }
 
       answerLockRef.current = true;
-      
-      // For wrong answers, update state immediately so labels appear right away
-      if (!res.isCorrect) {
+      setTimeout(() => {
         setState(res.newState);
-        setTimeout(() => {
+        // For reverse quiz mode, keep feedback until next input
+        if (stateRef.current.settings.gameMode !== 'reverse_quiz') {
           setFeedback(null);
-          answerLockRef.current = false;
-        }, 2000);
-      } else {
-        // For correct answers, keep the original timing
-        setTimeout(() => {
-          setState(res.newState);
-          setFeedback(null);
-          setFeedbackMessage("");
-          answerLockRef.current = false;
-        }, 450);
-      }
+          if (res.isCorrect) {
+            setFeedbackMessage("");
+          }
+        }
+        answerLockRef.current = false;
+      }, res.isCorrect ? 450 : 2000);
     },
     [allIds, seed]
   );
@@ -374,6 +369,22 @@ export default function Home() {
         )}
       </div>
 
+      {/* Toast notification for wrong answers */}
+      <Snackbar
+        open={toastOpen}
+        autoHideDuration={4000}
+        onClose={() => setToastOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={() => setToastOpen(false)} 
+          severity="error" 
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {toastMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }
