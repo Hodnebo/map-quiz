@@ -84,7 +84,7 @@ export class ReverseQuizMode extends BaseGameMode {
       return this.createMapConfig(false);
     }
 
-    const focusBounds = this.calculateFocusBounds(geojson, state.currentTargetId, seed, state.currentRound, difficulty);
+    const focusBounds = this.calculateFocusBounds(geojson, state.currentTargetId, seed, state.currentRound, difficulty, false); // Reverse quiz mode disables randomization
     const focusPadding = this.getFocusPadding(difficulty);
 
     return this.createMapConfig(
@@ -146,7 +146,8 @@ export class ReverseQuizMode extends BaseGameMode {
     targetId: string, 
     seed: number, 
     round: number, 
-    difficulty: string
+    difficulty: string,
+    randomizeZoomLocation: boolean = true
   ): [[number, number], [number, number]] | null {
     if (!geojson || !targetId) return null;
 
@@ -174,6 +175,18 @@ export class ReverseQuizMode extends BaseGameMode {
     const rawBounds: [[number, number], [number, number]] = [[minX, minY], [maxX, maxY]];
     // For reverse quiz, use less aggressive padding since we want to show the area clearly
     const paddedBounds = this.padBounds(rawBounds, this.getPaddingFactor(difficulty), 0.02, 0.015);
+    
+    if (!randomizeZoomLocation) {
+      // For reverse quiz, shift the bounds downward to account for the input card at the bottom
+      // Shift the center point downward by about 20% of the bounds height
+      const [[minX, minY], [maxX, maxY]] = paddedBounds;
+      const centerX = (minX + maxX) / 2;
+      const centerY = (minY + maxY) / 2;
+      const height = maxY - minY;
+      const shiftY = height * 0.2; // Shift downward by 20% of height
+      
+      return [[minX, minY - shiftY], [maxX, maxY - shiftY]];
+    }
     
     const rng = new XorShift32((seed + round * 1337) >>> 0);
     const jx = (rng.next() - 0.5) * 2;
@@ -215,11 +228,11 @@ export class ReverseQuizMode extends BaseGameMode {
 
   private getPaddingFactor(difficulty: string): number {
     switch (difficulty) {
-      case "training": return 1.2; // Less padding for reverse quiz
-      case "easy": return 1.5;
-      case "normal": return 2.0;
-      case "hard": return 2.5;
-      default: return 2.0;
+      case "training": return 1.8; // More padding for reverse quiz to show more context
+      case "easy": return 2.2;
+      case "normal": return 2.8;
+      case "hard": return 3.5;
+      default: return 2.8;
     }
   }
 

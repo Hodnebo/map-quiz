@@ -70,7 +70,7 @@ export class ClassicMode extends BaseGameMode {
       return this.createMapConfig(false);
     }
 
-    const focusBounds = this.calculateFocusBounds(geojson, state.currentTargetId, seed, state.currentRound, difficulty);
+    const focusBounds = this.calculateFocusBounds(geojson, state.currentTargetId, seed, state.currentRound, difficulty, true); // Classic mode uses randomization
     const focusPadding = this.getFocusPadding(difficulty);
 
     return this.createMapConfig(
@@ -132,7 +132,8 @@ export class ClassicMode extends BaseGameMode {
     targetId: string, 
     seed: number, 
     round: number, 
-    difficulty: string
+    difficulty: string,
+    randomizeZoomLocation: boolean = true
   ): [[number, number], [number, number]] | null {
     if (!geojson || !targetId) return null;
 
@@ -159,6 +160,10 @@ export class ClassicMode extends BaseGameMode {
 
     const rawBounds: [[number, number], [number, number]] = [[minX, minY], [maxX, maxY]];
     const paddedBounds = this.padBounds(rawBounds, this.getPaddingFactor(difficulty), 0.02, 0.015);
+    
+    if (!randomizeZoomLocation) {
+      return paddedBounds;
+    }
     
     const rng = new XorShift32((seed + round * 1337) >>> 0);
     const jx = (rng.next() - 0.5) * 2;
