@@ -40,12 +40,12 @@ export function GameModeModal({
   totalEntries = 15,
 }: GameModeModalProps) {
   const [selectedMode, setSelectedMode] = useState<GameMode>('classic');
-  const [settings, setSettings] = useState<GameSettings>({
-    rounds: 10,
-    maxAttempts: 3,
-    difficulty: 'medium',
-    alternativesCount: 4,
-  });
+  const [settings, setSettings] = useState<GameSettings>(() => ({
+    rounds: currentSettings?.rounds ?? 10,
+    maxAttempts: currentSettings?.maxAttempts ?? 3,
+    difficulty: currentSettings?.difficulty ?? 'medium',
+    alternativesCount: currentSettings?.alternativesCount ?? 4,
+  }));
 
   // Initialize with current values if provided
   useEffect(() => {
@@ -94,8 +94,8 @@ export function GameModeModal({
         },
       }}
     >
-      <DialogTitle>
-        <Typography variant="h4" component="h1" textAlign="center" fontWeight="bold">
+      <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
+        <Typography variant="h4" textAlign="center" fontWeight="bold">
           🗺️ Velg spillmodus
         </Typography>
         <Typography variant="body2" textAlign="center" sx={{ mt: 1, opacity: 0.9 }}>
