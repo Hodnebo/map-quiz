@@ -95,10 +95,10 @@ export function GameModeModal({
       }}
     >
       <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
-        <Typography variant="h4" textAlign="center" fontWeight="bold">
+        <Box sx={{ fontSize: '2rem', fontWeight: 'bold', mb: 1 }}>
           🗺️ Velg spillmodus
-        </Typography>
-        <Typography variant="body2" textAlign="center" sx={{ mt: 1, opacity: 0.9 }}>
+        </Box>
+        <Typography variant="body2" textAlign="center" sx={{ opacity: 0.9 }}>
           Velg hvordan du vil spille Oslo-kartet
         </Typography>
       </DialogTitle>
