@@ -133,7 +133,13 @@ export default function Home() {
       markModalAsSeen();
       setIsFirstVisit(false);
     }
-  }, [settings, isFirstVisit]);
+    // Start the game after settings are updated
+    setTimeout(() => {
+      if (!canPlay) return;
+      const settingsWithEffective = { ...updatedSettings, ...getEffectiveSettings(updatedSettings) };
+      setState((s) => startGame({ ...s, settings: settingsWithEffective }, allIds, seed));
+    }, 0);
+  }, [settings, isFirstVisit, canPlay, allIds, seed]);
 
   const handleNewGame = useCallback(() => {
     setShowModal(true);
