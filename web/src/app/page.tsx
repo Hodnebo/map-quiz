@@ -12,7 +12,7 @@ import { getEffectiveSettings } from "@/lib/gameModes";
 import { gameModeRegistry } from "@/lib/gameModeRegistry";
 import { getAssetUrl } from "@/lib/basePath";
 import { Button, AppBar, Toolbar, Typography, Box, IconButton } from "@mui/material";
-import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, Shuffle as ShuffleIcon, DarkMode as DarkModeIcon, LightMode as LightModeIcon, Settings as SettingsIcon } from "@mui/icons-material";
+import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, DarkMode as DarkModeIcon, LightMode as LightModeIcon, Settings as SettingsIcon } from "@mui/icons-material";
 import { useTheme } from "@/contexts/ThemeContext";
 import GameOverlay from "@/components/GameOverlay";
 import ReverseQuizOverlay from "@/components/ReverseQuizOverlay";
@@ -100,13 +100,16 @@ export default function Home() {
 
   const doRestart = useCallback(() => {
     if (!canPlay) return;
+    // Generate a new seed when restarting
+    const newSeed = Math.floor(Math.random() * 2 ** 31);
+    setSeed(newSeed);
     const settingsWithEffective = { ...settings, ...effectiveSettings };
     setState(createInitialState(settingsWithEffective));
     setWrongAnswerIds([]); // Clear wrong answer highlights
     setTimeout(() => {
-      setState((s) => startGame(s, allIds, seed));
+      setState((s) => startGame(s, allIds, newSeed));
     }, 0);
-  }, [allIds, canPlay, seed, settings, effectiveSettings]);
+  }, [allIds, canPlay, settings, effectiveSettings]);
 
   const handleModalClose = useCallback(() => {
     setShowModal(false);
@@ -337,24 +340,6 @@ export default function Home() {
             >
               Nytt spill
             </Button>
-            <Button
-              variant="outlined"
-              startIcon={<ShuffleIcon />}
-              onClick={() => {
-                setSeed(Math.floor(Math.random() * 2 ** 31));
-                if (state.status !== "idle") {
-                  setTimeout(() => doRestart(), 0);
-                }
-              }}
-              sx={{
-                borderWidth: '2px',
-                '&:hover': {
-                  borderWidth: '2px',
-                },
-              }}
-            >
-              Ny seed
-            </Button>
             <IconButton
               onClick={toggleTheme}
               color="inherit"
@@ -451,6 +436,7 @@ export default function Home() {
           onStartGame={handleStartGame}
           currentMode={settings.gameMode}
           currentSettings={settings}
+          totalEntries={allIds.length}
         />
       </div>
     </div>

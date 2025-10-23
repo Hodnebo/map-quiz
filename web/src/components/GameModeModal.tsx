@@ -28,6 +28,7 @@ interface GameModeModalProps {
   onStartGame: (mode: GameMode, settings: GameSettings) => void;
   currentMode?: GameMode;
   currentSettings?: GameSettings;
+  totalEntries?: number;
 }
 
 export function GameModeModal({
@@ -36,6 +37,7 @@ export function GameModeModal({
   onStartGame,
   currentMode,
   currentSettings,
+  totalEntries = 15,
 }: GameModeModalProps) {
   const [selectedMode, setSelectedMode] = useState<GameMode>('classic');
   const [settings, setSettings] = useState<GameSettings>({
@@ -157,12 +159,18 @@ export function GameModeModal({
                   },
                 }}
               >
-                {[5, 10, 15, 20, 25, 30].map((rounds) => (
-                  <MenuItem key={rounds} value={rounds}>
-                    {rounds} runder
-                  </MenuItem>
-                ))}
+                {[5, 10, 15, 20, 25, 30].map((rounds) => {
+                  const isDisabled = rounds > totalEntries;
+                  return (
+                    <MenuItem key={rounds} value={rounds} disabled={isDisabled}>
+                      {rounds} {isDisabled ? `(maks ${totalEntries})` : 'runder'}
+                    </MenuItem>
+                  );
+                })}
               </Select>
+              <Typography variant="caption" sx={{ mt: 0.5, opacity: 0.8, fontSize: '0.75rem' }}>
+                Totalt {totalEntries} bydeler tilgjengelig
+              </Typography>
             </FormControl>
 
             {/* Max Attempts */}
