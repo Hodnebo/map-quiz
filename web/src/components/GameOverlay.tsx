@@ -49,9 +49,11 @@ export default function GameOverlay({
         {!statsExpanded && (
           <Card
             sx={{
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(8px)',
-              boxShadow: 2,
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(12px)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: 3,
             }}
             onClick={() => setStatsExpanded(true)}
           >
@@ -110,7 +112,16 @@ export default function GameOverlay({
         }}
       >
         <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 } }}>
-          <Card sx={{ flex: 1, backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(8px)' }}>
+          <Card
+            sx={{
+              flex: 1,
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(12px)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: 2,
+            }}
+          >
             <CardContent sx={{ p: { xs: 0.75, sm: 1 }, '&:last-child': { pb: { xs: 0.75, sm: 1 } } }}>
               <Typography variant="body2" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' }, lineHeight: 1, color: '#666', fontWeight: 500 }}>
                 Poeng
@@ -120,7 +131,16 @@ export default function GameOverlay({
               </Typography>
             </CardContent>
           </Card>
-          <Card sx={{ flex: 1, backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(8px)' }}>
+          <Card
+            sx={{
+              flex: 1,
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(12px)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: 2,
+            }}
+          >
             <CardContent sx={{ p: { xs: 0.75, sm: 1 }, '&:last-child': { pb: { xs: 0.75, sm: 1 } } }}>
               <Typography variant="body2" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' }, lineHeight: 1, color: '#666', fontWeight: 500 }}>
                 Streak
@@ -132,7 +152,15 @@ export default function GameOverlay({
           </Card>
         </Box>
 
-        <Card sx={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(8px)' }}>
+        <Card
+          sx={{
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(12px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: 2,
+          }}
+        >
           <CardContent sx={{ p: { xs: 0.75, sm: 1 }, '&:last-child': { pb: { xs: 0.75, sm: 1 } } }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="body2" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' }, color: '#666', fontWeight: 500 }}>
@@ -154,7 +182,15 @@ export default function GameOverlay({
 
         {/* Current Target Info */}
         {state.status === "playing" && targetName && settings.gameMode !== 'reverse_quiz' && (
-          <Card sx={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(8px)' }}>
+          <Card
+            sx={{
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(12px)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: 2,
+            }}
+          >
             <CardContent sx={{ p: { xs: 1, sm: 1.5 }, '&:last-child': { pb: { xs: 1, sm: 1.5 } } }}>
               <Typography variant="body2" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' }, mb: 0.5, color: '#666', fontWeight: 500 }}>
                 Finn område
@@ -172,7 +208,15 @@ export default function GameOverlay({
         )}
 
         {state.status === "ended" && (
-          <Card sx={{ backgroundColor: 'rgba(76, 175, 80, 0.95)', backdropFilter: 'blur(8px)' }}>
+          <Card
+            sx={{
+              backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              backdropFilter: 'blur(12px)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: 2,
+            }}
+          >
             <CardContent sx={{ p: { xs: 1, sm: 1.5 }, '&:last-child': { pb: { xs: 1, sm: 1.5 } } }}>
               <Typography variant="body1" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' }, fontWeight: 600, color: 'white', textAlign: 'center' }}>
                 Ferdig! 🎉

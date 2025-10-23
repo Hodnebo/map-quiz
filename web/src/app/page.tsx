@@ -309,28 +309,63 @@ export default function Home() {
 
   return (
     <div className="min-h-screen grid grid-rows-[auto_1fr]">
-      <AppBar position="static" elevation={0} sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
+      <AppBar
+        position="static"
+        elevation={0}
+        sx={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          borderBottom: 'none',
+        }}
+      >
         <Toolbar>
-          <Typography variant="h1" component="h1" sx={{ flexGrow: 1 }}>
-            Oslo Bydel-Quiz
+          <Typography
+            variant="h1"
+            component="h1"
+            sx={{
+              flexGrow: 1,
+              fontSize: { xs: '1.5rem', sm: '2rem' },
+              fontWeight: 'bold',
+              color: 'white',
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            🗺️ Oslo Bydel-Quiz
           </Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
             {state.status === "idle" ? (
               <Button
                 variant="contained"
-                color="primary"
                 startIcon={<PlayArrowIcon />}
                 onClick={doStart}
                 disabled={!canPlay}
+                sx={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                  },
+                  '&:disabled': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                    color: 'rgba(255, 255, 255, 0.5)',
+                  },
+                }}
               >
                 Start
               </Button>
             ) : (
               <Button
                 variant="contained"
-                color="primary"
                 startIcon={<RefreshIcon />}
                 onClick={doRestart}
+                sx={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                  },
+                }}
               >
                 Restart
               </Button>
@@ -341,8 +376,11 @@ export default function Home() {
               onClick={handleNewGame}
               sx={{
                 borderWidth: '2px',
+                borderColor: 'rgba(255, 255, 255, 0.3)',
+                color: 'white',
                 '&:hover': {
-                  borderWidth: '2px',
+                  borderColor: 'rgba(255, 255, 255, 0.5)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 },
               }}
             >
@@ -352,6 +390,12 @@ export default function Home() {
               onClick={toggleTheme}
               color="inherit"
               aria-label="toggle theme"
+              sx={{
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                },
+              }}
             >
               {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
             </IconButton>
