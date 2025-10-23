@@ -5,17 +5,18 @@ import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useBydelerData } from "@/hooks/useBydelerData";
 import type { GameSettings, GameState } from "@/lib/types";
 import { createInitialState, startGame, answer } from "@/lib/game";
-import { load, save } from "@/lib/persistence";
+import { load, save, hasSeenModal, markModalAsSeen } from "@/lib/persistence";
 import { XorShift32 } from "@/lib/rng";
 import { playCorrectSound, playWrongSound, initializeAudio } from "@/lib/audio";
 import { getEffectiveSettings } from "@/lib/gameModes";
 import { gameModeRegistry } from "@/lib/gameModeRegistry";
 import { getAssetUrl } from "@/lib/basePath";
 import { Button, AppBar, Toolbar, Typography, Box, IconButton } from "@mui/material";
-import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, Shuffle as ShuffleIcon, DarkMode as DarkModeIcon, LightMode as LightModeIcon } from "@mui/icons-material";
+import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, Shuffle as ShuffleIcon, DarkMode as DarkModeIcon, LightMode as LightModeIcon, Settings as SettingsIcon } from "@mui/icons-material";
 import { useTheme } from "@/contexts/ThemeContext";
 import GameOverlay from "@/components/GameOverlay";
 import ReverseQuizOverlay from "@/components/ReverseQuizOverlay";
+import { GameModeModal } from "@/components/GameModeModal";
 
 const QuizMap = dynamic(() => import("@/components/Map"), { ssr: false });
 
@@ -38,6 +39,8 @@ export default function Home() {
   const [wrongAnswerIds, setWrongAnswerIds] = useState<string[]>([]);
   const [lastAnswerExhaustedAttempts, setLastAnswerExhaustedAttempts] = useState<boolean>(false);
   const [lastCorrectAnswerName, setLastCorrectAnswerName] = useState<string>('');
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [isFirstVisit, setIsFirstVisit] = useState<boolean>(false);
   const answerLockRef = useRef(false);
   const stateRef = useRef(state);
   const settingsRef = useRef(settings);
@@ -49,6 +52,15 @@ export default function Home() {
   useEffect(() => save("settings", settings), [settings]);
   useEffect(() => save("seed", seed), [seed]);
   useEffect(() => initializeAudio(), []);
+
+  // Check if this is the first visit and show modal
+  useEffect(() => {
+    const hasSeen = hasSeenModal();
+    if (!hasSeen) {
+      setIsFirstVisit(true);
+      setShowModal(true);
+    }
+  }, []);
 
   // Update settings with mode defaults when gameMode changes
   const prevGameModeRef = useRef(settings.gameMode);
@@ -95,6 +107,32 @@ export default function Home() {
       setState((s) => startGame(s, allIds, seed));
     }, 0);
   }, [allIds, canPlay, seed, settings, effectiveSettings]);
+
+  const handleModalClose = useCallback(() => {
+    setShowModal(false);
+    if (isFirstVisit) {
+      markModalAsSeen();
+      setIsFirstVisit(false);
+    }
+  }, [isFirstVisit]);
+
+  const handleStartGame = useCallback((mode: string, newSettings: any) => {
+    const updatedSettings = {
+      ...settings,
+      gameMode: mode as any,
+      ...newSettings,
+    };
+    setSettings(updatedSettings);
+    setShowModal(false);
+    if (isFirstVisit) {
+      markModalAsSeen();
+      setIsFirstVisit(false);
+    }
+  }, [settings, isFirstVisit]);
+
+  const handleNewGame = useCallback(() => {
+    setShowModal(true);
+  }, []);
 
   // Clear feedback message when moving to next question
   useEffect(() => {
@@ -288,6 +326,19 @@ export default function Home() {
             )}
             <Button
               variant="outlined"
+              startIcon={<SettingsIcon />}
+              onClick={handleNewGame}
+              sx={{
+                borderWidth: '2px',
+                '&:hover': {
+                  borderWidth: '2px',
+                },
+              }}
+            >
+              Nytt spill
+            </Button>
+            <Button
+              variant="outlined"
               startIcon={<ShuffleIcon />}
               onClick={() => {
                 setSeed(Math.floor(Math.random() * 2 ** 31));
@@ -368,6 +419,7 @@ export default function Home() {
           allIdsLength={allIds.length}
           targetName={targetName}
           attemptsLeft={attemptsLeft}
+          showSettings={false} // Hide settings UI since we now use modal
         />
 
         {/* Reverse Quiz Overlay */}
@@ -391,6 +443,15 @@ export default function Home() {
             }}
           />
         )}
+
+        {/* Game Mode Modal */}
+        <GameModeModal
+          open={showModal}
+          onClose={handleModalClose}
+          onStartGame={handleStartGame}
+          currentMode={settings.gameMode}
+          currentSettings={settings}
+        />
       </div>
     </div>
   );

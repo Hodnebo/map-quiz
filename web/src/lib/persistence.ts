@@ -16,3 +16,11 @@ export function load<T>(key: string, fallback: T): T {
     return fallback;
   }
 }
+
+export function hasSeenModal(): boolean {
+  return load('hasSeenModal', false);
+}
+
+export function markModalAsSeen(): void {
+  save('hasSeenModal', true);
+}

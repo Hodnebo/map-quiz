@@ -15,6 +15,7 @@ interface GameOverlayProps {
   allIdsLength: number;
   targetName?: string | null;
   attemptsLeft?: number;
+  showSettings?: boolean;
 }
 
 export default function GameOverlay({
@@ -24,7 +25,8 @@ export default function GameOverlay({
   onSettingsChange,
   allIdsLength,
   targetName,
-  attemptsLeft
+  attemptsLeft,
+  showSettings = true
 }: GameOverlayProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [statsExpanded, setStatsExpanded] = useState(false);
@@ -136,13 +138,15 @@ export default function GameOverlay({
               <Typography variant="body2" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' }, color: '#666', fontWeight: 500 }}>
                 Runde {state.currentRound}/{settings.rounds}
               </Typography>
-              <IconButton
-                size="small"
-                onClick={() => setSettingsOpen(true)}
-                sx={{ p: { xs: 0.25, sm: 0.5 } }}
-              >
-                <SettingsIcon fontSize="small" />
-              </IconButton>
+              {showSettings && (
+                <IconButton
+                  size="small"
+                  onClick={() => setSettingsOpen(true)}
+                  sx={{ p: { xs: 0.25, sm: 0.5 } }}
+                >
+                  <SettingsIcon fontSize="small" />
+                </IconButton>
+              )}
             </Box>
           </CardContent>
         </Card>
@@ -179,28 +183,30 @@ export default function GameOverlay({
       </Box>
 
       {/* Settings Drawer */}
-      <Drawer
-        anchor="right"
-        open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        PaperProps={{
-          sx: { width: 320, p: 2 }
-        }}
-      >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6">Innstillinger</Typography>
-          <IconButton onClick={() => setSettingsOpen(false)}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
-        <GameSettings
-          settings={settings}
-          effectiveSettings={effectiveSettings}
-          onSettingsChange={onSettingsChange}
-          allIdsLength={allIdsLength}
-          isGameActive={state.status !== 'idle'}
-        />
-      </Drawer>
+      {showSettings && (
+        <Drawer
+          anchor="right"
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          PaperProps={{
+            sx: { width: 320, p: 2 }
+          }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6">Innstillinger</Typography>
+            <IconButton onClick={() => setSettingsOpen(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          <GameSettings
+            settings={settings}
+            effectiveSettings={effectiveSettings}
+            onSettingsChange={onSettingsChange}
+            allIdsLength={allIdsLength}
+            isGameActive={state.status !== 'idle'}
+          />
+        </Drawer>
+      )}
     </>
   );
 }

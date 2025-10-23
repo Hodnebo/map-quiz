@@ -44,7 +44,7 @@ Uses **functional state management** with immutable updates rather than complex 
 - Outputs both full precision and web-optimized (<300KB) versions to `web/public/data/`
 
 ## Technology Stack
-- **Framework**: Next.js 15.5.2 with App Router and React 19
+- **Framework**: Next.js 15.5.2 with App Router and React 18
 - **Language**: TypeScript with strict typing
 - **Mapping**: MapLibre GL JS (open-source Mapbox alternative)
 - **Styling**: Tailwind CSS v4
