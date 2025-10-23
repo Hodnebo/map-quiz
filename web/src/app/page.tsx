@@ -53,11 +53,13 @@ export default function Home() {
   useEffect(() => save("seed", seed), [seed]);
   useEffect(() => initializeAudio(), []);
 
-  // Check if this is the first visit and show modal
+  // Show modal on page load when game is idle
   useEffect(() => {
-    const hasSeen = hasSeenModal();
-    if (!hasSeen) {
-      setIsFirstVisit(true);
+    if (state.status === 'idle' && !showModal) {
+      const hasSeen = hasSeenModal();
+      if (!hasSeen) {
+        setIsFirstVisit(true);
+      }
       setShowModal(true);
     }
   }, []);

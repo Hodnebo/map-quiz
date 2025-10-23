@@ -159,11 +159,12 @@ export function GameModeModal({
                   },
                 }}
               >
-                {[5, 10, 15, 20, 25, 30].map((rounds) => {
+                {[5, 15, 30, 60, totalEntries].map((rounds, idx) => {
                   const isDisabled = rounds > totalEntries;
+                  const isFull = rounds === totalEntries;
                   return (
-                    <MenuItem key={rounds} value={rounds} disabled={isDisabled}>
-                      {rounds} {isDisabled ? `(maks ${totalEntries})` : 'runder'}
+                    <MenuItem key={idx} value={rounds} disabled={isDisabled}>
+                      {isFull ? `Alle ${totalEntries} (full)` : `${rounds} runder`}
                     </MenuItem>
                   );
                 })}
