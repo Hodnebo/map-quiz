@@ -1,7 +1,7 @@
 {
   "app": {
-    "title": "🗺️ Oslo Bydel-Quiz",
-    "description": "Test your knowledge of Oslo districts"
+    "title": "🗺️ Map Quiz",
+    "description": "Test your geographical knowledge"
   },
   "map": {
     "osloAriaLabel": "Kart over Oslo bydeler",
