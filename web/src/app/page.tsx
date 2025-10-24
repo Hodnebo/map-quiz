@@ -97,33 +97,24 @@ export default function LandingPage() {
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  backgroundColor: theme => theme.palette.background.paper,
                   backdropFilter: 'blur(12px)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  boxShadow: theme => theme.palette.mode === 'dark'
+                    ? '0 8px 32px rgba(0, 0, 0, 0.3)'
+                    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+                  border: theme => theme.palette.mode === 'dark'
+                    ? '1px solid rgba(255, 255, 255, 0.1)'
+                    : '1px solid rgba(255, 255, 255, 0.2)',
                   borderRadius: 2,
                   transition: 'all 0.3s ease',
                   '&:hover': {
                     transform: 'translateY(-4px)',
-                    boxShadow: '0 12px 48px rgba(0, 0, 0, 0.15)',
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    boxShadow: theme => theme.palette.mode === 'dark'
+                      ? '0 12px 48px rgba(0, 0, 0, 0.4)'
+                      : '0 12px 48px rgba(0, 0, 0, 0.15)',
                   },
                 }}
               >
-                {mapConfig.previewImage && (
-                  <Box
-                    component="img"
-                    src={mapConfig.previewImage}
-                    alt={mapConfig.name}
-                    sx={{
-                      width: '100%',
-                      height: 200,
-                      objectFit: 'cover',
-                      borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
-                    }}
-                  />
-                )}
-
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Typography variant="h5" component="h3" gutterBottom sx={{ fontWeight: 600 }}>
                     {mapConfig.name}
@@ -144,9 +135,11 @@ export default function LandingPage() {
                       sx={{
                         px: 1.5,
                         py: 0.5,
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        backgroundColor: theme => theme.palette.mode === 'dark'
+                          ? 'rgba(102, 126, 234, 0.2)'
+                          : 'rgba(102, 126, 234, 0.1)',
                         borderRadius: 1,
-                        color: '#667eea',
+                        color: theme => theme.palette.mode === 'dark' ? '#8aa5ff' : '#667eea',
                         fontWeight: 500,
                       }}
                     >
@@ -158,9 +151,11 @@ export default function LandingPage() {
                         sx={{
                           px: 1.5,
                           py: 0.5,
-                          backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                          backgroundColor: theme => theme.palette.mode === 'dark'
+                            ? 'rgba(118, 75, 162, 0.2)'
+                            : 'rgba(118, 75, 162, 0.1)',
                           borderRadius: 1,
-                          color: '#764ba2',
+                          color: theme => theme.palette.mode === 'dark' ? '#b89ed6' : '#764ba2',
                           fontWeight: 500,
                         }}
                       >

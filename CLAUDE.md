@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an interactive Oslo neighbourhood map quiz web application built with Next.js 15, TypeScript, and MapLibre GL JS. Users click on Oslo districts (bydeler) on a map to test their geographical knowledge with scoring, streaks, and multiple difficulty levels.
+This is an extensible interactive map quiz web application built with Next.js 15, TypeScript, and MapLibre GL JS. Users click on geographical regions on a map to test their knowledge with scoring, streaks, and multiple difficulty levels. The app supports multiple maps (currently Oslo districts) with per-map configuration, localization, and persistent state isolation.
 
 ## Development Commands
 
@@ -30,10 +30,14 @@ This is an interactive Oslo neighbourhood map quiz web application built with Ne
   - `/scripts/` - Data processing utilities for GeoJSON normalization
 
 ### Key Components
-- **Map Component** (`web/src/components/Map.tsx`) - MapLibre GL JS integration with click-based polygon selection
+- **Map Component** (`web/src/components/Map.tsx`) - MapLibre GL JS integration with click-based polygon selection, configurable center and zoom
 - **Game State** (`web/src/lib/game.ts`) - Functional state machine: `idle` → `playing` → `ended`
-- **Data Hook** (`web/src/hooks/useBydelerData.ts`) - GeoJSON data fetching and processing
-- **Types** (`web/src/lib/types.ts`) - Core TypeScript interfaces for game state, quiz settings, and geographical data
+- **Data Hooks**
+  - `useRegionData(mapId)` (`web/src/hooks/useRegionData.ts`) - Generic GeoJSON data fetching with map config support
+  - `useBydelerData()` (`web/src/hooks/useBydelerData.ts`) - Legacy wrapper for backward compatibility
+- **Map Configuration** (`web/src/config/maps/`) - Registry pattern for managing multiple map configs
+- **Types** (`web/src/lib/types.ts`) - Core TypeScript interfaces including `Region`, `MapConfig`, `MapMetadata`, game state, and quiz settings
+- **Internationalization** (`web/src/i18n/`) - Translation system with support for multiple locales (Norwegian, English)
 
 ### State Management Pattern
 Uses **functional state management** with immutable updates rather than complex state libraries. Game state flows through a state machine with scoring, streaks, and multi-attempt logic. Local persistence via `web/src/lib/persistence.ts`.
@@ -75,4 +79,64 @@ Uses **functional state management** with immutable updates rather than complex 
 - ARIA labels for map interactions
 - Keyboard navigation support
 - Mobile-responsive with touch-friendly interactions
-- Norwegian (nb-NO) as primary language with i18n-ready structure
+- Multi-language support with Norwegian and English
+- Dark mode support with theme-aware styling
+
+## Routing Architecture
+
+### Landing Page
+- **Route**: `/`
+- **Component**: `web/src/app/page.tsx`
+- **Purpose**: Map selector with card-based UI showing all available maps
+- **Features**: Dark mode support, map metadata display, difficulty indicators
+
+### Game Pages
+- **Route**: `/game/[mapId]`
+- **Server Component**: `web/src/app/game/[mapId]/layout.tsx` with `generateStaticParams()`
+- **Client Component**: `web/src/app/game/[mapId]/page.tsx`
+- **Purpose**: Play the map quiz with dynamic routing support
+- **Features**: Per-map state isolation, configurable map parameters (center, zoom, bounds)
+
+## Adding a New Map
+
+To add a new map to the application:
+
+1. **Create map configuration** in `web/src/config/maps/[mapName].ts`:
+   ```typescript
+   export const mapConfig: MapConfigWithMetadata = {
+     id: 'unique-id',
+     name: 'Display Name',
+     dataPath: '/data/filename.geo.json',
+     center: [lng, lat],
+     initialZoom: 10,
+     bounds: [[minLng, minLat], [maxLng, maxLat]],
+     language: 'no',
+     description: 'Map description',
+     featureCount: 15,
+     difficulty: 'medium',
+   };
+   ```
+
+2. **Register map** in `web/src/config/maps/index.ts`:
+   ```typescript
+   import { mapConfig } from './[mapName]';
+
+   const ALL_MAPS = [osloMapConfig, mapConfig];
+   ```
+
+3. **Add GeoJSON data** to `web/public/data/filename.geo.json` with features containing:
+   - `navn` (name)
+   - `centroid` [lng, lat] (for hints)
+
+4. **Add translations** for map names and descriptions in `web/src/i18n/translations/*.json`
+
+5. **Build and deploy** - Static generation automatically includes the new map route
+
+## Multi-Map State Isolation
+
+Each map maintains isolated state using localStorage keys scoped by mapId:
+- `locale:{mapId}` - Language preference per map
+- `settings:{mapId}` - Game settings (rounds, difficulty) per map
+- `seed:{mapId}` - Random seed for consistent question selection per map
+
+This prevents settings from one map affecting another map during gameplay.

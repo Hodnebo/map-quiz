@@ -13,6 +13,5 @@ export const osloMapConfig: MapConfigWithMetadata = {
   language: 'no',
   description: 'Test your knowledge of Oslo districts (bydeler)',
   featureCount: 15,
-  previewImage: '/images/oslo-preview.png',
   difficulty: 'medium',
 };
