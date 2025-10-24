@@ -14,6 +14,8 @@ import { getAssetUrl } from "@/lib/basePath";
 import { Button, AppBar, Toolbar, Typography, Box, IconButton } from "@mui/material";
 import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, DarkMode as DarkModeIcon, LightMode as LightModeIcon, Settings as SettingsIcon } from "@mui/icons-material";
 import { useTheme } from "@/contexts/ThemeContext";
+import { t } from "@/i18n";
+import type { Locale } from "@/i18n/config";
 import GameOverlay from "@/components/GameOverlay";
 import ReverseQuizOverlay from "@/components/ReverseQuizOverlay";
 import { GameModeModal } from "@/components/GameModeModal";
@@ -31,6 +33,7 @@ const DEFAULT_SETTINGS: GameSettings = {
 export default function Home() {
   const { bydeler, geojson, loading, error } = useBydelerData();
   const { isDarkMode, toggleTheme } = useTheme();
+  const [locale, setLocale] = useState<Locale>(() => load("locale", "no" as Locale));
   const [settings, setSettings] = useState<GameSettings>(() => load("settings", DEFAULT_SETTINGS));
   const [seed, setSeed] = useState<number>(() => load("seed", Math.floor(Date.now() % 2 ** 31)));
   const [state, setState] = useState<GameState>(() => createInitialState(settings));
@@ -49,6 +52,7 @@ export default function Home() {
   useEffect(() => { settingsRef.current = settings; }, [settings]);
 
 
+  useEffect(() => save("locale", locale), [locale]);
   useEffect(() => save("settings", settings), [settings]);
   useEffect(() => save("seed", seed), [seed]);
   useEffect(() => initializeAudio(), []);
@@ -329,7 +333,7 @@ export default function Home() {
               textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
             }}
           >
-            🗺️ Oslo Bydel-Quiz
+            {t('app.title', locale)}
           </Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
             {state.status === "idle" ? (
@@ -457,6 +461,7 @@ export default function Home() {
           targetName={targetName}
           attemptsLeft={attemptsLeft}
           showSettings={false} // Hide settings UI since we now use modal
+          locale={locale}
         />
 
         {/* Reverse Quiz Overlay */}
@@ -489,6 +494,7 @@ export default function Home() {
           currentMode={settings.gameMode}
           currentSettings={settings}
           totalEntries={allIds.length}
+          locale={locale}
         />
       </div>
     </div>
