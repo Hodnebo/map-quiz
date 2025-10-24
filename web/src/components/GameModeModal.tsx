@@ -21,6 +21,8 @@ import {
 } from '@mui/material';
 import { GameMode, GameSettings } from '@/lib/types';
 import { gameModeRegistry } from '@/lib/gameModeRegistry';
+import { t } from '@/i18n';
+import type { Locale } from '@/i18n/config';
 
 interface GameModeModalProps {
   open: boolean;
@@ -29,6 +31,7 @@ interface GameModeModalProps {
   currentMode?: GameMode;
   currentSettings?: GameSettings;
   totalEntries?: number;
+  locale?: Locale;
 }
 
 export function GameModeModal({
@@ -38,6 +41,7 @@ export function GameModeModal({
   currentMode,
   currentSettings,
   totalEntries = 15,
+  locale = 'no',
 }: GameModeModalProps) {
   const [selectedMode, setSelectedMode] = useState<GameMode>('classic');
   const [settings, setSettings] = useState<GameSettings>(() => ({
@@ -96,10 +100,10 @@ export function GameModeModal({
     >
       <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
         <Box sx={{ fontSize: '2rem', fontWeight: 'bold', mb: 1 }}>
-          🗺️ Velg spillmodus
+          {t('modal.title', locale)}
         </Box>
         <Typography variant="body2" textAlign="center" sx={{ opacity: 0.9 }}>
-          Velg hvordan du vil spille Oslo-kartet
+          {t('modal.subtitle', locale)}
         </Typography>
       </DialogTitle>
 
@@ -107,7 +111,7 @@ export function GameModeModal({
         <Box sx={{ mt: 2 }}>
           {/* Game Mode Selection */}
           <Typography variant="h6" gutterBottom fontWeight="bold">
-            Spillmodus
+            {t('modal.gameMode', locale)}
           </Typography>
           <Stack direction="row" spacing={1} sx={{ mb: 3, flexWrap: 'wrap', gap: 1 }}>
             {gameModeRegistry.getAllModes().map((strategy) => {
@@ -135,17 +139,17 @@ export function GameModeModal({
 
           {/* Settings */}
           <Typography variant="h6" gutterBottom fontWeight="bold">
-            Innstillinger
+            {t('modal.settings', locale)}
           </Typography>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {/* Rounds */}
             <FormControl fullWidth>
-              <InputLabel sx={{ color: 'white' }}>Antall runder</InputLabel>
+              <InputLabel sx={{ color: 'white' }}>{t('modal.rounds', locale)}</InputLabel>
               <Select
                 value={settings.rounds}
                 onChange={(e) => handleSettingChange('rounds', Number(e.target.value))}
-                label="Antall runder"
+                label={t('modal.rounds', locale)}
                 sx={{
                   color: 'white',
                   '& .MuiOutlinedInput-notchedOutline': {
@@ -164,23 +168,23 @@ export function GameModeModal({
                   const isFull = rounds === totalEntries;
                   return (
                     <MenuItem key={idx} value={rounds} disabled={isDisabled}>
-                      {isFull ? `Alle ${totalEntries} (full)` : `${rounds} runder`}
+                      {isFull ? t('modal.full', locale, { count: totalEntries }) : t('modal.rounds_plural', locale, { count: rounds })}
                     </MenuItem>
                   );
                 })}
               </Select>
               <Typography variant="caption" sx={{ mt: 0.5, opacity: 0.8, fontSize: '0.75rem' }}>
-                Totalt {totalEntries} bydeler tilgjengelig
+                {t('game.totalDistricts', locale, { count: totalEntries })}
               </Typography>
             </FormControl>
 
             {/* Max Attempts */}
             <FormControl fullWidth>
-              <InputLabel sx={{ color: 'white' }}>Maks forsøk per runde</InputLabel>
+              <InputLabel sx={{ color: 'white' }}>{t('modal.maxAttempts', locale)}</InputLabel>
               <Select
                 value={settings.maxAttempts}
                 onChange={(e) => handleSettingChange('maxAttempts', Number(e.target.value))}
-                label="Maks forsøk per runde"
+                label={t('modal.maxAttempts', locale)}
                 sx={{
                   color: 'white',
                   '& .MuiOutlinedInput-notchedOutline': {
@@ -196,7 +200,7 @@ export function GameModeModal({
               >
                 {[1, 2, 3, 4, 5].map((attempts) => (
                   <MenuItem key={attempts} value={attempts}>
-                    {attempts} forsøk
+                    {t('modal.attempts_plural', locale, { count: attempts })}
                   </MenuItem>
                 ))}
               </Select>
@@ -205,11 +209,11 @@ export function GameModeModal({
             {/* Difficulty (only show if the mode supports it) */}
             {settingsProps.showDifficulty && (
               <FormControl fullWidth>
-                <InputLabel sx={{ color: 'white' }}>Vanskelighet</InputLabel>
+                <InputLabel sx={{ color: 'white' }}>{t('modal.difficulty', locale)}</InputLabel>
                 <Select
                   value={settings.difficulty}
                   onChange={(e) => handleSettingChange('difficulty', e.target.value)}
-                  label="Vanskelighet"
+                  label={t('modal.difficulty', locale)}
                   sx={{
                     color: 'white',
                     '& .MuiOutlinedInput-notchedOutline': {
@@ -223,9 +227,9 @@ export function GameModeModal({
                     },
                   }}
                 >
-                  <MenuItem value="easy">Lett</MenuItem>
-                  <MenuItem value="medium">Middels</MenuItem>
-                  <MenuItem value="hard">Vanskelig</MenuItem>
+                  <MenuItem value="easy">{t('modal.easy', locale)}</MenuItem>
+                  <MenuItem value="medium">{t('modal.medium', locale)}</MenuItem>
+                  <MenuItem value="hard">{t('modal.hard', locale)}</MenuItem>
                 </Select>
               </FormControl>
             )}
@@ -233,11 +237,11 @@ export function GameModeModal({
             {/* Alternatives Count (only show if the mode supports it) */}
             {settingsProps.showAlternatives && (
               <FormControl fullWidth>
-                <InputLabel sx={{ color: 'white' }}>Antall alternativer</InputLabel>
+                <InputLabel sx={{ color: 'white' }}>{t('modal.alternatives', locale)}</InputLabel>
                 <Select
                   value={settings.alternativesCount}
                   onChange={(e) => handleSettingChange('alternativesCount', Number(e.target.value))}
-                  label="Antall alternativer"
+                  label={t('modal.alternatives', locale)}
                   sx={{
                     color: 'white',
                     '& .MuiOutlinedInput-notchedOutline': {
@@ -253,7 +257,7 @@ export function GameModeModal({
                 >
                   {[2, 3, 4, 5, 6].map((count) => (
                     <MenuItem key={count} value={count}>
-                      {count} alternativer
+                      {t('modal.alternatives_plural', locale, { count })}
                     </MenuItem>
                   ))}
                 </Select>
@@ -276,7 +280,7 @@ export function GameModeModal({
             },
           }}
         >
-          Avbryt
+          {t('modal.cancel', locale)}
         </Button>
         <Button
           onClick={handleStartGame}
@@ -289,7 +293,7 @@ export function GameModeModal({
             },
           }}
         >
-          Start spill
+          {t('modal.start', locale)}
         </Button>
       </DialogActions>
     </Dialog>
