@@ -41,7 +41,7 @@ export default function LandingPage() {
               textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
             }}
           >
-            🗺️ {t('app.title', locale)}
+            {t('app.title', locale)}
           </Typography>
           <IconButton
             onClick={toggleTheme}
