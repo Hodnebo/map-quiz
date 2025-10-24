@@ -1,0 +1,41 @@
+{
+  "app": {
+    "title": "🗺️ Oslo District Quiz",
+    "description": "Test your knowledge of Oslo districts"
+  },
+  "map": {
+    "osloAriaLabel": "Map of Oslo districts",
+    "findArea": "Find area",
+    "attemptsLeft": "Attempts left: {count} remaining"
+  },
+  "game": {
+    "points": "Points",
+    "streak": "Streak",
+    "round": "Round",
+    "finished": "Done! 🎉",
+    "totalDistricts": "Total {count} districts available"
+  },
+  "modal": {
+    "title": "🗺️ Select Game Mode",
+    "subtitle": "Choose how you want to play the Oslo map",
+    "gameMode": "Game Mode",
+    "settings": "Settings",
+    "rounds": "Number of rounds",
+    "maxAttempts": "Max attempts per round",
+    "difficulty": "Difficulty",
+    "alternatives": "Number of alternatives",
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+    "full": "All {count} (full)",
+    "rounds_plural": "{count} rounds",
+    "attempts_plural": "{count} attempts",
+    "alternatives_plural": "{count} alternatives",
+    "cancel": "Cancel",
+    "start": "Start Game"
+  },
+  "settings": {
+    "title": "Settings",
+    "close": "Close"
+  }
+}

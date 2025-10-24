@@ -1,0 +1,41 @@
+{
+  "app": {
+    "title": "🗺️ Oslo Bydel-Quiz",
+    "description": "Test your knowledge of Oslo districts"
+  },
+  "map": {
+    "osloAriaLabel": "Kart over Oslo bydeler",
+    "findArea": "Finn område",
+    "attemptsLeft": "Forsøk igjen: {count} igjen"
+  },
+  "game": {
+    "points": "Poeng",
+    "streak": "Streak",
+    "round": "Runde",
+    "finished": "Ferdig! 🎉",
+    "totalDistricts": "Totalt {count} bydeler tilgjengelig"
+  },
+  "modal": {
+    "title": "🗺️ Velg spillmodus",
+    "subtitle": "Velg hvordan du vil spille Oslo-kartet",
+    "gameMode": "Spillmodus",
+    "settings": "Innstillinger",
+    "rounds": "Antall runder",
+    "maxAttempts": "Maks forsøk per runde",
+    "difficulty": "Vanskelighet",
+    "alternatives": "Antall alternativer",
+    "easy": "Lett",
+    "medium": "Middels",
+    "hard": "Vanskelig",
+    "full": "Alle {count} (full)",
+    "rounds_plural": "{count} runder",
+    "attempts_plural": "{count} forsøk",
+    "alternatives_plural": "{count} alternativer",
+    "cancel": "Avbryt",
+    "start": "Start spill"
+  },
+  "settings": {
+    "title": "Innstillinger",
+    "close": "Lukk"
+  }
+}

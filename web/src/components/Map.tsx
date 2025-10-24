@@ -18,9 +18,9 @@ interface MapProps {
   candidateIds?: string[];
   isDarkMode?: boolean;
   mapStyle?: "backdrop" | "dataviz" | "basic-v2";
+  center?: LngLatLike;
+  initialZoom?: number;
 }
-
-const OSLO_CENTER: LngLatLike = [10.7522, 59.9139];
 
 export default function MapView(props: MapProps) {
   const {
@@ -37,6 +37,8 @@ export default function MapView(props: MapProps) {
     hideBasemapLabels = true,
     candidateIds = [],
     mapStyle = "basic-v2",
+    center = [10.7522, 59.9139] as LngLatLike, // Default to Oslo
+    initialZoom = 10,
   } = (props ?? ({} as MapProps));
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -96,8 +98,8 @@ export default function MapView(props: MapProps) {
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: (vectorStyleUrl ?? fallbackRasterStyle) as any,
-      center: OSLO_CENTER,
-      zoom: 10,
+      center: center,
+      zoom: initialZoom,
       interactive: true,
       cooperativeGestures: true,
     });
