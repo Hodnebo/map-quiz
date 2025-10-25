@@ -110,7 +110,7 @@ export class ReverseQuizMode extends BaseGameMode {
     const answeredTargets = [...state.answeredIds, state.currentTargetId!];
     const revealed = [...(state.revealedIds ?? []), state.currentTargetId!];
     const remaining = allIds.filter((id) => !answeredTargets.includes(id));
-    const hasMoreRounds = state.currentRound < state.settings.rounds;
+    const hasMoreRounds = state.currentRound < state.settings.rounds && remaining.length > 0;
 
     let nextTarget: string | null = null;
     if (hasMoreRounds && remaining.length > 0) {

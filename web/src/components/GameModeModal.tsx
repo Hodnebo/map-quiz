@@ -63,10 +63,13 @@ export function GameModeModal({
 
   const handleModeChange = (mode: GameMode) => {
     setSelectedMode(mode);
-    // Reset settings to defaults for the new mode
+    // Reset settings to defaults for the new mode, but preserve existing fields
     const modeStrategy = gameModeRegistry.getMode(mode);
     const defaultSettings = modeStrategy.getDefaultSettings();
-    setSettings(defaultSettings);
+    setSettings(prev => ({
+      ...prev,
+      ...defaultSettings,
+    }));
   };
 
   const handleSettingChange = (key: keyof GameSettings, value: any) => {

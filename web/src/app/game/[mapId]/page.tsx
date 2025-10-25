@@ -482,7 +482,7 @@ export default function GamePage() {
           onStartGame={handleStartGame}
           currentMode={settings.gameMode}
           currentSettings={settings}
-          totalEntries={allIds.length}
+          totalEntries={mapConfig.featureCount}
           locale={locale}
         />
       </div>
