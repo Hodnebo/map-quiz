@@ -11,6 +11,7 @@ import { XorShift32 } from "@/lib/rng";
 import { playCorrectSound, playWrongSound, initializeAudio } from "@/lib/audio";
 import { getEffectiveSettings } from "@/lib/gameModes";
 import { gameModeRegistry } from "@/lib/gameModeRegistry";
+import "@/lib/modes"; // Import to ensure modes are registered
 import { getAssetUrl } from "@/lib/basePath";
 import { getMapConfig, hasMapConfig, type MapId } from "@/config/maps";
 import { Button, AppBar, Toolbar, Typography, Box, IconButton } from "@mui/material";
@@ -133,10 +134,11 @@ export default function GamePage() {
   const handleStartGame = useCallback((mode: string, newSettings: any) => {
     const updatedSettings = {
       ...settings,
-      gameMode: mode as any,
       ...newSettings,
+      gameMode: mode as any,
     };
     setSettings(updatedSettings);
+    setWrongAnswerIds([]);
     setShowModal(false);
     if (isFirstVisit) {
       markModalAsSeen();

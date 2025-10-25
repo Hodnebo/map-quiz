@@ -2,6 +2,9 @@ import type { GameSettings, GameState } from "@/lib/types";
 import type { AnswerResult } from "./gameModeStrategy";
 import { gameModeRegistry } from "./gameModeRegistry";
 
+// Import modes to ensure they are registered before use
+import "@/lib/modes";
+
 
 export function createInitialState(settings: GameSettings): GameState {
   return {

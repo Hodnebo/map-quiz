@@ -20,6 +20,10 @@
     "oslo": {
       "name": "Oslo Bydeler",
       "description": "Test dine kjennskap til Oslos del-bydeler"
+    },
+    "kommuner": {
+      "name": "Norske Kommuner",
+      "description": "Test dine kunnskaper om alle 357 norske kommuner"
     }
   },
   "map": {
@@ -46,6 +50,7 @@
     "easy": "Lett",
     "medium": "Middels",
     "hard": "Vanskelig",
+    "expert": "Ekspert",
     "full": "Alle {count} (full)",
     "rounds_plural": "{count} runder",
     "attempts_plural": "{count} forsøk",

@@ -5,7 +5,7 @@ export interface MapConfigWithMetadata extends MapConfig {
   nameKey: string;
   featureCount: number;
   previewImage?: string;
-  difficulty?: 'easy' | 'medium' | 'hard';
+  difficulty?: 'easy' | 'medium' | 'hard' | 'expert';
 }
 
-export type MapId = 'oslo';
+export type MapId = 'oslo' | 'kommuner';

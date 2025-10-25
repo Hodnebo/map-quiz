@@ -20,6 +20,10 @@
     "oslo": {
       "name": "Oslo Districts",
       "description": "Test your knowledge of Oslo districts"
+    },
+    "kommuner": {
+      "name": "Norwegian Municipalities",
+      "description": "Test your knowledge of all 357 Norwegian municipalities"
     }
   },
   "map": {
@@ -46,6 +50,7 @@
     "easy": "Easy",
     "medium": "Medium",
     "hard": "Hard",
+    "expert": "Expert",
     "full": "All {count} (full)",
     "rounds_plural": "{count} rounds",
     "attempts_plural": "{count} attempts",

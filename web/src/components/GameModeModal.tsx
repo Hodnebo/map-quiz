@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import { GameMode, GameSettings } from '@/lib/types';
 import { gameModeRegistry } from '@/lib/gameModeRegistry';
+import '@/lib/modes'; // Import to ensure modes are registered
 import { t } from '@/i18n';
 import type { Locale } from '@/i18n/config';
 

@@ -4,7 +4,7 @@ WEB_DIR := web
 SCRIPTS_DIR := scripts
 ARCGIS_DELBYDELER := https://services-eu1.arcgis.com/Hky23fkHucfDZYMu/arcgis/rest/services/Delbydeler/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=geojson
 
-.PHONY: help install data data-delbydeler dev build start lint clean ci test e2e
+.PHONY: help install data data-delbydeler data-kommuner dev build start lint clean ci test e2e
 
 help: ## Show this help
 	@echo "Available targets:" ; \
@@ -19,6 +19,9 @@ data: ## Generate normalized and simplified GeoJSON (optional: DATA_URL=...)
 
 data-delbydeler: ## Fetch Oslo delbydeler from ArcGIS and generate outputs
 	@DATA_URL="$(ARCGIS_DELBYDELER)" npm run fetch:oslo --prefix $(SCRIPTS_DIR)
+
+data-kommuner: ## Process Norwegian municipalities GeoJSON
+	@npm run fetch:kommuner --prefix $(SCRIPTS_DIR)
 
 dev: ## Run Next.js dev server
 	@npm run dev --prefix $(WEB_DIR)
@@ -35,6 +38,7 @@ lint: ## Run linter
 clean: ## Remove build artifacts and generated data
 	@rm -rf $(WEB_DIR)/.next
 	@rm -f $(WEB_DIR)/public/data/bydeler.geo.json $(WEB_DIR)/public/data/bydeler_simplified.geo.json
+	@rm -f $(WEB_DIR)/public/data/kommuner.geo.json $(WEB_DIR)/public/data/kommuner_simplified.geo.json
 
 ci: ## Run CI steps (install, data, lint, build)
 	@$(MAKE) install
