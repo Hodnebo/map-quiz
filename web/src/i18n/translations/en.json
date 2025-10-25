@@ -3,6 +3,19 @@
     "title": "🗺️ Map Quiz",
     "description": "Test your geographical knowledge"
   },
+  "landing": {
+    "selectMap": "Select a map to play",
+    "subtitle": "Test your geographical knowledge with interactive map quizzes. Choose a map below to get started!",
+    "noMapsAvailable": "No maps available",
+    "play": "Play",
+    "regions": "{count} regions"
+  },
+  "game": {
+    "start": "Start",
+    "restart": "Restart",
+    "newGame": "New Game",
+    "loadingMap": "Loading map..."
+  },
   "maps": {
     "oslo": {
       "name": "Oslo Districts",

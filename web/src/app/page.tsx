@@ -108,7 +108,7 @@ export default function LandingPage() {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            Velg et kart å spille
+            {t('landing.selectMap', locale)}
           </Typography>
           <Typography
             variant="body1"
@@ -119,7 +119,7 @@ export default function LandingPage() {
               mx: 'auto',
             }}
           >
-            Test din geografikunne med interaktive kartkveiss. Velg et kart nedenfor for å begynne!
+            {t('landing.subtitle', locale)}
           </Typography>
         </Box>
 
@@ -177,7 +177,7 @@ export default function LandingPage() {
                         fontWeight: 500,
                       }}
                     >
-                      {mapConfig.featureCount} områder
+                      {t('landing.regions', locale, { count: String(mapConfig.featureCount) })}
                     </Typography>
                     {mapConfig.difficulty && (
                       <Typography
@@ -217,7 +217,7 @@ export default function LandingPage() {
                       },
                     }}
                   >
-                    Spill
+                    {t('landing.play', locale)}
                   </Button>
                 </CardActions>
               </Card>
@@ -228,7 +228,7 @@ export default function LandingPage() {
         {maps.length === 0 && (
           <Box sx={{ textAlign: 'center', py: 8 }}>
             <Typography variant="h6" color="text.secondary">
-              Ingen kart tilgjengelig
+              {t('landing.noMapsAvailable', locale)}
             </Typography>
           </Box>
         )}

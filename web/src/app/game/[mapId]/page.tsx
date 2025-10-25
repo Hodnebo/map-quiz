@@ -329,7 +329,7 @@ export default function GamePage() {
                   },
                 }}
               >
-                Start
+                {t('game.start', locale)}
               </Button>
             ) : (
               <Button
@@ -345,7 +345,7 @@ export default function GamePage() {
                   },
                 }}
               >
-                Restart
+                {t('game.restart', locale)}
               </Button>
             )}
             <Button
@@ -362,7 +362,7 @@ export default function GamePage() {
                 },
               }}
             >
-              Nytt spill
+              {t('game.newGame', locale)}
             </Button>
             <Button
               color="inherit"
@@ -396,7 +396,7 @@ export default function GamePage() {
         </Toolbar>
       </AppBar>
       <div className="relative h-full">
-        {loading && <div className="absolute inset-0 flex items-center justify-center">Laster kart...</div>}
+        {loading && <div className="absolute inset-0 flex items-center justify-center">{t('game.loadingMap', locale)}</div>}
         {error && <div className="absolute inset-0 flex items-center justify-center text-red-600">{error}</div>}
         {state.status === "playing" && targetName && settings.gameMode !== 'reverse_quiz' && (
           <div

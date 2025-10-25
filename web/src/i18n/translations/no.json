@@ -1,12 +1,25 @@
 {
   "app": {
     "title": "🗺️ Map Quiz",
-    "description": "Test your geographical knowledge"
+    "description": "Test dine geografiske kunnskaper!"
+  },
+  "landing": {
+    "selectMap": "Velg et kart å spille",
+    "subtitle": "Test dine geografikunnskaper med interaktive kartkveiss. Velg et kart nedenfor for å begynne!",
+    "noMapsAvailable": "Ingen kart tilgjengelig",
+    "play": "Spill",
+    "regions": "{count} områder"
+  },
+  "game": {
+    "start": "Start",
+    "restart": "Restart",
+    "newGame": "Nytt spill",
+    "loadingMap": "Laster kart..."
   },
   "maps": {
     "oslo": {
       "name": "Oslo Bydeler",
-      "description": "Test your knowledge of Oslo districts (bydeler)"
+      "description": "Test dine kjennskap til Oslos del-bydeler"
     }
   },
   "map": {
