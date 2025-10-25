@@ -3,12 +3,14 @@ import type { MapId } from './types';
 import { osloMapConfig } from './oslo';
 import { kommunerMapConfig } from './kommuner';
 import { fylkerMapConfig } from './fylker';
+import { worldMapConfig } from './world';
 
 // Registry of all available maps
 const mapRegistry: Record<MapId, MapConfigWithMetadata> = {
   oslo: osloMapConfig,
   kommuner: kommunerMapConfig,
   fylker: fylkerMapConfig,
+  world: worldMapConfig,
 };
 
 /**

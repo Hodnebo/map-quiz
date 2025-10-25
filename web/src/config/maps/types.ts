@@ -9,4 +9,4 @@ export interface MapConfigWithMetadata extends MapConfig {
   color?: string;
 }
 
-export type MapId = 'oslo' | 'kommuner' | 'fylker';
+export type MapId = 'oslo' | 'kommuner' | 'fylker' | 'world';

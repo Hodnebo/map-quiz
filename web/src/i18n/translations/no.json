@@ -29,9 +29,9 @@
       "name": "Norske Kommuner",
       "description": "Test dine kunnskaper om alle 357 norske kommuner"
     },
-    "fylker": {
-      "name": "Norske Fylker",
-      "description": "Test dine kunnskaper om alle 15 norske fylker"
+    "world": {
+      "name": "Verdens Land",
+      "description": "Test dine kunnskaper om verdens land"
     }
   },
   "map": {
@@ -83,17 +83,9 @@
       "name": "Omvendt Quiz",
       "description": "Skriv navnet på det markerte området"
     },
-    "fylker": {
-      "name": "Norske Fylker",
-      "description": "Test dine kunnskaper om alle 15 norske fylker"
-    },
     "multiple_choice": {
       "name": "Flervalgsspørsmål",
       "description": "Velg riktig område fra flere alternativer"
-    },
-    "fylker": {
-      "name": "Norske Fylker",
-      "description": "Test dine kunnskaper om alle 15 norske fylker"
     }
   }
 }

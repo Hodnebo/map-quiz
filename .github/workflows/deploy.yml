@@ -33,6 +33,7 @@ jobs:
         make data
         make data-kommuner
         make data-fylker
+        make data-world
 
     - name: Build application
       run: |

@@ -29,9 +29,9 @@
       "name": "Norwegian Municipalities",
       "description": "Test your knowledge of all 357 Norwegian municipalities"
     },
-    "fylker": {
-      "name": "Norwegian Counties",
-      "description": "Test your knowledge of all 15 Norwegian counties"
+    "world": {
+      "name": "World Countries",
+      "description": "Test your knowledge of world countries"
     }
   },
   "map": {
