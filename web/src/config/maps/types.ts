@@ -6,6 +6,7 @@ export interface MapConfigWithMetadata extends MapConfig {
   featureCount: number;
   previewImage?: string;
   difficulty?: 'easy' | 'medium' | 'hard' | 'expert';
+  color?: string;
 }
 
 export type MapId = 'oslo' | 'kommuner' | 'fylker';

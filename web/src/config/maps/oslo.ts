@@ -14,4 +14,5 @@ export const osloMapConfig: MapConfigWithMetadata = {
   descriptionKey: 'maps.oslo.description',
   featureCount: 98,
   difficulty: 'hard',
+  color: '#667eea',
 };

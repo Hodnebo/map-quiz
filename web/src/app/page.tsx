@@ -9,6 +9,7 @@ import { t } from "@/i18n";
 import { useState, useEffect } from "react";
 import type { Locale } from "@/i18n/config";
 import { detectBrowserLocale } from "@/i18n/utils";
+import { MapPreview } from "@/components/MapPreview";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -34,6 +35,21 @@ export default function LandingPage() {
 
   const handleMapSelect = (mapId: string) => {
     router.push(`/game/${mapId}`);
+  };
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'easy':
+        return { bg: 'rgba(34, 197, 94, 0.1)', color: '#16a34a', border: 'rgba(34, 197, 94, 0.2)' };
+      case 'medium':
+        return { bg: 'rgba(245, 158, 11, 0.1)', color: '#d97706', border: 'rgba(245, 158, 11, 0.2)' };
+      case 'hard':
+        return { bg: 'rgba(239, 68, 68, 0.1)', color: '#dc2626', border: 'rgba(239, 68, 68, 0.2)' };
+      case 'expert':
+        return { bg: 'rgba(220, 38, 127, 0.1)', color: '#be185d', border: 'rgba(220, 38, 127, 0.2)' };
+      default:
+        return { bg: 'rgba(102, 126, 234, 0.1)', color: '#667eea', border: 'rgba(102, 126, 234, 0.2)' };
+    }
   };
 
   return (
@@ -141,6 +157,7 @@ export default function LandingPage() {
                     : '1px solid rgba(255, 255, 255, 0.2)',
                   borderRadius: 2,
                   transition: 'all 0.3s ease',
+                  overflow: 'hidden',
                   '&:hover': {
                     transform: 'translateY(-4px)',
                     boxShadow: theme => theme.palette.mode === 'dark'
@@ -149,6 +166,15 @@ export default function LandingPage() {
                   },
                 }}
               >
+                {/* Dynamic Preview */}
+                {mapConfig.color && (
+                  <MapPreview
+                    featureCount={mapConfig.featureCount}
+                    color={mapConfig.color}
+                    height={120}
+                  />
+                )}
+                
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Typography variant="h5" component="h3" gutterBottom sx={{ fontWeight: 600 }}>
                     {t(mapConfig.nameKey, locale)}
@@ -185,12 +211,11 @@ export default function LandingPage() {
                         sx={{
                           px: 1.5,
                           py: 0.5,
-                          backgroundColor: theme => theme.palette.mode === 'dark'
-                            ? 'rgba(118, 75, 162, 0.2)'
-                            : 'rgba(118, 75, 162, 0.1)',
+                          backgroundColor: getDifficultyColor(mapConfig.difficulty).bg,
                           borderRadius: 1,
-                          color: theme => theme.palette.mode === 'dark' ? '#b89ed6' : '#764ba2',
-                          fontWeight: 500,
+                          color: getDifficultyColor(mapConfig.difficulty).color,
+                          fontWeight: 600,
+                          border: `1px solid ${getDifficultyColor(mapConfig.difficulty).border}`,
                         }}
                       >
                         {t(`modal.${mapConfig.difficulty}`, locale)}

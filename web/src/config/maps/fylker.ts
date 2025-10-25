@@ -13,5 +13,6 @@ export const fylkerMapConfig: MapConfigWithMetadata = {
   nameKey: 'maps.fylker.name',
   descriptionKey: 'maps.fylker.description',
   featureCount: 15,
-  difficulty: 'medium',
+  difficulty: 'easy',
+  color: '#f39c12',
 };

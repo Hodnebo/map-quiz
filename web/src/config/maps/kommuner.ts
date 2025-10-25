@@ -14,4 +14,5 @@ export const kommunerMapConfig: MapConfigWithMetadata = {
   descriptionKey: 'maps.kommuner.description',
   featureCount: 357,
   difficulty: 'expert',
+  color: '#e74c3c',
 };
