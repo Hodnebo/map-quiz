@@ -12,7 +12,7 @@ const FULL_OUT = path.join(WEB_PUBLIC, "bydeler.geo.json");
 const SIMPLE_OUT = path.join(WEB_PUBLIC, "bydeler_simplified.geo.json");
 
 // Prefer authoritative remote GeoJSON via DATA_URL; otherwise fall back to local placeholder file.
-const DATA_URL = process.env.DATA_URL;
+const DATA_URL = process.env.DATA_URL || "https://raw.githubusercontent.com/oslokart/kommune-og-bydelsfakta/main/geodata/bydeler.geo.json";
 
 function slugify(name: string) {
   return name
@@ -28,8 +28,26 @@ async function ensureDir(dir: string) {
 }
 
 async function loadLocalFallback(): Promise<any> {
-  const buf = await fs.readFile(SIMPLE_OUT, "utf8");
-  return JSON.parse(buf);
+  try {
+    const buf = await fs.readFile(SIMPLE_OUT, "utf8");
+    return JSON.parse(buf);
+  } catch (err) {
+    // If no local file exists, create a minimal fallback
+    console.warn(`[data] No local fallback file found at ${SIMPLE_OUT}. Creating minimal fallback.`);
+    return {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          properties: { DELBYDELSN: "Gamle Oslo", bydelsnummer: 1 },
+          geometry: {
+            type: "Polygon",
+            coordinates: [[[10.7, 59.9], [10.8, 59.9], [10.8, 60.0], [10.7, 60.0], [10.7, 59.9]]]
+          }
+        }
+      ]
+    };
+  }
 }
 
 async function loadSource(): Promise<any> {

@@ -31,6 +31,8 @@ jobs:
     - name: Generate data
       run: |
         make data
+        make data-kommuner
+        make data-fylker
 
     - name: Build application
       run: |
