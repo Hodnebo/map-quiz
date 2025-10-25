@@ -307,7 +307,7 @@ export default function GamePage() {
               textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
             }}
           >
-            {mapConfig.name}
+            {t(mapConfig.nameKey, locale)}
           </Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
             {state.status === "idle" ? (
@@ -329,7 +329,7 @@ export default function GamePage() {
                   },
                 }}
               >
-                {t('game.start', locale)}
+                {t('gameActions.start', locale)}
               </Button>
             ) : (
               <Button
@@ -345,7 +345,7 @@ export default function GamePage() {
                   },
                 }}
               >
-                {t('game.restart', locale)}
+                {t('gameActions.restart', locale)}
               </Button>
             )}
             <Button
@@ -362,7 +362,7 @@ export default function GamePage() {
                 },
               }}
             >
-              {t('game.newGame', locale)}
+              {t('gameActions.newGame', locale)}
             </Button>
             <Button
               color="inherit"
@@ -396,7 +396,7 @@ export default function GamePage() {
         </Toolbar>
       </AppBar>
       <div className="relative h-full">
-        {loading && <div className="absolute inset-0 flex items-center justify-center">{t('game.loadingMap', locale)}</div>}
+        {loading && <div className="absolute inset-0 flex items-center justify-center">{t('gameActions.loadingMap', locale)}</div>}
         {error && <div className="absolute inset-0 flex items-center justify-center text-red-600">{error}</div>}
         {state.status === "playing" && targetName && settings.gameMode !== 'reverse_quiz' && (
           <div

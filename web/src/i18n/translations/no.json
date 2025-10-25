@@ -5,12 +5,12 @@
   },
   "landing": {
     "selectMap": "Velg et kart å spille",
-    "subtitle": "Test dine geografikunnskaper med interaktive kartkveiss. Velg et kart nedenfor for å begynne!",
+    "subtitle": "Test dine geografikunnskaper med interaktive kart-quiz. Velg et kart nedenfor for å begynne!",
     "noMapsAvailable": "Ingen kart tilgjengelig",
     "play": "Spill",
     "regions": "{count} områder"
   },
-  "game": {
+  "gameActions": {
     "start": "Start",
     "restart": "Restart",
     "newGame": "Nytt spill",
@@ -56,5 +56,19 @@
   "settings": {
     "title": "Innstillinger",
     "close": "Lukk"
+  },
+  "gameModes": {
+    "classic": {
+      "name": "Klassisk",
+      "description": "Finn områder på kartet med zoom-hint basert på vanskelighetsgrad"
+    },
+    "reverse_quiz": {
+      "name": "Omvendt Quiz",
+      "description": "Skriv navnet på det markerte området"
+    },
+    "multiple_choice": {
+      "name": "Flervalgsspørsmål",
+      "description": "Velg riktig område fra flere alternativer"
+    }
   }
 }

@@ -119,7 +119,7 @@ export function GameModeModal({
               return (
                 <Chip
                   key={strategy.id}
-                  label={strategy.name}
+                  label={t(strategy.name, locale)}
                   onClick={() => handleModeChange(strategy.id as GameMode)}
                   variant={isSelected ? 'filled' : 'outlined'}
                   sx={{

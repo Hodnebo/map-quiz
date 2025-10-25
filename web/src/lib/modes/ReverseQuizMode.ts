@@ -5,8 +5,8 @@ import { XorShift32 } from '../rng';
 
 export class ReverseQuizMode extends BaseGameMode {
   readonly id = 'reverse_quiz';
-  readonly name = 'Omvendt Quiz';
-  readonly description = 'Skriv navnet på det markerte området';
+  readonly nameKey = 'gameModes.reverse_quiz.name';
+  readonly descriptionKey = 'gameModes.reverse_quiz.description';
 
   getDefaultSettings(): Partial<GameSettings> {
     return {

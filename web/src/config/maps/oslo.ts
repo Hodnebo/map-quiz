@@ -2,7 +2,6 @@ import type { MapConfigWithMetadata } from './types';
 
 export const osloMapConfig: MapConfigWithMetadata = {
   id: 'oslo',
-  name: 'Oslo Bydeler',
   dataPath: '/data/bydeler_simplified.geo.json',
   center: [10.7522, 59.9139],
   initialZoom: 10,

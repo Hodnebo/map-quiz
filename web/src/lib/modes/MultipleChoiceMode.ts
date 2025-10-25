@@ -4,8 +4,8 @@ import type { QuestionData, AnswerResult, MapConfig } from '../gameModeStrategy'
 
 export class MultipleChoiceMode extends BaseGameMode {
   readonly id = 'multiple_choice';
-  readonly name = 'Flervalgsspørsmål';
-  readonly description = 'Velg riktig område fra flere alternativer';
+  readonly nameKey = 'gameModes.multiple_choice.name';
+  readonly descriptionKey = 'gameModes.multiple_choice.description';
 
   getDefaultSettings(): Partial<GameSettings> {
     return {

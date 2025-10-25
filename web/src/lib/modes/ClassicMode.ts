@@ -5,8 +5,8 @@ import { XorShift32 } from '../rng';
 
 export class ClassicMode extends BaseGameMode {
   readonly id = 'classic';
-  readonly name = 'Klassisk';
-  readonly description = 'Finn områder på kartet med zoom-hint basert på vanskelighetsgrad';
+  readonly nameKey = 'gameModes.classic.name';
+  readonly descriptionKey = 'gameModes.classic.description';
 
   getDefaultSettings(): Partial<GameSettings> {
     return {

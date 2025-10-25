@@ -20,7 +20,7 @@ export interface Region {
 // Map configuration interface
 export interface MapConfig {
   id: string;
-  name: string;
+  name?: string; // Deprecated: use nameKey with i18n instead
   dataPath: string;
   center: Coordinates;
   initialZoom: number;

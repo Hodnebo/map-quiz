@@ -10,7 +10,7 @@
     "play": "Play",
     "regions": "{count} regions"
   },
-  "game": {
+  "gameActions": {
     "start": "Start",
     "restart": "Restart",
     "newGame": "New Game",
@@ -56,5 +56,19 @@
   "settings": {
     "title": "Settings",
     "close": "Close"
+  },
+  "gameModes": {
+    "classic": {
+      "name": "Classic",
+      "description": "Find areas on the map with zoom hints based on difficulty"
+    },
+    "reverse_quiz": {
+      "name": "Reverse Quiz",
+      "description": "Write the name of the highlighted area"
+    },
+    "multiple_choice": {
+      "name": "Multiple Choice",
+      "description": "Select the correct area from multiple options"
+    }
   }
 }

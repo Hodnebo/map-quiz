@@ -193,11 +193,7 @@ export default function LandingPage() {
                           fontWeight: 500,
                         }}
                       >
-                        {mapConfig.difficulty === 'easy'
-                          ? 'Lett'
-                          : mapConfig.difficulty === 'medium'
-                          ? 'Middels'
-                          : 'Vanskelig'}
+                        {t(`modal.${mapConfig.difficulty}`, locale)}
                       </Typography>
                     )}
                   </Box>
