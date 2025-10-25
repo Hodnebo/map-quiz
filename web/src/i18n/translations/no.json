@@ -3,6 +3,12 @@
     "title": "🗺️ Map Quiz",
     "description": "Test your geographical knowledge"
   },
+  "maps": {
+    "oslo": {
+      "name": "Oslo Bydeler",
+      "description": "Test your knowledge of Oslo districts (bydeler)"
+    }
+  },
   "map": {
     "osloAriaLabel": "Kart over Oslo bydeler",
     "findArea": "Finn område",

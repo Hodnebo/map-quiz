@@ -11,7 +11,8 @@ export const osloMapConfig: MapConfigWithMetadata = {
     [11.1, 60.1],
   ],
   language: 'no',
-  description: 'Test your knowledge of Oslo districts (bydeler)',
+  nameKey: 'maps.oslo.name',
+  descriptionKey: 'maps.oslo.description',
   featureCount: 98,
   difficulty: 'hard',
 };

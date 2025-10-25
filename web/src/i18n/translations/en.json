@@ -3,6 +3,12 @@
     "title": "🗺️ Map Quiz",
     "description": "Test your geographical knowledge"
   },
+  "maps": {
+    "oslo": {
+      "name": "Oslo Districts",
+      "description": "Test your knowledge of Oslo districts"
+    }
+  },
   "map": {
     "osloAriaLabel": "Map of Oslo districts",
     "findArea": "Find area",

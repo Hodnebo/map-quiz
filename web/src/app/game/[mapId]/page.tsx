@@ -364,6 +364,21 @@ export default function GamePage() {
             >
               Nytt spill
             </Button>
+            <Button
+              color="inherit"
+              onClick={() => setLocale(locale === 'no' ? 'en' : 'no')}
+              sx={{
+                color: 'white',
+                textTransform: 'uppercase',
+                fontWeight: 600,
+                fontSize: '0.85rem',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                },
+              }}
+            >
+              {locale === 'no' ? 'EN' : 'NO'}
+            </Button>
             <IconButton
               onClick={toggleTheme}
               color="inherit"

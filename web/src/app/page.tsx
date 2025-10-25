@@ -6,14 +6,31 @@ import { DarkMode as DarkModeIcon, LightMode as LightModeIcon } from "@mui/icons
 import { useTheme } from "@/contexts/ThemeContext";
 import { getAllMapConfigs } from "@/config/maps";
 import { t } from "@/i18n";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Locale } from "@/i18n/config";
+import { detectBrowserLocale } from "@/i18n/utils";
 
 export default function LandingPage() {
   const router = useRouter();
   const { isDarkMode, toggleTheme } = useTheme();
-  const [locale, setLocale] = useState<Locale>("no");
+  const [locale, setLocale] = useState<Locale>(() => {
+    // Initialize from localStorage or browser detection
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('landing_locale');
+      if (stored === 'en' || stored === 'no') return stored;
+      return detectBrowserLocale();
+    }
+    return 'no';
+  });
   const maps = getAllMapConfigs();
+
+  useEffect(() => {
+    localStorage.setItem('landing_locale', locale);
+  }, [locale]);
+
+  const toggleLocale = () => {
+    setLocale(locale === 'no' ? 'en' : 'no');
+  };
 
   const handleMapSelect = (mapId: string) => {
     router.push(`/game/${mapId}`);
@@ -43,19 +60,36 @@ export default function LandingPage() {
           >
             {t('app.title', locale)}
           </Typography>
-          <IconButton
-            onClick={toggleTheme}
-            color="inherit"
-            aria-label="toggle theme"
-            sx={{
-              color: 'white',
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              },
-            }}
-          >
-            {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
-          </IconButton>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              color="inherit"
+              onClick={toggleLocale}
+              sx={{
+                color: 'white',
+                textTransform: 'uppercase',
+                fontWeight: 600,
+                fontSize: '0.85rem',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                },
+              }}
+            >
+              {locale === 'no' ? 'EN' : 'NO'}
+            </Button>
+            <IconButton
+              onClick={toggleTheme}
+              color="inherit"
+              aria-label="toggle theme"
+              sx={{
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                },
+              }}
+            >
+              {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+          </Box>
         </Toolbar>
       </AppBar>
 
@@ -117,10 +151,10 @@ export default function LandingPage() {
               >
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Typography variant="h5" component="h3" gutterBottom sx={{ fontWeight: 600 }}>
-                    {mapConfig.name}
+                    {t(mapConfig.nameKey, locale)}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" paragraph>
-                    {mapConfig.description}
+                    {t(mapConfig.descriptionKey, locale)}
                   </Typography>
                   <Box
                     sx={{
