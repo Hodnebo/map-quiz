@@ -5,8 +5,8 @@ import { XorShift32 } from '../rng';
 
 export class ReverseQuizMode extends BaseGameMode {
   readonly id = 'reverse_quiz';
-  readonly name = 'Omvendt Quiz';
-  readonly description = 'Skriv navnet på det markerte området';
+  readonly nameKey = 'gameModes.reverse_quiz.name';
+  readonly descriptionKey = 'gameModes.reverse_quiz.description';
 
   getDefaultSettings(): Partial<GameSettings> {
     return {
@@ -110,7 +110,7 @@ export class ReverseQuizMode extends BaseGameMode {
     const answeredTargets = [...state.answeredIds, state.currentTargetId!];
     const revealed = [...(state.revealedIds ?? []), state.currentTargetId!];
     const remaining = allIds.filter((id) => !answeredTargets.includes(id));
-    const hasMoreRounds = state.currentRound < state.settings.rounds;
+    const hasMoreRounds = state.currentRound < state.settings.rounds && remaining.length > 0;
 
     let nextTarget: string | null = null;
     if (hasMoreRounds && remaining.length > 0) {

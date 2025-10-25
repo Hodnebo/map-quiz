@@ -1,0 +1,79 @@
+{
+  "app": {
+    "title": "🗺️ Map Quiz",
+    "description": "Test dine geografiske kunnskaper!"
+  },
+  "landing": {
+    "selectMap": "Velg et kart å spille",
+    "subtitle": "Test dine geografikunnskaper med interaktive kart-quiz. Velg et kart nedenfor for å begynne!",
+    "noMapsAvailable": "Ingen kart tilgjengelig",
+    "play": "Spill",
+    "regions": "{count} områder"
+  },
+  "gameActions": {
+    "start": "Start",
+    "restart": "Restart",
+    "newGame": "Nytt spill",
+    "loadingMap": "Laster kart..."
+  },
+  "maps": {
+    "oslo": {
+      "name": "Oslo Bydeler",
+      "description": "Test dine kjennskap til Oslos del-bydeler"
+    },
+    "kommuner": {
+      "name": "Norske Kommuner",
+      "description": "Test dine kunnskaper om alle 357 norske kommuner"
+    }
+  },
+  "map": {
+    "osloAriaLabel": "Kart over Oslo bydeler",
+    "findArea": "Finn område",
+    "attemptsLeft": "Forsøk igjen: {count} igjen"
+  },
+  "game": {
+    "points": "Poeng",
+    "streak": "Streak",
+    "round": "Runde",
+    "finished": "Ferdig! 🎉",
+    "totalDistricts": "Totalt {count} bydeler tilgjengelig"
+  },
+  "modal": {
+    "title": "🗺️ Velg spillmodus",
+    "subtitle": "Velg hvordan du vil spille Oslo-kartet",
+    "gameMode": "Spillmodus",
+    "settings": "Innstillinger",
+    "rounds": "Antall runder",
+    "maxAttempts": "Maks forsøk per runde",
+    "difficulty": "Vanskelighet",
+    "alternatives": "Antall alternativer",
+    "easy": "Lett",
+    "medium": "Middels",
+    "hard": "Vanskelig",
+    "expert": "Ekspert",
+    "full": "Alle {count} (full)",
+    "rounds_plural": "{count} runder",
+    "attempts_plural": "{count} forsøk",
+    "alternatives_plural": "{count} alternativer",
+    "cancel": "Avbryt",
+    "start": "Start spill"
+  },
+  "settings": {
+    "title": "Innstillinger",
+    "close": "Lukk"
+  },
+  "gameModes": {
+    "classic": {
+      "name": "Klassisk",
+      "description": "Finn områder på kartet med zoom-hint basert på vanskelighetsgrad"
+    },
+    "reverse_quiz": {
+      "name": "Omvendt Quiz",
+      "description": "Skriv navnet på det markerte området"
+    },
+    "multiple_choice": {
+      "name": "Flervalgsspørsmål",
+      "description": "Velg riktig område fra flere alternativer"
+    }
+  }
+}

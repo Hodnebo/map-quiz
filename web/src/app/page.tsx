@@ -1,314 +1,43 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useState, useRef } from "react";
-import { useBydelerData } from "@/hooks/useBydelerData";
-import type { GameSettings, GameState } from "@/lib/types";
-import { createInitialState, startGame, answer } from "@/lib/game";
-import { load, save, hasSeenModal, markModalAsSeen } from "@/lib/persistence";
-import { XorShift32 } from "@/lib/rng";
-import { playCorrectSound, playWrongSound, initializeAudio } from "@/lib/audio";
-import { getEffectiveSettings } from "@/lib/gameModes";
-import { gameModeRegistry } from "@/lib/gameModeRegistry";
-import { getAssetUrl } from "@/lib/basePath";
-import { Button, AppBar, Toolbar, Typography, Box, IconButton } from "@mui/material";
-import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, DarkMode as DarkModeIcon, LightMode as LightModeIcon, Settings as SettingsIcon } from "@mui/icons-material";
+import { useRouter } from "next/navigation";
+import { Button, AppBar, Toolbar, Typography, Box, IconButton, Card, CardContent, CardActions, Grid, Container } from "@mui/material";
+import { DarkMode as DarkModeIcon, LightMode as LightModeIcon } from "@mui/icons-material";
 import { useTheme } from "@/contexts/ThemeContext";
-import GameOverlay from "@/components/GameOverlay";
-import ReverseQuizOverlay from "@/components/ReverseQuizOverlay";
-import { GameModeModal } from "@/components/GameModeModal";
+import { getAllMapConfigs } from "@/config/maps";
+import { t } from "@/i18n";
+import { useState, useEffect } from "react";
+import type { Locale } from "@/i18n/config";
+import { detectBrowserLocale } from "@/i18n/utils";
 
-const QuizMap = dynamic(() => import("@/components/Map"), { ssr: false });
-
-const DEFAULT_SETTINGS: GameSettings = {
-  gameMode: "classic",
-  rounds: 15,
-  audioEnabled: true,
-  mapStyle: "basic-v2",
-};
-
-
-export default function Home() {
-  const { bydeler, geojson, loading, error } = useBydelerData();
+export default function LandingPage() {
+  const router = useRouter();
   const { isDarkMode, toggleTheme } = useTheme();
-  const [settings, setSettings] = useState<GameSettings>(() => load("settings", DEFAULT_SETTINGS));
-  const [seed, setSeed] = useState<number>(() => load("seed", Math.floor(Date.now() % 2 ** 31)));
-  const [state, setState] = useState<GameState>(() => createInitialState(settings));
-  const [feedback, setFeedback] = useState<null | "correct" | "wrong">(null);
-  const [feedbackMessage, setFeedbackMessage] = useState<string>("");
-  const [wrongAnswerIds, setWrongAnswerIds] = useState<string[]>([]);
-  const [lastAnswerExhaustedAttempts, setLastAnswerExhaustedAttempts] = useState<boolean>(false);
-  const [lastCorrectAnswerName, setLastCorrectAnswerName] = useState<string>('');
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [isFirstVisit, setIsFirstVisit] = useState<boolean>(false);
-  const answerLockRef = useRef(false);
-  const stateRef = useRef(state);
-  const settingsRef = useRef(settings);
-  const answerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  useEffect(() => { stateRef.current = state; }, [state]);
-  useEffect(() => { settingsRef.current = settings; }, [settings]);
+  const [locale, setLocale] = useState<Locale>(() => {
+    // Initialize from localStorage or browser detection
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('landing_locale');
+      if (stored === 'en' || stored === 'no') return stored;
+      return detectBrowserLocale();
+    }
+    return 'no';
+  });
+  const maps = getAllMapConfigs();
 
-
-  useEffect(() => save("settings", settings), [settings]);
-  useEffect(() => save("seed", seed), [seed]);
-  useEffect(() => initializeAudio(), []);
-
-  // Show modal on page load when game is idle
   useEffect(() => {
-    if (state.status === 'idle' && !showModal) {
-      const hasSeen = hasSeenModal();
-      if (!hasSeen) {
-        setIsFirstVisit(true);
-      }
-      setShowModal(true);
-    }
-  }, []);
+    localStorage.setItem('landing_locale', locale);
+  }, [locale]);
 
-  // Update settings with mode defaults when gameMode changes
-  const prevGameModeRef = useRef(settings.gameMode);
-  useEffect(() => {
-    if (prevGameModeRef.current !== settings.gameMode) {
-      const mode = gameModeRegistry.getMode(settings.gameMode);
-      const defaultSettings = mode.getDefaultSettings();
-      
-      // Only update if the setting is not already set
-      const updatedSettings = { ...settings };
-      let hasChanges = false;
-      
-      Object.entries(defaultSettings).forEach(([key, value]) => {
-        if (updatedSettings[key as keyof GameSettings] === undefined && value !== undefined) {
-          (updatedSettings as any)[key] = value;
-          hasChanges = true;
-        }
-      });
-      
-      if (hasChanges) {
-        setSettings(updatedSettings);
-      }
-      
-      prevGameModeRef.current = settings.gameMode;
-    }
-  }, [settings.gameMode, settings]);
+  const toggleLocale = () => {
+    setLocale(locale === 'no' ? 'en' : 'no');
+  };
 
-  const allIds = useMemo(() => (bydeler ? bydeler.map((b) => b.id) : []), [bydeler]);
-  const canPlay = !!geojson && allIds.length > 0;
-  const effectiveSettings = useMemo(() => getEffectiveSettings(settings), [settings]);
-
-  const doStart = useCallback(() => {
-    if (!canPlay) return;
-    const settingsWithEffective = { ...settings, ...effectiveSettings };
-    setState((s) => startGame({ ...s, settings: settingsWithEffective }, allIds, seed));
-  }, [allIds, canPlay, seed, settings, effectiveSettings]);
-
-  const doRestart = useCallback(() => {
-    if (!canPlay) return;
-    // Generate a new seed when restarting
-    const newSeed = Math.floor(Math.random() * 2 ** 31);
-    setSeed(newSeed);
-    const settingsWithEffective = { ...settings, ...effectiveSettings };
-    setState(createInitialState(settingsWithEffective));
-    setWrongAnswerIds([]); // Clear wrong answer highlights
-    setTimeout(() => {
-      setState((s) => startGame(s, allIds, newSeed));
-    }, 0);
-  }, [allIds, canPlay, settings, effectiveSettings]);
-
-  const handleModalClose = useCallback(() => {
-    setShowModal(false);
-    if (isFirstVisit) {
-      markModalAsSeen();
-      setIsFirstVisit(false);
-    }
-  }, [isFirstVisit]);
-
-  const handleStartGame = useCallback((mode: string, newSettings: any) => {
-    const updatedSettings = {
-      ...settings,
-      gameMode: mode as any,
-      ...newSettings,
-    };
-    setSettings(updatedSettings);
-    setShowModal(false);
-    if (isFirstVisit) {
-      markModalAsSeen();
-      setIsFirstVisit(false);
-    }
-    // Start the game after settings are updated
-    setTimeout(() => {
-      if (!canPlay) return;
-      const settingsWithEffective = { ...updatedSettings, ...getEffectiveSettings(updatedSettings) };
-      setState((s) => startGame({ ...s, settings: settingsWithEffective }, allIds, seed));
-    }, 0);
-  }, [settings, isFirstVisit, canPlay, allIds, seed]);
-
-  const handleNewGame = useCallback(() => {
-    setShowModal(true);
-  }, []);
-
-  // Clear feedback message when moving to next question
-  useEffect(() => {
-    if (state.status === 'playing' && state.currentTargetId) {
-      setFeedbackMessage("");
-    }
-  }, [state.currentTargetId, state.currentRound]);
-
-  // Update game state settings dynamically when settings change
-  useEffect(() => {
-    if (state.status !== 'idle') {
-      const settingsWithEffective = { ...settings, ...effectiveSettings };
-      setState(prevState => {
-        const newState = {
-          ...prevState,
-          settings: { ...prevState.settings, ...settingsWithEffective }
-        };
-
-        // If rounds changed and we're still playing, adjust if needed
-        if (settingsWithEffective.rounds !== prevState.settings.rounds && state.status === 'playing') {
-          // If new rounds is less than current round, end the game
-          if (settingsWithEffective.rounds < prevState.currentRound) {
-            newState.status = 'ended';
-            newState.currentTargetId = null;
-          }
-        }
-
-        return newState;
-      });
-    }
-  }, [settings, effectiveSettings, state.status, state.currentRound]);
-
-  const onFeatureClick = useCallback(
-    (id: string) => {
-      // Clear any existing timeout to allow immediate new answers
-      if (answerTimeoutRef.current) {
-        clearTimeout(answerTimeoutRef.current);
-        answerTimeoutRef.current = null;
-      }
-      
-      // Don't process map clicks in reverse quiz mode
-      if (stateRef.current.settings.gameMode === 'reverse_quiz') {
-        return;
-      }
-      
-      const res = answer(stateRef.current, id, allIds, seed);
-      setFeedback(res.isCorrect ? "correct" : "wrong");
-
-      // Set feedback message for overlay - only for wrong answers
-      if (!res.isCorrect) {
-        const targetName = bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? "området";
-        const guessedName = bydeler?.find((b) => b.id === id)?.name ?? id;
-        setFeedbackMessage(`Det var ${guessedName}`);
-        // Don't add clicked area to wrongAnswerIds here - only add target area when revealedCorrect
-      } else {
-        // Clear feedback message immediately on correct answers
-        setFeedbackMessage("");
-      }
-
-      // Add wrong answer to the list if answer was wrong and revealed
-      if (res.revealedCorrect) {
-        setWrongAnswerIds(prev => [...prev, res.correctId!]);
-      }
-
-      // Play audio feedback if enabled - use ref to get latest settings
-      if (settingsRef.current.audioEnabled ?? true) {
-        if (res.isCorrect) {
-          playCorrectSound();
-        } else {
-          playWrongSound();
-        }
-      }
-
-      // Clear any existing timeout
-      if (answerTimeoutRef.current) {
-        clearTimeout(answerTimeoutRef.current);
-      }
-      
-      // Update state immediately for instant feedback (attempts counter, etc.)
-      setState(res.newState);
-      
-      // Set timeout only for clearing visual feedback
-      answerTimeoutRef.current = setTimeout(() => {
-        setFeedback(null);
-        // Only clear feedback message for correct answers
-        if (res.isCorrect) {
-          setFeedbackMessage("");
-        }
-        answerTimeoutRef.current = null;
-      }, res.isCorrect ? 450 : 2000); // Longer delay for wrong answers
-    },
-    [allIds, seed, bydeler, state.currentTargetId]
-  );
-
-  const onReverseQuizAnswer = useCallback(
-    (userAnswer: string, correctName: string) => {
-      // Clear any existing timeout to allow immediate new answers
-      if (answerTimeoutRef.current) {
-        clearTimeout(answerTimeoutRef.current);
-        answerTimeoutRef.current = null;
-      }
-      const res = answer(stateRef.current, userAnswer, allIds, seed, correctName);
-      setFeedback(res.isCorrect ? "correct" : "wrong");
-      setLastAnswerExhaustedAttempts(res.revealedCorrect);
-      if (res.revealedCorrect) {
-        setLastCorrectAnswerName(correctName);
-      }
-
-      // Clear feedback message for reverse quiz
-      setFeedbackMessage("");
-
-      // Add wrong answer to the list if answer was wrong and revealed
-      if (res.revealedCorrect) {
-        setWrongAnswerIds(prev => [...prev, res.correctId!]);
-      }
-
-      // Play audio feedback if enabled
-      if (settingsRef.current.audioEnabled ?? true) {
-        if (res.isCorrect) {
-          playCorrectSound();
-        } else {
-          playWrongSound();
-        }
-      }
-
-      // Clear any existing timeout
-      if (answerTimeoutRef.current) {
-        clearTimeout(answerTimeoutRef.current);
-      }
-      
-      // Update state immediately for instant feedback (attempts counter, etc.)
-      setState(res.newState);
-      
-      // Set timeout only for clearing visual feedback
-      answerTimeoutRef.current = setTimeout(() => {
-        // For reverse quiz mode, keep feedback until next input
-        if (stateRef.current.settings.gameMode !== 'reverse_quiz') {
-          setFeedback(null);
-          if (res.isCorrect) {
-            setFeedbackMessage("");
-          }
-        }
-        answerTimeoutRef.current = null;
-      }, res.isCorrect ? 450 : 2000);
-    },
-    [allIds, seed]
-  );
-
-  const targetName = useMemo(() => bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? null, [bydeler, state.currentTargetId]);
-  const attemptsLeft = useMemo(() => {
-    // For reverse quiz feedback, calculate based on current state
-    return (effectiveSettings.maxAttempts ?? 3) - (state.attemptsThisRound ?? 0);
-  }, [effectiveSettings.maxAttempts, state.attemptsThisRound]);
-  
-
-
-  const mapConfig = useMemo(() => {
-    if (!geojson) return null;
-    const mode = gameModeRegistry.getMode(state.settings.gameMode);
-    return mode.getMapConfig(state, settings, geojson, seed);
-  }, [geojson, state, settings, seed]);
-
+  const handleMapSelect = (mapId: string) => {
+    router.push(`/game/${mapId}`);
+  };
 
   return (
-    <div className="min-h-screen grid grid-rows-[auto_1fr]">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 grid grid-rows-[auto_1fr]">
       <AppBar
         position="static"
         elevation={0}
@@ -329,62 +58,23 @@ export default function Home() {
               textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
             }}
           >
-            🗺️ Oslo Bydel-Quiz
+            {t('app.title', locale)}
           </Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            {state.status === "idle" ? (
-              <Button
-                variant="contained"
-                startIcon={<PlayArrowIcon />}
-                onClick={doStart}
-                disabled={!canPlay}
-                sx={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  color: 'white',
-                  borderColor: 'rgba(255, 255, 255, 0.3)',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                  },
-                  '&:disabled': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-                    color: 'rgba(255, 255, 255, 0.5)',
-                  },
-                }}
-              >
-                Start
-              </Button>
-            ) : (
-              <Button
-                variant="contained"
-                startIcon={<RefreshIcon />}
-                onClick={doRestart}
-                sx={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  color: 'white',
-                  borderColor: 'rgba(255, 255, 255, 0.3)',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                  },
-                }}
-              >
-                Restart
-              </Button>
-            )}
             <Button
-              variant="outlined"
-              startIcon={<SettingsIcon />}
-              onClick={handleNewGame}
+              color="inherit"
+              onClick={toggleLocale}
               sx={{
-                borderWidth: '2px',
-                borderColor: 'rgba(255, 255, 255, 0.3)',
                 color: 'white',
+                textTransform: 'uppercase',
+                fontWeight: 600,
+                fontSize: '0.85rem',
                 '&:hover': {
-                  borderColor: 'rgba(255, 255, 255, 0.5)',
                   backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 },
               }}
             >
-              Nytt spill
+              {locale === 'no' ? 'EN' : 'NO'}
             </Button>
             <IconButton
               onClick={toggleTheme}
@@ -402,95 +92,143 @@ export default function Home() {
           </Box>
         </Toolbar>
       </AppBar>
-      <div className="relative h-full">
-        {loading && <div className="absolute inset-0 flex items-center justify-center">Laster kart...</div>}
-        {error && <div className="absolute inset-0 flex items-center justify-center text-red-600">{error}</div>}
-        {state.status === "playing" && targetName && settings.gameMode !== 'reverse_quiz' && (
-          <div
-            className={
-              "pointer-events-none absolute top-3 left-1/2 -translate-x-1/2 z-10 px-4 py-2 rounded-full shadow-md border " +
-              (feedback === "correct"
-                 ? " feedback-correct"
-                 : feedback === "wrong" || feedbackMessage
-                   ? " feedback-wrong"
-                   : " bg-blue-600 border-blue-700 text-white")
-            }
-            aria-live="polite"
-          >
-            <span className={(feedback === "correct" ? "animate-correct " : feedback === "wrong" ? "animate-wrong " : "") + "inline-flex items-center gap-2"}>
-              <span className="text-xs text-white" style={{ opacity: feedback ? 0.9 : 0.9 }}>
-                {feedback ? (feedback === "correct" ? "Riktig" : "Feil") : feedbackMessage ? "" : "Finn"}
-              </span>
-              <span className="font-semibold text-white">
-                {feedback === "wrong" && attemptsLeft <= 0 ? `Riktig svar: ${targetName}` : targetName}
-              </span>
-            </span>
-            {feedbackMessage && (
-              <div className="mt-1 text-xs text-white text-center" style={{ opacity: 0.95 }}>
-                {feedbackMessage}
-              </div>
-            )}
-          </div>
-        )}
-        {canPlay && mapConfig && (
-          <QuizMap
-            geojsonUrl={getAssetUrl("/data/bydeler_simplified.geo.json")}
-            onFeatureClick={onFeatureClick}
-            highlightFeatureId={settings.gameMode === 'reverse_quiz' ? state.currentTargetId : null}
-            disableHoverOutline={mapConfig.disableHoverOutline}
-            focusBounds={mapConfig.focusBounds}
-            focusPadding={mapConfig.focusPadding}
-            revealedIds={state.revealedIds}
-            wrongAnswerIds={wrongAnswerIds}
-            candidateIds={state.candidateIds}
-            isDarkMode={isDarkMode}
-            mapStyle={settings.mapStyle}
-          />
-        )}
 
-        <GameOverlay
-          state={state}
-          settings={settings}
-          effectiveSettings={effectiveSettings}
-          onSettingsChange={setSettings}
-          allIdsLength={allIds.length}
-          targetName={targetName}
-          attemptsLeft={attemptsLeft}
-          showSettings={false} // Hide settings UI since we now use modal
-        />
-
-        {/* Reverse Quiz Overlay */}
-        {settings.gameMode === 'reverse_quiz' && bydeler && (
-          <ReverseQuizOverlay
-            state={state}
-            settings={settings}
-            targetName={targetName}
-            targetId={state.currentTargetId}
-            attemptsLeft={lastAnswerExhaustedAttempts ? 0 : attemptsLeft}
-            lastCorrectAnswerName={lastCorrectAnswerName}
-            bydeler={bydeler}
-            onAnswer={onReverseQuizAnswer}
-            feedback={feedback}
-            feedbackMessage={feedbackMessage}
-            onClearFeedback={() => {
-              setFeedback(null);
-              setFeedbackMessage("");
-              setLastAnswerExhaustedAttempts(false);
-              setLastCorrectAnswerName("");
+      <Container maxWidth="lg" sx={{ py: { xs: 4, sm: 6, md: 8 } }}>
+        <Box sx={{ textAlign: 'center', mb: 6 }}>
+          <Typography
+            variant="h2"
+            component="h2"
+            sx={{
+              fontSize: { xs: '1.75rem', sm: '2.5rem' },
+              fontWeight: 'bold',
+              mb: 2,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
             }}
-          />
-        )}
+          >
+            {t('landing.selectMap', locale)}
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              fontSize: { xs: '1rem', sm: '1.125rem' },
+              color: 'text.secondary',
+              maxWidth: '600px',
+              mx: 'auto',
+            }}
+          >
+            {t('landing.subtitle', locale)}
+          </Typography>
+        </Box>
 
-        {/* Game Mode Modal */}
-        <GameModeModal
-          open={showModal}
-          onClose={handleModalClose}
-          onStartGame={handleStartGame}
-          currentMode={settings.gameMode}
-          currentSettings={settings}
-          totalEntries={allIds.length}
-        />
-      </div>
+        <Grid container spacing={3}>
+          {maps.map((mapConfig) => (
+            <Grid item xs={12} sm={6} md={4} key={mapConfig.id}>
+              <Card
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  backgroundColor: theme => theme.palette.background.paper,
+                  backdropFilter: 'blur(12px)',
+                  boxShadow: theme => theme.palette.mode === 'dark'
+                    ? '0 8px 32px rgba(0, 0, 0, 0.3)'
+                    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+                  border: theme => theme.palette.mode === 'dark'
+                    ? '1px solid rgba(255, 255, 255, 0.1)'
+                    : '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: 2,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: theme => theme.palette.mode === 'dark'
+                      ? '0 12px 48px rgba(0, 0, 0, 0.4)'
+                      : '0 12px 48px rgba(0, 0, 0, 0.15)',
+                  },
+                }}
+              >
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Typography variant="h5" component="h3" gutterBottom sx={{ fontWeight: 600 }}>
+                    {t(mapConfig.nameKey, locale)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    {t(mapConfig.descriptionKey, locale)}
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      gap: 1,
+                      flexWrap: 'wrap',
+                      mt: 2,
+                    }}
+                  >
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        px: 1.5,
+                        py: 0.5,
+                        backgroundColor: theme => theme.palette.mode === 'dark'
+                          ? 'rgba(102, 126, 234, 0.2)'
+                          : 'rgba(102, 126, 234, 0.1)',
+                        borderRadius: 1,
+                        color: theme => theme.palette.mode === 'dark' ? '#8aa5ff' : '#667eea',
+                        fontWeight: 500,
+                      }}
+                    >
+                      {t('landing.regions', locale, { count: String(mapConfig.featureCount) })}
+                    </Typography>
+                    {mapConfig.difficulty && (
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          px: 1.5,
+                          py: 0.5,
+                          backgroundColor: theme => theme.palette.mode === 'dark'
+                            ? 'rgba(118, 75, 162, 0.2)'
+                            : 'rgba(118, 75, 162, 0.1)',
+                          borderRadius: 1,
+                          color: theme => theme.palette.mode === 'dark' ? '#b89ed6' : '#764ba2',
+                          fontWeight: 500,
+                        }}
+                      >
+                        {t(`modal.${mapConfig.difficulty}`, locale)}
+                      </Typography>
+                    )}
+                  </Box>
+                </CardContent>
+
+                <CardActions sx={{ pt: 0 }}>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    onClick={() => handleMapSelect(mapConfig.id)}
+                    sx={{
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      color: 'white',
+                      fontWeight: 600,
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #5568d3 0%, #6a3d8f 100%)',
+                      },
+                    }}
+                  >
+                    {t('landing.play', locale)}
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        {maps.length === 0 && (
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h6" color="text.secondary">
+              {t('landing.noMapsAvailable', locale)}
+            </Typography>
+          </Box>
+        )}
+      </Container>
     </div>
   );
 }

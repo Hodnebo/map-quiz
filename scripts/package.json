@@ -4,14 +4,16 @@
   "type": "module",
   "version": "0.0.0",
   "scripts": {
-    "fetch:oslo": "tsx scripts/fetch_oslo_geo.ts"
+    "fetch:oslo": "tsx scripts/fetch_oslo_geo.ts",
+    "fetch:kommuner": "tsx scripts/fetch_kommuner_geo.ts"
   },
   "dependencies": {
     "node-fetch": "^3.3.2",
     "@turf/centroid": "^7.2.0",
     "@turf/area": "^7.2.0",
     "topojson-server": "^3.0.1",
-    "topojson-simplify": "^3.0.3"
+    "topojson-simplify": "^3.0.3",
+    "topojson-client": "^3.1.0"
   },
   "devDependencies": {
     "tsx": "^4.19.1",

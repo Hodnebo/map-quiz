@@ -4,8 +4,17 @@ import { XorShift32, shuffleInPlace, pickOne } from '../rng';
 
 export abstract class BaseGameMode implements GameModeStrategy {
   abstract readonly id: string;
-  abstract readonly name: string;
-  abstract readonly description: string;
+  abstract readonly nameKey: string; // i18n key for the game mode name
+  abstract readonly descriptionKey: string; // i18n key for the game mode description
+
+  // For backward compatibility with code that expects .name and .description
+  get name(): string {
+    return this.nameKey;
+  }
+
+  get description(): string {
+    return this.descriptionKey;
+  }
 
   // Abstract methods that must be implemented by subclasses
   abstract generateQuestion(state: GameState, allIds: string[], seed: number): QuestionData;

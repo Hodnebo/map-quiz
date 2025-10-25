@@ -6,6 +6,8 @@ import { Settings as SettingsIcon, Close as CloseIcon, ExpandMore as ExpandMoreI
 import GameSettings from './GameSettings';
 import type { GameSettings as GameSettingsType, GameState } from '@/lib/types';
 import { getEffectiveSettings } from '@/lib/gameModes';
+import { t } from '@/i18n';
+import type { Locale } from '@/i18n/config';
 
 interface GameOverlayProps {
   state: GameState;
@@ -16,6 +18,7 @@ interface GameOverlayProps {
   targetName?: string | null;
   attemptsLeft?: number;
   showSettings?: boolean;
+  locale?: Locale;
 }
 
 export default function GameOverlay({
@@ -26,7 +29,8 @@ export default function GameOverlay({
   allIdsLength,
   targetName,
   attemptsLeft,
-  showSettings = true
+  showSettings = true,
+  locale = 'no'
 }: GameOverlayProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [statsExpanded, setStatsExpanded] = useState(false);
@@ -60,7 +64,7 @@ export default function GameOverlay({
             <CardContent sx={{ p: 0.75, '&:last-child': { pb: 0.75 }, display: 'flex', gap: 1.5, alignItems: 'center' }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1, color: '#666', display: 'block' }}>
-                  Poeng
+                  {t('game.points', locale)}
                 </Typography>
                 <Typography variant="body2" sx={{ fontSize: '0.875rem', fontWeight: 600, lineHeight: 1.2, color: '#1a1a1a' }}>
                   {state.score}
@@ -68,7 +72,7 @@ export default function GameOverlay({
               </Box>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1, color: '#666', display: 'block' }}>
-                  Runde
+                  {t('game.round', locale)}
                 </Typography>
                 <Typography variant="body2" sx={{ fontSize: '0.875rem', fontWeight: 600, lineHeight: 1.2, color: '#1a1a1a' }}>
                   {state.currentRound}/{settings.rounds}
@@ -124,7 +128,7 @@ export default function GameOverlay({
           >
             <CardContent sx={{ p: { xs: 0.75, sm: 1 }, '&:last-child': { pb: { xs: 0.75, sm: 1 } } }}>
               <Typography variant="body2" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' }, lineHeight: 1, color: '#666', fontWeight: 500 }}>
-                Poeng
+                {t('game.points', locale)}
               </Typography>
               <Typography variant="h6" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' }, fontWeight: 600, lineHeight: 1, color: '#1a1a1a' }}>
                 {state.score}
@@ -143,7 +147,7 @@ export default function GameOverlay({
           >
             <CardContent sx={{ p: { xs: 0.75, sm: 1 }, '&:last-child': { pb: { xs: 0.75, sm: 1 } } }}>
               <Typography variant="body2" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' }, lineHeight: 1, color: '#666', fontWeight: 500 }}>
-                Streak
+                {t('game.streak', locale)}
               </Typography>
               <Typography variant="h6" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' }, fontWeight: 600, lineHeight: 1, color: '#1a1a1a' }}>
                 {state.streak}
@@ -164,7 +168,7 @@ export default function GameOverlay({
           <CardContent sx={{ p: { xs: 0.75, sm: 1 }, '&:last-child': { pb: { xs: 0.75, sm: 1 } } }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="body2" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' }, color: '#666', fontWeight: 500 }}>
-                Runde {state.currentRound}/{settings.rounds}
+                {t('game.round', locale)} {state.currentRound}/{settings.rounds}
               </Typography>
               {showSettings && (
                 <IconButton
@@ -193,14 +197,14 @@ export default function GameOverlay({
           >
             <CardContent sx={{ p: { xs: 1, sm: 1.5 }, '&:last-child': { pb: { xs: 1, sm: 1.5 } } }}>
               <Typography variant="body2" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' }, mb: 0.5, color: '#666', fontWeight: 500 }}>
-                Finn område
+                {t('map.findArea', locale)}
               </Typography>
               <Typography variant="body1" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' }, fontWeight: 600, mb: 0.5, color: '#1a1a1a' }}>
                 {targetName}
               </Typography>
               {attemptsLeft !== undefined && (
                 <Typography variant="body2" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' }, color: '#666' }}>
-                  Forsøk igjen: {attemptsLeft} igjen
+                  {t('map.attemptsLeft', locale, { count: attemptsLeft })}
                 </Typography>
               )}
             </CardContent>
@@ -219,7 +223,7 @@ export default function GameOverlay({
           >
             <CardContent sx={{ p: { xs: 1, sm: 1.5 }, '&:last-child': { pb: { xs: 1, sm: 1.5 } } }}>
               <Typography variant="body1" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' }, fontWeight: 600, color: 'white', textAlign: 'center' }}>
-                Ferdig! 🎉
+                {t('game.finished', locale)}
               </Typography>
             </CardContent>
           </Card>
@@ -237,7 +241,7 @@ export default function GameOverlay({
           }}
         >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6">Innstillinger</Typography>
+            <Typography variant="h6">{t('settings.title', locale)}</Typography>
             <IconButton onClick={() => setSettingsOpen(false)}>
               <CloseIcon />
             </IconButton>

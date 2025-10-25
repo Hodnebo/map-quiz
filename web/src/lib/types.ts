@@ -8,6 +8,39 @@ export interface Bydel {
   slug: string;
 }
 
+// Generic region type for multi-map support
+export interface Region {
+  id: string;
+  name: string;
+  centroid: Coordinates;
+  areaKm2: number;
+  slug: string;
+}
+
+// Map configuration interface
+export interface MapConfig {
+  id: string;
+  name?: string; // Deprecated: use nameKey with i18n instead
+  dataPath: string;
+  center: Coordinates;
+  initialZoom: number;
+  bounds?: [[number, number], [number, number]]; // [[minLng, minLat], [maxLng, maxLat]]
+  language: string;
+  description?: string;
+  featureCount?: number;
+  previewImage?: string;
+}
+
+// Map metadata for UI display
+export interface MapMetadata {
+  description: string;
+  featureCount: number;
+  language: string;
+  region: string;
+  previewImage?: string;
+  difficulty?: "easy" | "medium" | "hard";
+}
+
 export interface GameMode {
   id: string;
   name: string;

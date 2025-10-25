@@ -1,0 +1,79 @@
+{
+  "app": {
+    "title": "🗺️ Map Quiz",
+    "description": "Test your geographical knowledge"
+  },
+  "landing": {
+    "selectMap": "Select a map to play",
+    "subtitle": "Test your geographical knowledge with interactive map quizzes. Choose a map below to get started!",
+    "noMapsAvailable": "No maps available",
+    "play": "Play",
+    "regions": "{count} regions"
+  },
+  "gameActions": {
+    "start": "Start",
+    "restart": "Restart",
+    "newGame": "New Game",
+    "loadingMap": "Loading map..."
+  },
+  "maps": {
+    "oslo": {
+      "name": "Oslo Districts",
+      "description": "Test your knowledge of Oslo districts"
+    },
+    "kommuner": {
+      "name": "Norwegian Municipalities",
+      "description": "Test your knowledge of all 357 Norwegian municipalities"
+    }
+  },
+  "map": {
+    "osloAriaLabel": "Map of Oslo districts",
+    "findArea": "Find area",
+    "attemptsLeft": "Attempts left: {count} remaining"
+  },
+  "game": {
+    "points": "Points",
+    "streak": "Streak",
+    "round": "Round",
+    "finished": "Done! 🎉",
+    "totalDistricts": "Total {count} districts available"
+  },
+  "modal": {
+    "title": "🗺️ Select Game Mode",
+    "subtitle": "Choose how you want to play the Oslo map",
+    "gameMode": "Game Mode",
+    "settings": "Settings",
+    "rounds": "Number of rounds",
+    "maxAttempts": "Max attempts per round",
+    "difficulty": "Difficulty",
+    "alternatives": "Number of alternatives",
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+    "expert": "Expert",
+    "full": "All {count} (full)",
+    "rounds_plural": "{count} rounds",
+    "attempts_plural": "{count} attempts",
+    "alternatives_plural": "{count} alternatives",
+    "cancel": "Cancel",
+    "start": "Start Game"
+  },
+  "settings": {
+    "title": "Settings",
+    "close": "Close"
+  },
+  "gameModes": {
+    "classic": {
+      "name": "Classic",
+      "description": "Find areas on the map with zoom hints based on difficulty"
+    },
+    "reverse_quiz": {
+      "name": "Reverse Quiz",
+      "description": "Write the name of the highlighted area"
+    },
+    "multiple_choice": {
+      "name": "Multiple Choice",
+      "description": "Select the correct area from multiple options"
+    }
+  }
+}
