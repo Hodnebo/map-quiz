@@ -8,4 +8,4 @@ export interface MapConfigWithMetadata extends MapConfig {
   difficulty?: 'easy' | 'medium' | 'hard' | 'expert';
 }
 
-export type MapId = 'oslo' | 'kommuner';
+export type MapId = 'oslo' | 'kommuner' | 'fylker';

@@ -5,7 +5,8 @@
   "version": "0.0.0",
   "scripts": {
     "fetch:oslo": "tsx scripts/fetch_oslo_geo.ts",
-    "fetch:kommuner": "tsx scripts/fetch_kommuner_geo.ts"
+    "fetch:kommuner": "tsx scripts/fetch_kommuner_geo.ts",
+    "fetch:fylker": "tsx scripts/fetch_fylker_geo.ts"
   },
   "dependencies": {
     "node-fetch": "^3.3.2",

@@ -16,6 +16,7 @@ This is an extensible interactive map quiz web application built with Next.js 15
 - `make install` - Install dependencies for monorepo
 - `make data` - Generate normalized GeoJSON boundary data (Oslo districts)
 - `make data-kommuner` - Process Norwegian municipalities GeoJSON data
+- `make data-fylker` - Process Norwegian counties GeoJSON data
 - `make clean` - Remove build artifacts and generated data
 
 ### Direct Package Commands
@@ -48,6 +49,7 @@ Uses **functional state management** with immutable updates rather than complex 
 - Processing scripts at `scripts/scripts/` with topology-preserving simplification:
   - `fetch_oslo_geo.ts` - Oslo districts from ArcGIS
   - `fetch_kommuner_geo.ts` - Norwegian municipalities from local GeoJSON
+  - `fetch_fylker_geo.ts` - Norwegian counties from local GeoJSON
 - Outputs both full precision and web-optimized versions to `web/public/data/`
 
 ## Technology Stack
@@ -123,7 +125,7 @@ To add a new map to the application:
 
 2. **Update map types** in `web/src/config/maps/types.ts`:
    ```typescript
-   export type MapId = 'oslo' | 'kommuner' | 'newMap';
+   export type MapId = 'oslo' | 'kommuner' | 'fylker' | 'newMap';
    ```
 
 3. **Register map** in `web/src/config/maps/index.ts`:
@@ -133,6 +135,7 @@ To add a new map to the application:
    const mapRegistry: Record<MapId, MapConfigWithMetadata> = {
      oslo: osloMapConfig,
      kommuner: kommunerMapConfig,
+  fylker: fylkerMapConfig,
      newMap: mapConfig,
    };
    ```
@@ -158,7 +161,17 @@ To add a new map to the application:
 - **Properties**: `navn`, `bydelsnummer`, `areal_km2`
 
 ### Norwegian Municipalities (`kommuner`)
-- **Features**: 357 Norwegian municipalities
+
+### Norwegian Counties (`fylker`)
+- **Features**: 15 Norwegian counties (fylker)
+- **Difficulty**: Medium
+- **Data Source**: GitHub - robhop/fylker-og-kommuner
+- **Center**: [10.7522, 65.0] (Norway)
+- **Properties**: `name`, `id`, `slug`, `area_km2`, `centroid`
+- **File**: `web/public/data/fylker_simplified.geo.json`
+- **Script**: `scripts/scripts/fetch_fylker_geo.ts`
+- **Route**: `/game/fylker`
+- **Description**: Test your knowledge of all 15 Norwegian counties- **Features**: 357 Norwegian municipalities
 - **Difficulty**: Expert
 - **Data Source**: Local GeoJSON data
 - **Center**: Norway center (65.0°N, 10.75°E)

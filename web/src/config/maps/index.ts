@@ -2,11 +2,13 @@ import type { MapConfigWithMetadata } from './types';
 import type { MapId } from './types';
 import { osloMapConfig } from './oslo';
 import { kommunerMapConfig } from './kommuner';
+import { fylkerMapConfig } from './fylker';
 
 // Registry of all available maps
 const mapRegistry: Record<MapId, MapConfigWithMetadata> = {
   oslo: osloMapConfig,
   kommuner: kommunerMapConfig,
+  fylker: fylkerMapConfig,
 };
 
 /**

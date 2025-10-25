@@ -21,9 +21,17 @@
       "name": "Oslo Bydeler",
       "description": "Test dine kjennskap til Oslos del-bydeler"
     },
+    "fylker": {
+      "name": "Norske Fylker",
+      "description": "Test dine kunnskaper om alle 15 norske fylker"
+    },
     "kommuner": {
       "name": "Norske Kommuner",
       "description": "Test dine kunnskaper om alle 357 norske kommuner"
+    },
+    "fylker": {
+      "name": "Norske Fylker",
+      "description": "Test dine kunnskaper om alle 15 norske fylker"
     }
   },
   "map": {
@@ -67,13 +75,25 @@
       "name": "Klassisk",
       "description": "Finn områder på kartet med zoom-hint basert på vanskelighetsgrad"
     },
+    "fylker": {
+      "name": "Norske Fylker",
+      "description": "Test dine kunnskaper om alle 15 norske fylker"
+    },
     "reverse_quiz": {
       "name": "Omvendt Quiz",
       "description": "Skriv navnet på det markerte området"
     },
+    "fylker": {
+      "name": "Norske Fylker",
+      "description": "Test dine kunnskaper om alle 15 norske fylker"
+    },
     "multiple_choice": {
       "name": "Flervalgsspørsmål",
       "description": "Velg riktig område fra flere alternativer"
+    },
+    "fylker": {
+      "name": "Norske Fylker",
+      "description": "Test dine kunnskaper om alle 15 norske fylker"
     }
   }
 }

@@ -21,9 +21,17 @@
       "name": "Oslo Districts",
       "description": "Test your knowledge of Oslo districts"
     },
+    "fylker": {
+      "name": "Norwegian Counties",
+      "description": "Test your knowledge of all 15 Norwegian counties"
+    },
     "kommuner": {
       "name": "Norwegian Municipalities",
       "description": "Test your knowledge of all 357 Norwegian municipalities"
+    },
+    "fylker": {
+      "name": "Norwegian Counties",
+      "description": "Test your knowledge of all 15 Norwegian counties"
     }
   },
   "map": {
@@ -67,13 +75,25 @@
       "name": "Classic",
       "description": "Find areas on the map with zoom hints based on difficulty"
     },
+    "fylker": {
+      "name": "Norwegian Counties",
+      "description": "Test your knowledge of all 15 Norwegian counties"
+    },
     "reverse_quiz": {
       "name": "Reverse Quiz",
       "description": "Write the name of the highlighted area"
     },
+    "fylker": {
+      "name": "Norwegian Counties",
+      "description": "Test your knowledge of all 15 Norwegian counties"
+    },
     "multiple_choice": {
       "name": "Multiple Choice",
       "description": "Select the correct area from multiple options"
+    },
+    "fylker": {
+      "name": "Norwegian Counties",
+      "description": "Test your knowledge of all 15 Norwegian counties"
     }
   }
 }

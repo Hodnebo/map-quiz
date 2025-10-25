@@ -7,9 +7,9 @@ import { presimplify, simplify } from "topojson-simplify";
 
 const ROOT = path.resolve(process.cwd(), "..");
 const WEB_PUBLIC = path.join(ROOT, "web", "public", "data");
-const INPUT_FILE = path.join(ROOT, "scripts/kommuner.json");
-const FULL_OUT = path.join(WEB_PUBLIC, "kommuner.geo.json");
-const SIMPLE_OUT = path.join(WEB_PUBLIC, "kommuner_simplified.geo.json");
+const INPUT_FILE = path.join(ROOT, "scripts/fylker.json");
+const FULL_OUT = path.join(WEB_PUBLIC, "fylker.geo.json");
+const SIMPLE_OUT = path.join(WEB_PUBLIC, "fylker_simplified.geo.json");
 
 function slugify(name: string) {
   return name
@@ -34,13 +34,13 @@ async function loadSource(): Promise<any> {
 }
 
 function pickName(props: any, idx: number): string {
-  const candidate = props.name ?? props.kommunenavn ?? props.navn;
+  const candidate = props.name ?? props.fylkesnavn ?? props.navn;
   if (!candidate) throw new Error(`Feature ${idx} missing name property`);
   return String(candidate);
 }
 
 function pickId(props: any, idx: number): string {
-  const candidate = props.id ?? props.kommunenummer ?? idx;
+  const candidate = props.id ?? props.fylkesnummer ?? idx;
   return String(candidate);
 }
 
