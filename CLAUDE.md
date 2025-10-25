@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an extensible interactive map quiz web application built with Next.js 15, TypeScript, and MapLibre GL JS. Users click on geographical regions on a map to test their knowledge with scoring, streaks, and multiple difficulty levels. The app supports multiple maps (currently Oslo districts) with per-map configuration, localization, and persistent state isolation.
+This is an extensible interactive map quiz web application built with Next.js 15, TypeScript, and MapLibre GL JS. Users click on geographical regions on a map to test their knowledge with scoring, streaks, and multiple difficulty levels. The app supports multiple maps (Oslo districts and Norwegian municipalities) with per-map configuration, localization, and persistent state isolation.
 
 ## Development Commands
 
@@ -14,7 +14,8 @@ This is an extensible interactive map quiz web application built with Next.js 15
 - `make lint` - Run ESLint across the codebase
 - `make ci` - Full CI pipeline (install, data, lint, build)
 - `make install` - Install dependencies for monorepo
-- `make data` - Generate normalized GeoJSON boundary data
+- `make data` - Generate normalized GeoJSON boundary data (Oslo districts)
+- `make data-kommuner` - Process Norwegian municipalities GeoJSON data
 - `make clean` - Remove build artifacts and generated data
 
 ### Direct Package Commands
@@ -35,7 +36,7 @@ This is an extensible interactive map quiz web application built with Next.js 15
 - **Data Hooks**
   - `useRegionData(mapId)` (`web/src/hooks/useRegionData.ts`) - Generic GeoJSON data fetching with map config support
   - `useBydelerData()` (`web/src/hooks/useBydelerData.ts`) - Legacy wrapper for backward compatibility
-- **Map Configuration** (`web/src/config/maps/`) - Registry pattern for managing multiple map configs
+- **Map Configuration** (`web/src/config/maps/`) - Registry pattern for managing multiple map configs with type-safe map IDs
 - **Types** (`web/src/lib/types.ts`) - Core TypeScript interfaces including `Region`, `MapConfig`, `MapMetadata`, game state, and quiz settings
 - **Internationalization** (`web/src/i18n/`) - Translation system with support for multiple locales (Norwegian, English)
 
@@ -43,9 +44,11 @@ This is an extensible interactive map quiz web application built with Next.js 15
 Uses **functional state management** with immutable updates rather than complex state libraries. Game state flows through a state machine with scoring, streaks, and multi-attempt logic. Local persistence via `web/src/lib/persistence.ts`.
 
 ### Data Pipeline
-- GeoJSON boundaries sourced from authoritative Oslo data
-- Processing script at `scripts/scripts/fetch_oslo_geo.ts` with topology-preserving simplification
-- Outputs both full precision and web-optimized (<300KB) versions to `web/public/data/`
+- GeoJSON boundaries sourced from authoritative data (Oslo districts and Norwegian municipalities)
+- Processing scripts at `scripts/scripts/` with topology-preserving simplification:
+  - `fetch_oslo_geo.ts` - Oslo districts from ArcGIS
+  - `fetch_kommuner_geo.ts` - Norwegian municipalities from local GeoJSON
+- Outputs both full precision and web-optimized versions to `web/public/data/`
 
 ## Technology Stack
 - **Framework**: Next.js 15.5.2 with App Router and React 18
@@ -70,7 +73,8 @@ Uses **functional state management** with immutable updates rather than complex 
 - Multiple difficulty levels affecting question selection
 
 ## Data Structure
-- Oslo districts stored as GeoJSON with properties: `navn` (name), `bydelsnummer` (number), `areal_km2` (area)
+- **Oslo districts**: GeoJSON with properties `navn` (name), `bydelsnummer` (number), `areal_km2` (area)
+- **Norwegian municipalities**: GeoJSON with properties `name`, `id`, `slug`, `area_km2`, `centroid`
 - Centroids calculated for hint positioning
 - Simplified topology for web performance while maintaining accuracy
 
@@ -105,32 +109,60 @@ To add a new map to the application:
    ```typescript
    export const mapConfig: MapConfigWithMetadata = {
      id: 'unique-id',
-     name: 'Display Name',
      dataPath: '/data/filename.geo.json',
      center: [lng, lat],
      initialZoom: 10,
      bounds: [[minLng, minLat], [maxLng, maxLat]],
      language: 'no',
-     description: 'Map description',
+     nameKey: 'maps.mapName.name',
+     descriptionKey: 'maps.mapName.description',
      featureCount: 15,
      difficulty: 'medium',
    };
    ```
 
-2. **Register map** in `web/src/config/maps/index.ts`:
+2. **Update map types** in `web/src/config/maps/types.ts`:
    ```typescript
-   import { mapConfig } from './[mapName]';
-
-   const ALL_MAPS = [osloMapConfig, mapConfig];
+   export type MapId = 'oslo' | 'kommuner' | 'newMap';
    ```
 
-3. **Add GeoJSON data** to `web/public/data/filename.geo.json` with features containing:
-   - `navn` (name)
+3. **Register map** in `web/src/config/maps/index.ts`:
+   ```typescript
+   import { mapConfig } from './[mapName]';
+   
+   const mapRegistry: Record<MapId, MapConfigWithMetadata> = {
+     oslo: osloMapConfig,
+     kommuner: kommunerMapConfig,
+     newMap: mapConfig,
+   };
+   ```
+
+4. **Add GeoJSON data** to `web/public/data/filename.geo.json` with features containing:
+   - `name` (display name)
    - `centroid` [lng, lat] (for hints)
+   - `id` (unique identifier)
 
-4. **Add translations** for map names and descriptions in `web/src/i18n/translations/*.json`
+5. **Add translations** for map names and descriptions in `web/src/i18n/translations/*.json`
 
-5. **Build and deploy** - Static generation automatically includes the new map route
+6. **Add data processing script** (optional) in `scripts/scripts/fetch_[mapName]_geo.ts` for automated data generation
+
+7. **Build and deploy** - Static generation automatically includes the new map route
+
+## Available Maps
+
+### Oslo Districts (`oslo`)
+- **Features**: 15 districts of Oslo
+- **Difficulty**: Medium
+- **Data Source**: ArcGIS Oslo delbydeler
+- **Center**: Oslo city center
+- **Properties**: `navn`, `bydelsnummer`, `areal_km2`
+
+### Norwegian Municipalities (`kommuner`)
+- **Features**: 357 Norwegian municipalities
+- **Difficulty**: Expert
+- **Data Source**: Local GeoJSON data
+- **Center**: Norway center (65.0°N, 10.75°E)
+- **Properties**: `name`, `id`, `slug`, `area_km2`, `centroid`
 
 ## Multi-Map State Isolation
 
