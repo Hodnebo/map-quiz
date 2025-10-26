@@ -173,6 +173,16 @@ export class ReverseQuizMode extends BaseGameMode {
     if (minX === Infinity) return null;
 
     const rawBounds: [[number, number], [number, number]] = [[minX, minY], [maxX, maxY]];
+    
+    // Debug logging for invalid bounds
+    if (minX < -180 || maxX > 180 || minY < -90 || maxY > 90) {
+      console.warn(`Invalid bounds for feature ${targetId}:`, {
+        minX, minY, maxX, maxY,
+        bounds: rawBounds,
+        featureName: feat.properties?.name
+      });
+    }
+    
     // For reverse quiz, use less aggressive padding since we want to show the area clearly
     const paddedBounds = this.padBounds(rawBounds, this.getPaddingFactor(difficulty), 0.02, 0.015);
     

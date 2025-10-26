@@ -8,7 +8,8 @@
     "fetch:kommuner": "tsx scripts/fetch_kommuner_geo.ts",
     "fetch:fylker": "tsx scripts/fetch_fylker_geo.ts",
     "fetch:world": "tsx scripts/fetch_world_geo.ts",
-    "process:world": "tsx scripts/process_world_data.ts"
+    "process:world": "tsx scripts/process_world_data.ts",
+    "check:world": "tsx scripts/check_world_coords.ts"
   },
   "dependencies": {
     "@turf/area": "^7.2.0",
