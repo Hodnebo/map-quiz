@@ -389,7 +389,21 @@ export default function MapView(props: MapProps) {
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !focusBounds) return;
-    map.fitBounds(focusBounds, { padding: focusPadding, duration: 300 });
+    
+    try {
+      // Validate bounds coordinates
+      const [[swLng, swLat], [neLng, neLat]] = focusBounds;
+      if (
+        swLng >= -180 && swLng <= 180 && swLat >= -90 && swLat <= 90 &&
+        neLng >= -180 && neLng <= 180 && neLat >= -90 && neLat <= 90
+      ) {
+        map.fitBounds(focusBounds, { padding: focusPadding, duration: 300 });
+      } else {
+        console.warn('Invalid bounds coordinates:', focusBounds);
+      }
+    } catch (error) {
+      console.warn('Error fitting bounds:', error);
+    }
   }, [focusBounds, focusPadding]);
 
 

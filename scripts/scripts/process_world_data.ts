@@ -64,12 +64,22 @@ function processWorldData() {
     
     try {
       const centroidResult = turf.centroid(feature);
-      centroid = centroidResult.geometry.coordinates as [number, number];
+      const coords = centroidResult.geometry.coordinates as [number, number];
+      
+      // Validate coordinates
+      const [lng, lat] = coords;
+      if (lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90) {
+        centroid = coords;
+      } else {
+        console.warn(`Invalid coordinates for ${name}: [${lng}, ${lat}], using [0, 0]`);
+        centroid = [0, 0];
+      }
       
       const areaResult = turf.area(feature);
       areaKm2 = Number((areaResult / 1000000).toFixed(3)); // Convert m² to km²
     } catch (error) {
       console.warn(`Error processing feature ${name}:`, error);
+      centroid = [0, 0];
     }
     
     return {
