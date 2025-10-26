@@ -158,9 +158,21 @@ export class ReverseQuizMode extends BaseGameMode {
     if (!feat) return null;
 
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    let coordCount = 0;
+    let invalidCoordCount = 0;
     const walk = (coords: any) => {
       if (typeof coords[0] === "number") {
         const [x, y] = coords as [number, number];
+        coordCount++;
+        
+        // Check for invalid coordinates
+        if (x < -180 || x > 180 || y < -90 || y > 90 || isNaN(x) || isNaN(y) || !isFinite(x) || !isFinite(y)) {
+          invalidCoordCount++;
+          if (invalidCoordCount <= 5) { // Only log first 5 invalid coordinates
+            console.warn(`Invalid coordinate in ${feat.properties?.name}: [${x}, ${y}]`);
+          }
+        }
+        
         if (x < minX) minX = x;
         if (y < minY) minY = y;
         if (x > maxX) maxX = x;
@@ -171,6 +183,10 @@ export class ReverseQuizMode extends BaseGameMode {
     };
     walk(feat.geometry.coordinates);
     if (minX === Infinity) return null;
+    
+    // Log coordinate statistics
+    console.log(`Bounds calculation for ${feat.properties?.name}: ${coordCount} coordinates, ${invalidCoordCount} invalid`);
+    console.log(`Raw min/max values: minX=${minX}, minY=${minY}, maxX=${maxX}, maxY=${maxY}`);
 
     const rawBounds: [[number, number], [number, number]] = [[minX, minY], [maxX, maxY]];
     
@@ -179,7 +195,10 @@ export class ReverseQuizMode extends BaseGameMode {
       console.warn(`Invalid bounds for feature ${targetId}:`, {
         minX, minY, maxX, maxY,
         bounds: rawBounds,
-        featureName: feat.properties?.name
+        featureName: feat.properties?.name,
+        interpretation: `minLng=${minX}, minLat=${minY}, maxLng=${maxX}, maxLat=${maxY}`,
+        coordCount,
+        invalidCoordCount
       });
     }
     
@@ -212,6 +231,23 @@ export class ReverseQuizMode extends BaseGameMode {
     minH: number
   ): [[number, number], [number, number]] {
     const [[minX, minY], [maxX, maxY]] = bbox;
+    
+    // Check if this feature spans the entire world (common for islands crossing 180° meridian)
+    const spansWorld = (maxX - minX) > 300; // More than 300 degrees longitude
+    
+    if (spansWorld) {
+      // For world-spanning features, use a fixed reasonable bounds instead of padding
+      // This prevents creating invalid coordinates that extend beyond -180/180
+      const centerLng = (minX + maxX) / 2;
+      const centerLat = (minY + maxY) / 2;
+      const padding = 0.1; // 0.1 degrees padding
+      
+      return [
+        [Math.max(centerLng - padding, -180), Math.max(centerLat - padding, -90)],
+        [Math.min(centerLng + padding, 180), Math.min(centerLat + padding, 90)]
+      ];
+    }
+    
     const width = Math.max(maxX - minX, minW);
     const height = Math.max(maxY - minY, minH);
     const cx = (minX + maxX) / 2;
@@ -233,16 +269,36 @@ export class ReverseQuizMode extends BaseGameMode {
     const cy = (minY + maxY) / 2 + height * fracY;
     const halfW = width / 2;
     const halfH = height / 2;
-    return [[cx - halfW, cy - halfH], [cx + halfW, cy + halfH]];
+    
+    const shiftedBounds = [[cx - halfW, cy - halfH], [cx + halfW, cy + halfH]];
+    
+    // Validate and clamp bounds to valid coordinate ranges
+    const [[newMinX, newMinY], [newMaxX, newMaxY]] = shiftedBounds;
+    
+    // Clamp longitude to [-180, 180] and latitude to [-90, 90]
+    const clampedMinX = Math.max(-180, Math.min(180, newMinX));
+    const clampedMinY = Math.max(-90, Math.min(90, newMinY));
+    const clampedMaxX = Math.max(-180, Math.min(180, newMaxX));
+    const clampedMaxY = Math.max(-90, Math.min(90, newMaxY));
+    
+    // If bounds were clamped, log a warning
+    if (clampedMinX !== newMinX || clampedMinY !== newMinY || 
+        clampedMaxX !== newMaxX || clampedMaxY !== newMaxY) {
+      console.warn(`Bounds were clamped: original=${JSON.stringify(shiftedBounds)}, clamped=${JSON.stringify([[clampedMinX, clampedMinY], [clampedMaxX, clampedMaxY]])}`);
+    }
+    
+    return [[clampedMinX, clampedMinY], [clampedMaxX, clampedMaxY]];
   }
 
   private getPaddingFactor(difficulty: string): number {
     switch (difficulty) {
-      case "training": return 1.8; // More padding for reverse quiz to show more context
-      case "easy": return 2.2;
-      case "normal": return 2.8;
-      case "hard": return 3.5;
-      default: return 2.8;
+      case "training": return 1.2; // More padding for reverse quiz to show more context
+      case "easy": return 1.5;
+      case "normal": 
+      case "medium": return 2.0;
+      case "hard": return 2.5;
+      case "expert": return 3.0;
+      default: return 1.5;
     }
   }
 

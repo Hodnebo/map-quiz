@@ -75,12 +75,13 @@ export default function GameSettings({ settings, effectiveSettings, onSettingsCh
                 <Select
                   value={settings.difficulty ?? currentMode.settings.difficulty}
                   label="Vanskelighet"
-                  onChange={(e) => updateSetting('difficulty', e.target.value as "training" | "easy" | "normal" | "hard")}
+                  onChange={(e) => updateSetting('difficulty', e.target.value as "training" | "easy" | "normal" | "hard" | "expert")}
                 >
                   <MenuItem value="training">Trening</MenuItem>
                   <MenuItem value="easy">Lett</MenuItem>
                   <MenuItem value="normal">Normal</MenuItem>
                   <MenuItem value="hard">Vanskelig</MenuItem>
+                  <MenuItem value="expert">Ekspert</MenuItem>
                 </Select>
               </FormControl>
             )}

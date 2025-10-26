@@ -46,7 +46,7 @@ export interface GameMode {
   name: string;
   description: string;
   settings: {
-    difficulty?: "training" | "easy" | "normal" | "hard";
+    difficulty?: "training" | "easy" | "normal" | "hard" | "expert";
     alternativesCount?: number | null;
     maxAttempts?: number;
     zoomEnabled?: boolean;
@@ -62,7 +62,7 @@ export interface GameSettings {
   audioEnabled?: boolean;
   mapStyle?: MapStyle;
   // Mode-specific overrides
-  difficulty?: "training" | "easy" | "normal" | "hard";
+  difficulty?: "training" | "easy" | "normal" | "hard" | "expert";
   alternativesCount?: number | null;
   maxAttempts?: number;
   timerSeconds?: number | null;
