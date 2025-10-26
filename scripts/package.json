@@ -7,18 +7,20 @@
     "fetch:oslo": "tsx scripts/fetch_oslo_geo.ts",
     "fetch:kommuner": "tsx scripts/fetch_kommuner_geo.ts",
     "fetch:fylker": "tsx scripts/fetch_fylker_geo.ts",
-    "fetch:world": "tsx scripts/fetch_world_geo.ts"
+    "fetch:world": "tsx scripts/fetch_world_geo.ts",
+    "process:world": "tsx scripts/process_world_data.ts"
   },
   "dependencies": {
-    "node-fetch": "^3.3.2",
-    "@turf/centroid": "^7.2.0",
     "@turf/area": "^7.2.0",
+    "@turf/centroid": "^7.2.0",
+    "@turf/turf": "^7.2.0",
+    "node-fetch": "^3.3.2",
+    "topojson-client": "^3.1.0",
     "topojson-server": "^3.0.1",
-    "topojson-simplify": "^3.0.3",
-    "topojson-client": "^3.1.0"
+    "topojson-simplify": "^3.0.3"
   },
   "devDependencies": {
     "tsx": "^4.19.1",
     "typescript": "^5.6.2"
   }
-} 
+}

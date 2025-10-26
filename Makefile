@@ -27,7 +27,7 @@ data-fylker: ## Process Norwegian counties GeoJSON
 	@npm run fetch:fylker --prefix $(SCRIPTS_DIR)
 
 data-world: ## Process world countries GeoJSON
-	@npm run fetch:world --prefix $(SCRIPTS_DIR)
+	@npm run process:world --prefix $(SCRIPTS_DIR)
 
 dev: ## Run Next.js dev server
 	@npm run dev --prefix $(WEB_DIR)
