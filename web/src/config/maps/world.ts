@@ -12,5 +12,7 @@ export const worldMapConfig: MapConfigWithMetadata = {
   nameKey: 'maps.world.name',
   featureCount: 177,
   difficulty: 'expert',
-  color: '#2ecc71'
+  color: '#2ecc71',
+  category: 'global',
+  subcategory: 'countries'
 };

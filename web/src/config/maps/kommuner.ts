@@ -15,4 +15,6 @@ export const kommunerMapConfig: MapConfigWithMetadata = {
   featureCount: 357,
   difficulty: 'expert',
   color: '#e74c3c',
+  category: 'norway',
+  subcategory: 'municipalities',
 };

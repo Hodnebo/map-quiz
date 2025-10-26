@@ -4,6 +4,11 @@ import { osloMapConfig } from './oslo';
 import { kommunerMapConfig } from './kommuner';
 import { fylkerMapConfig } from './fylker';
 import { worldMapConfig } from './world';
+import { europeMapConfig } from './europe';
+import { africaMapConfig } from './africa';
+import { northAmericaMapConfig } from './north_america';
+import { southAmericaMapConfig } from './south_america';
+import { oceaniaAsiaMapConfig } from './oceania_asia';
 
 // Registry of all available maps
 const mapRegistry: Record<MapId, MapConfigWithMetadata> = {
@@ -11,6 +16,11 @@ const mapRegistry: Record<MapId, MapConfigWithMetadata> = {
   kommuner: kommunerMapConfig,
   fylker: fylkerMapConfig,
   world: worldMapConfig,
+  europe: europeMapConfig,
+  africa: africaMapConfig,
+  north_america: northAmericaMapConfig,
+  south_america: southAmericaMapConfig,
+  oceania_asia: oceaniaAsiaMapConfig,
 };
 
 /**

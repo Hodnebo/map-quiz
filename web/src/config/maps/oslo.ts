@@ -15,4 +15,6 @@ export const osloMapConfig: MapConfigWithMetadata = {
   featureCount: 98,
   difficulty: 'hard',
   color: '#667eea',
+  category: 'norway',
+  subcategory: 'districts',
 };

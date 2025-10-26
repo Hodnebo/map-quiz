@@ -15,4 +15,6 @@ export const fylkerMapConfig: MapConfigWithMetadata = {
   featureCount: 15,
   difficulty: 'easy',
   color: '#f39c12',
+  category: 'norway',
+  subcategory: 'counties',
 };

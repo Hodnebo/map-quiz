@@ -194,6 +194,8 @@ export default function GamePage() {
       if (!res.isCorrect) {
         const targetName = bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? "området";
         const guessedName = bydeler?.find((b) => b.id === id)?.name ?? id;
+        console.log('Debug - bydeler:', bydeler?.length, 'id:', id, 'guessedName:', guessedName);
+        console.log('Debug - bydeler IDs:', bydeler?.map(b => b.id));
         setFeedbackMessage(`Det var ${guessedName}`);
       } else {
         setFeedbackMessage("");

@@ -29,6 +29,9 @@ data-fylker: ## Process Norwegian counties GeoJSON
 data-world: ## Process world countries GeoJSON
 	@npm run process:world --prefix $(SCRIPTS_DIR)
 
+data-europe: ## Process Europe countries GeoJSON
+	@npm run process:europe --prefix $(SCRIPTS_DIR)
+
 dev: ## Run Next.js dev server
 	@npm run dev --prefix $(WEB_DIR)
 
@@ -47,6 +50,7 @@ clean: ## Remove build artifacts and generated data
 	@rm -f $(WEB_DIR)/public/data/kommuner.geo.json $(WEB_DIR)/public/data/kommuner_simplified.geo.json
 	@rm -f $(WEB_DIR)/public/data/fylker.geo.json $(WEB_DIR)/public/data/fylker_simplified.geo.json
 	@rm -f $(WEB_DIR)/public/data/world.geo.json $(WEB_DIR)/public/data/world_simplified.geo.json
+	@rm -f $(WEB_DIR)/public/data/europe.geo.json $(WEB_DIR)/public/data/europe_simplified.geo.json
 
 ci: ## Run CI steps (install, data, lint, build)
 	@$(MAKE) install

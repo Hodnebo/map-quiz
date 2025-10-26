@@ -8,7 +8,21 @@
     "subtitle": "Test dine geografikunnskaper med interaktive kart-quiz. Velg et kart nedenfor for å begynne!",
     "noMapsAvailable": "Ingen kart tilgjengelig",
     "play": "Spill",
-    "regions": "{count} områder"
+    "regions": "{count} områder",
+    "mapsCount": "{count} kart",
+    "areasCount": "{count} områder"
+  },
+  "categories": {
+    "global": "Globale Kart",
+    "globalDescription": "Geografiske utfordringer fra hele verden",
+    "norway": "Norske Kart",
+    "norwayDescription": "Norske geografiske regioner",
+    "usa": "Amerikanske Kart",
+    "usaDescription": "Amerikanske geografiske regioner",
+    "europe": "Europeiske Kart",
+    "europeDescription": "Europeiske geografiske regioner",
+    "asia": "Asiatiske Kart",
+    "asiaDescription": "Asiatiske geografiske regioner"
   },
   "gameActions": {
     "start": "Start",
@@ -32,6 +46,26 @@
     "world": {
       "name": "Verdens Land",
       "description": "Test dine kunnskaper om verdens land"
+    },
+    "europe": {
+      "name": "Europeiske Land",
+      "description": "Test dine kunnskaper om europeiske land"
+    },
+    "africa": {
+      "name": "Afrika",
+      "description": "Test dine kunnskaper om afrikanske land"
+    },
+    "north_america": {
+      "name": "Nord-Amerika",
+      "description": "Test dine kunnskaper om nordamerikanske land"
+    },
+    "south_america": {
+      "name": "Sør-Amerika",
+      "description": "Test dine kunnskaper om søramerikanske land"
+    },
+    "oceania_asia": {
+      "name": "Oseania & Asia",
+      "description": "Test dine kunnskaper om asiatiske og oseaniske land"
     }
   },
   "map": {

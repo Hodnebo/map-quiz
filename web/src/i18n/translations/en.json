@@ -8,7 +8,21 @@
     "subtitle": "Test your geographical knowledge with interactive map quizzes. Choose a map below to get started!",
     "noMapsAvailable": "No maps available",
     "play": "Play",
-    "regions": "{count} regions"
+    "regions": "{count} regions",
+    "mapsCount": "{count} maps",
+    "areasCount": "{count} areas"
+  },
+  "categories": {
+    "global": "Global Maps",
+    "globalDescription": "Worldwide geographical challenges",
+    "norway": "Norway Maps",
+    "norwayDescription": "Norwegian geographical regions",
+    "usa": "United States Maps",
+    "usaDescription": "US geographical regions",
+    "europe": "Europe Maps",
+    "europeDescription": "European geographical regions",
+    "asia": "Asia Maps",
+    "asiaDescription": "Asian geographical regions"
   },
   "gameActions": {
     "start": "Start",
@@ -32,6 +46,26 @@
     "world": {
       "name": "World Countries",
       "description": "Test your knowledge of world countries"
+    },
+    "europe": {
+      "name": "Europe Countries",
+      "description": "Test your knowledge of European countries"
+    },
+    "africa": {
+      "name": "Africa",
+      "description": "Test your knowledge of African countries"
+    },
+    "north_america": {
+      "name": "North America",
+      "description": "Test your knowledge of North American countries"
+    },
+    "south_america": {
+      "name": "South America",
+      "description": "Test your knowledge of South American countries"
+    },
+    "oceania_asia": {
+      "name": "Oceania & Asia",
+      "description": "Test your knowledge of Asian and Oceanian countries"
     }
   },
   "map": {

@@ -29,6 +29,8 @@ export interface MapConfig {
   description?: string;
   featureCount?: number;
   previewImage?: string;
+  category: 'global' | 'norway' | 'usa' | 'europe' | 'asia';
+  subcategory?: string; // e.g., 'countries', 'districts', 'municipalities'
 }
 
 // Map metadata for UI display

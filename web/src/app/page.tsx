@@ -1,15 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Button, AppBar, Toolbar, Typography, Box, IconButton, Card, CardContent, CardActions, Grid, Container } from "@mui/material";
+import { Button, AppBar, Toolbar, Typography, Box, IconButton, Container } from "@mui/material";
 import { DarkMode as DarkModeIcon, LightMode as LightModeIcon } from "@mui/icons-material";
 import { useTheme } from "@/contexts/ThemeContext";
 import { getAllMapConfigs } from "@/config/maps";
 import { t } from "@/i18n";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { Locale } from "@/i18n/config";
 import { detectBrowserLocale } from "@/i18n/utils";
-import { MapPreview } from "@/components/MapPreview";
+import MapCategory from "@/components/MapCategory";
+import type { MapConfigWithMetadata } from "@/config/maps/types";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -33,22 +34,49 @@ export default function LandingPage() {
     setLocale(locale === 'no' ? 'en' : 'no');
   };
 
-  const handleMapSelect = (mapId: string) => {
-    router.push(`/game/${mapId}`);
-  };
+  // Group maps by category
+  const categorizedMaps = useMemo(() => {
+    const categories = {
+      global: maps.filter(map => map.category === 'global'),
+      norway: maps.filter(map => map.category === 'norway'),
+      usa: maps.filter(map => map.category === 'usa'),
+      europe: maps.filter(map => map.category === 'europe'),
+      asia: maps.filter(map => map.category === 'asia'),
+    };
+    return categories;
+  }, [maps]);
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'easy':
-        return { bg: 'rgba(34, 197, 94, 0.1)', color: '#16a34a', border: 'rgba(34, 197, 94, 0.2)' };
-      case 'medium':
-        return { bg: 'rgba(245, 158, 11, 0.1)', color: '#d97706', border: 'rgba(245, 158, 11, 0.2)' };
-      case 'hard':
-        return { bg: 'rgba(239, 68, 68, 0.1)', color: '#dc2626', border: 'rgba(239, 68, 68, 0.2)' };
-      case 'expert':
-        return { bg: 'rgba(220, 38, 127, 0.1)', color: '#be185d', border: 'rgba(220, 38, 127, 0.2)' };
-      default:
-        return { bg: 'rgba(102, 126, 234, 0.1)', color: '#667eea', border: 'rgba(102, 126, 234, 0.2)' };
+  // Category configuration
+  const categoryConfig = {
+    global: {
+      title: t('categories.global', locale),
+      icon: '🌍',
+      description: t('categories.globalDescription', locale),
+      defaultExpanded: true
+    },
+    norway: {
+      title: t('categories.norway', locale),
+      icon: '🇳🇴',
+      description: t('categories.norwayDescription', locale),
+      defaultExpanded: false
+    },
+    usa: {
+      title: t('categories.usa', locale),
+      icon: '🇺🇸',
+      description: t('categories.usaDescription', locale),
+      defaultExpanded: false
+    },
+    europe: {
+      title: t('categories.europe', locale),
+      icon: '🇪🇺',
+      description: t('categories.europeDescription', locale),
+      defaultExpanded: false
+    },
+    asia: {
+      title: t('categories.asia', locale),
+      icon: '🇦🇸',
+      description: t('categories.asiaDescription', locale),
+      defaultExpanded: false
     }
   };
 
@@ -139,112 +167,23 @@ export default function LandingPage() {
           </Typography>
         </Box>
 
-        <Grid container spacing={3}>
-          {maps.map((mapConfig) => (
-            <Grid item xs={12} sm={6} md={4} key={mapConfig.id}>
-              <Card
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  backgroundColor: theme => theme.palette.background.paper,
-                  backdropFilter: 'blur(12px)',
-                  boxShadow: theme => theme.palette.mode === 'dark'
-                    ? '0 8px 32px rgba(0, 0, 0, 0.3)'
-                    : '0 8px 32px rgba(0, 0, 0, 0.1)',
-                  border: theme => theme.palette.mode === 'dark'
-                    ? '1px solid rgba(255, 255, 255, 0.1)'
-                    : '1px solid rgba(255, 255, 255, 0.2)',
-                  borderRadius: 2,
-                  transition: 'all 0.3s ease',
-                  overflow: 'hidden',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: theme => theme.palette.mode === 'dark'
-                      ? '0 12px 48px rgba(0, 0, 0, 0.4)'
-                      : '0 12px 48px rgba(0, 0, 0, 0.15)',
-                  },
-                }}
-              >
-                {/* Dynamic Preview */}
-                {mapConfig.color && (
-                  <MapPreview
-                    featureCount={mapConfig.featureCount}
-                    color={mapConfig.color}
-                    height={120}
-                  />
-                )}
-                
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Typography variant="h5" component="h3" gutterBottom sx={{ fontWeight: 600 }}>
-                    {t(mapConfig.nameKey, locale)}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" paragraph>
-                    {t(mapConfig.descriptionKey, locale)}
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      gap: 1,
-                      flexWrap: 'wrap',
-                      mt: 2,
-                    }}
-                  >
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        px: 1.5,
-                        py: 0.5,
-                        backgroundColor: theme => theme.palette.mode === 'dark'
-                          ? 'rgba(102, 126, 234, 0.2)'
-                          : 'rgba(102, 126, 234, 0.1)',
-                        borderRadius: 1,
-                        color: theme => theme.palette.mode === 'dark' ? '#8aa5ff' : '#667eea',
-                        fontWeight: 500,
-                      }}
-                    >
-                      {t('landing.regions', locale, { count: String(mapConfig.featureCount) })}
-                    </Typography>
-                    {mapConfig.difficulty && (
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          px: 1.5,
-                          py: 0.5,
-                          backgroundColor: getDifficultyColor(mapConfig.difficulty).bg,
-                          borderRadius: 1,
-                          color: getDifficultyColor(mapConfig.difficulty).color,
-                          fontWeight: 600,
-                          border: `1px solid ${getDifficultyColor(mapConfig.difficulty).border}`,
-                        }}
-                      >
-                        {t(`modal.${mapConfig.difficulty}`, locale)}
-                      </Typography>
-                    )}
-                  </Box>
-                </CardContent>
-
-                <CardActions sx={{ pt: 0 }}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    onClick={() => handleMapSelect(mapConfig.id)}
-                    sx={{
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      color: 'white',
-                      fontWeight: 600,
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #5568d3 0%, #6a3d8f 100%)',
-                      },
-                    }}
-                  >
-                    {t('landing.play', locale)}
-                  </Button>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+        {/* Categorized Maps */}
+        {Object.entries(categorizedMaps).map(([categoryKey, categoryMaps]) => {
+          if (categoryMaps.length === 0) return null;
+          
+          const config = categoryConfig[categoryKey as keyof typeof categoryConfig];
+          return (
+            <MapCategory
+              key={categoryKey}
+              title={config.title}
+              icon={config.icon}
+              description={config.description}
+              maps={categoryMaps}
+              defaultExpanded={config.defaultExpanded}
+              locale={locale}
+            />
+          );
+        })}
 
         {maps.length === 0 && (
           <Box sx={{ textAlign: 'center', py: 8 }}>
