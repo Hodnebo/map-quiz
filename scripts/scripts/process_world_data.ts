@@ -68,7 +68,8 @@ function processWorldData() {
       
       // Validate coordinates
       const [lng, lat] = coords;
-      if (lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90) {
+      if (lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90 && 
+          !isNaN(lng) && !isNaN(lat) && isFinite(lng) && isFinite(lat)) {
         centroid = coords;
       } else {
         console.warn(`Invalid coordinates for ${name}: [${lng}, ${lat}], using [0, 0]`);
