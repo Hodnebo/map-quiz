@@ -108,9 +108,17 @@ export default function GamePage() {
 
   const doStart = useCallback(() => {
     if (!canPlay) return;
+    const newSeed = Math.floor(Math.random() * 2 ** 31);
+    setSeed(newSeed);
     const settingsWithEffective = { ...settings, ...effectiveSettings };
-    setState((s) => startGame({ ...s, settings: settingsWithEffective }, allIds, seed));
-  }, [allIds, canPlay, seed, settings, effectiveSettings]);
+    setState(createInitialState(settingsWithEffective));
+    setWrongAnswerIds([]);
+    setFeedback(null);
+    setFeedbackMessage("");
+    setTimeout(() => {
+      setState((s) => startGame(s, allIds, newSeed));
+    }, 0);
+  }, [allIds, canPlay, settings, effectiveSettings]);
 
   const doRestart = useCallback(() => {
     if (!canPlay) return;
@@ -119,6 +127,8 @@ export default function GamePage() {
     const settingsWithEffective = { ...settings, ...effectiveSettings };
     setState(createInitialState(settingsWithEffective));
     setWrongAnswerIds([]);
+    setFeedback(null);
+    setFeedbackMessage("");
     setTimeout(() => {
       setState((s) => startGame(s, allIds, newSeed));
     }, 0);
@@ -140,6 +150,8 @@ export default function GamePage() {
     };
     setSettings(updatedSettings);
     setWrongAnswerIds([]);
+    setFeedback(null);
+    setFeedbackMessage("");
     setShowModal(false);
     if (isFirstVisit) {
       markModalAsSeen();
@@ -148,7 +160,10 @@ export default function GamePage() {
     setTimeout(() => {
       if (!canPlay) return;
       const settingsWithEffective = { ...updatedSettings, ...getEffectiveSettings(updatedSettings) };
-      setState((s) => startGame({ ...s, settings: settingsWithEffective }, allIds, seed));
+      setState(createInitialState(settingsWithEffective));
+      setTimeout(() => {
+        setState((s) => startGame(s, allIds, seed));
+      }, 0);
     }, 0);
   }, [settings, isFirstVisit, canPlay, allIds, seed]);
 
@@ -329,6 +344,8 @@ export default function GamePage() {
                   backgroundColor: 'rgba(255, 255, 255, 0.2)',
                   color: 'white',
                   borderColor: 'rgba(255, 255, 255, 0.3)',
+                  minWidth: { xs: 'auto', sm: 'auto' },
+                  px: { xs: 1, sm: 2 },
                   '&:hover': {
                     backgroundColor: 'rgba(255, 255, 255, 0.3)',
                   },
@@ -338,7 +355,9 @@ export default function GamePage() {
                   },
                 }}
               >
-                {t('gameActions.start', locale)}
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                  {t('gameActions.start', locale)}
+                </Box>
               </Button>
             ) : (
               <Button

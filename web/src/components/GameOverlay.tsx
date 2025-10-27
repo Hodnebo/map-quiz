@@ -33,20 +33,22 @@ export default function GameOverlay({
   locale = 'no'
 }: GameOverlayProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [mobileStatsExpanded, setMobileStatsExpanded] = useState(false);
 
   return (
     <>
-      {/* Compact score badge for mobile - bottom left corner */}
+      {/* Mobile Stats - Expandable/Collapsible */}
       <Box
         sx={{
           display: { xs: 'flex', sm: 'none' },
           position: 'absolute',
-          bottom: 16,
-          left: 8,
+          top: 80,
+          right: 8,
           zIndex: 11,
-          pb: 'env(safe-area-inset-bottom)',
-          pl: 'env(safe-area-inset-left)',
+          pr: 'env(safe-area-inset-right)',
+          maxWidth: 180,
         }}
+        onClick={() => setMobileStatsExpanded(!mobileStatsExpanded)}
       >
         <Card
           sx={{
@@ -55,39 +57,97 @@ export default function GameOverlay({
             boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
             border: '1px solid rgba(255, 255, 255, 0.3)',
             borderRadius: 2,
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.2)',
+            },
           }}
         >
-          <CardContent sx={{ p: 0.5, '&:last-child': { pb: 0.5 }, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-            {/* Score */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Typography variant="caption" sx={{ fontSize: '0.5rem', lineHeight: 1, color: '#999', minWidth: 20 }}>
-                {t('game.points', locale).charAt(0).toUpperCase()}
-              </Typography>
-              <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 700, lineHeight: 1, color: '#1a1a1a' }}>
-                {state.score}
-              </Typography>
-            </Box>
-            
-            {/* Correct Answers */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Typography variant="caption" sx={{ fontSize: '0.5rem', lineHeight: 1, color: '#4caf50', minWidth: 20 }}>
-                ✓
-              </Typography>
-              <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 700, lineHeight: 1, color: '#1a1a1a' }}>
-                {state.correctAnswers}/{state.currentRound}
-              </Typography>
-            </Box>
-            
-            {/* Round */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Typography variant="caption" sx={{ fontSize: '0.5rem', lineHeight: 1, color: '#999', minWidth: 20 }}>
-                {t('game.round', locale).charAt(0).toUpperCase()}
-              </Typography>
-              <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 700, lineHeight: 1, color: '#1a1a1a' }}>
-                {state.currentRound}/{settings.rounds}
-              </Typography>
-            </Box>
-          </CardContent>
+          {!mobileStatsExpanded ? (
+            // Compact View
+            <CardContent sx={{ p: 0.5, '&:last-child': { pb: 0.5 }, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              {/* Score */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Typography variant="caption" sx={{ fontSize: '0.5rem', lineHeight: 1, color: '#999', minWidth: 20 }}>
+                  {t('game.points', locale).charAt(0).toUpperCase()}
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 700, lineHeight: 1, color: '#1a1a1a' }}>
+                  {state.score}
+                </Typography>
+              </Box>
+              
+              {/* Correct Answers */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Typography variant="caption" sx={{ fontSize: '0.5rem', lineHeight: 1, color: '#4caf50', minWidth: 20 }}>
+                  ✓
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 700, lineHeight: 1, color: '#1a1a1a' }}>
+                  {state.correctAnswers}/{state.currentRound}
+                </Typography>
+              </Box>
+              
+              {/* Round */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Typography variant="caption" sx={{ fontSize: '0.5rem', lineHeight: 1, color: '#999', minWidth: 20 }}>
+                  {t('game.round', locale).charAt(0).toUpperCase()}
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 700, lineHeight: 1, color: '#1a1a1a' }}>
+                  {state.currentRound}/{settings.rounds}
+                </Typography>
+              </Box>
+            </CardContent>
+          ) : (
+            // Expanded View
+            <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 }, display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {/* Score & Streak Row */}
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Box sx={{ flex: 1, textAlign: 'center', p: 1, backgroundColor: 'rgba(103, 126, 234, 0.1)', borderRadius: 1 }}>
+                  <Typography variant="caption" sx={{ fontSize: '0.65rem', color: '#666', fontWeight: 500 }}>
+                    {t('game.points', locale)}
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#1a1a1a', lineHeight: 1.2 }}>
+                    {state.score}
+                  </Typography>
+                </Box>
+                <Box sx={{ flex: 1, textAlign: 'center', p: 1, backgroundColor: 'rgba(103, 126, 234, 0.1)', borderRadius: 1 }}>
+                  <Typography variant="caption" sx={{ fontSize: '0.65rem', color: '#666', fontWeight: 500 }}>
+                    {t('game.streak', locale)}
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#1a1a1a', lineHeight: 1.2 }}>
+                    {state.streak}
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Correct Answers */}
+              <Box sx={{ p: 1, backgroundColor: 'rgba(76, 175, 80, 0.1)', borderRadius: 1, border: '1px solid rgba(76, 175, 80, 0.3)' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography sx={{ fontSize: '1.25rem' }}>✓</Typography>
+                    <Box>
+                      <Typography variant="caption" sx={{ fontSize: '0.65rem', color: '#2e7d32', fontWeight: 500 }}>
+                        {t('results.correctAnswers', locale)}
+                      </Typography>
+                      <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 700, color: '#1b5e20', lineHeight: 1.2 }}>
+                        {state.correctAnswers} / {state.currentRound}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Typography variant="h5" sx={{ fontSize: '1.5rem', fontWeight: 700, color: state.currentRound > 0 ? `rgba(76, 175, 80, ${Math.max(0.3, state.correctAnswers / state.currentRound)})` : 'rgba(76, 175, 80, 0.3)' }}>
+                    {state.currentRound > 0 ? Math.round((state.correctAnswers / state.currentRound) * 100) : 0}%
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Round Info */}
+              <Box sx={{ textAlign: 'center', p: 0.5 }}>
+                <Typography variant="body2" sx={{ fontSize: '0.75rem', color: '#666', fontWeight: 500 }}>
+                  {t('game.round', locale)} {state.currentRound}/{settings.rounds}
+                </Typography>
+              </Box>
+            </CardContent>
+          )}
         </Card>
       </Box>
 
