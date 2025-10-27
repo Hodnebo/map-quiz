@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, Typography, Box, IconButton, Drawer, Collapse, Fab } from '@mui/material';
-import { Settings as SettingsIcon, Close as CloseIcon, ExpandMore as ExpandMoreIcon, ExpandLess as ExpandLessIcon } from '@mui/icons-material';
+import { Card, CardContent, Typography, Box, IconButton, Drawer } from '@mui/material';
+import { Settings as SettingsIcon, Close as CloseIcon } from '@mui/icons-material';
 import GameSettings from './GameSettings';
 import type { GameSettings as GameSettingsType, GameState } from '@/lib/types';
 import { getEffectiveSettings } from '@/lib/gameModes';
@@ -33,86 +33,76 @@ export default function GameOverlay({
   locale = 'no'
 }: GameOverlayProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [statsExpanded, setStatsExpanded] = useState(false);
 
   return (
     <>
-      {/* Compact toggle button for mobile */}
+      {/* Compact score badge for mobile - bottom left corner */}
       <Box
         sx={{
           display: { xs: 'flex', sm: 'none' },
           position: 'absolute',
-          top: 8,
-          right: 8,
+          bottom: 16,
+          left: 8,
           zIndex: 11,
-          gap: 1,
-          alignItems: 'center',
+          pb: 'env(safe-area-inset-bottom)',
+          pl: 'env(safe-area-inset-left)',
         }}
       >
-        {/* Compact score badge */}
-        {!statsExpanded && (
-          <Card
-            sx={{
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              backdropFilter: 'blur(12px)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: 3,
-            }}
-            onClick={() => setStatsExpanded(true)}
-          >
-            <CardContent sx={{ p: 0.75, '&:last-child': { pb: 0.75 }, display: 'flex', gap: 1.5, alignItems: 'center' }}>
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1, color: '#666', display: 'block' }}>
-                  {t('game.points', locale)}
-                </Typography>
-                <Typography variant="body2" sx={{ fontSize: '0.875rem', fontWeight: 600, lineHeight: 1.2, color: '#1a1a1a' }}>
-                  {state.score}
-                </Typography>
-              </Box>
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="caption" sx={{ fontSize: '0.6rem', lineHeight: 1, color: '#666', display: 'block' }}>
-                  {t('game.round', locale)}
-                </Typography>
-                <Typography variant="body2" sx={{ fontSize: '0.875rem', fontWeight: 600, lineHeight: 1.2, color: '#1a1a1a' }}>
-                  {state.currentRound}/{settings.rounds}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        )}
-        <IconButton
-          size="small"
-          onClick={() => setStatsExpanded(!statsExpanded)}
+        <Card
           sx={{
-            backgroundColor: 'primary.main',
-            color: 'white',
-            boxShadow: 2,
-            width: 40,
-            height: 40,
-            '&:hover': {
-              backgroundColor: 'primary.dark',
-            },
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(12px)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: 2,
           }}
         >
-          {statsExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-        </IconButton>
+          <CardContent sx={{ p: 0.5, '&:last-child': { pb: 0.5 }, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            {/* Score */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography variant="caption" sx={{ fontSize: '0.5rem', lineHeight: 1, color: '#999', minWidth: 20 }}>
+                {t('game.points', locale).charAt(0).toUpperCase()}
+              </Typography>
+              <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 700, lineHeight: 1, color: '#1a1a1a' }}>
+                {state.score}
+              </Typography>
+            </Box>
+            
+            {/* Correct Answers */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography variant="caption" sx={{ fontSize: '0.5rem', lineHeight: 1, color: '#4caf50', minWidth: 20 }}>
+                ✓
+              </Typography>
+              <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 700, lineHeight: 1, color: '#1a1a1a' }}>
+                {state.correctAnswers}/{state.currentRound}
+              </Typography>
+            </Box>
+            
+            {/* Round */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography variant="caption" sx={{ fontSize: '0.5rem', lineHeight: 1, color: '#999', minWidth: 20 }}>
+                {t('game.round', locale).charAt(0).toUpperCase()}
+              </Typography>
+              <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 700, lineHeight: 1, color: '#1a1a1a' }}>
+                {state.currentRound}/{settings.rounds}
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
       </Box>
 
-      {/* Game Stats Overlay - Top Right */}
+      {/* Game Stats Overlay - Top Right (Desktop only) */}
       <Box
         sx={{
           position: 'absolute',
-          top: { xs: 8, sm: 16 },
-          right: { xs: 8, sm: 16 },
-          left: { xs: 8, sm: 'auto' },
+          top: 16,
+          right: 16,
           zIndex: 10,
-          display: { xs: statsExpanded ? 'flex' : 'none', sm: 'flex' },
+          display: { xs: 'none', sm: 'flex' },
           flexDirection: 'column',
           gap: 1,
-          maxWidth: { xs: '100%', sm: 250 },
-          minWidth: { xs: 'auto', sm: 200 },
-          pt: { xs: 6, sm: 0 },
+          maxWidth: 250,
+          minWidth: 200,
         }}
       >
         <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 } }}>
@@ -155,6 +145,57 @@ export default function GameOverlay({
             </CardContent>
           </Card>
         </Box>
+
+        <Card
+          sx={{
+            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+            backdropFilter: 'blur(12px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            border: '2px solid rgba(76, 175, 80, 0.3)',
+            borderRadius: 2,
+          }}
+        >
+          <CardContent sx={{ p: { xs: 0.75, sm: 1 }, '&:last-child': { pb: { xs: 0.75, sm: 1 } } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box
+                sx={{
+                  width: { xs: 32, sm: 40 },
+                  height: { xs: 32, sm: 40 },
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Typography sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>✓</Typography>
+              </Box>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="body2" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' }, lineHeight: 1, color: '#2e7d32', fontWeight: 500 }}>
+                  {t('results.correctAnswers', locale)}
+                </Typography>
+                <Typography variant="h6" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' }, fontWeight: 600, lineHeight: 1.2, color: '#1b5e20' }}>
+                  {state.correctAnswers} / {state.currentRound}
+                </Typography>
+              </Box>
+              <Typography 
+                variant="h4" 
+                sx={{ 
+                  fontSize: { xs: '1.5rem', sm: '2rem' }, 
+                  fontWeight: 700, 
+                  color: state.currentRound > 0 ? 
+                    `rgba(76, 175, 80, ${Math.max(0.3, state.correctAnswers / state.currentRound)})` : 
+                    'rgba(76, 175, 80, 0.3)',
+                  minWidth: { xs: 48, sm: 60 },
+                  textAlign: 'right',
+                }}
+              >
+                {state.currentRound > 0 ? Math.round((state.correctAnswers / state.currentRound) * 100) : 0}%
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
 
         <Card
           sx={{

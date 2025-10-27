@@ -349,12 +349,16 @@ export default function GamePage() {
                   backgroundColor: 'rgba(255, 255, 255, 0.2)',
                   color: 'white',
                   borderColor: 'rgba(255, 255, 255, 0.3)',
+                  minWidth: { xs: 'auto', sm: 'auto' },
+                  px: { xs: 1, sm: 2 },
                   '&:hover': {
                     backgroundColor: 'rgba(255, 255, 255, 0.3)',
                   },
                 }}
               >
-                {t('gameActions.restart', locale)}
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                  {t('gameActions.restart', locale)}
+                </Box>
               </Button>
             )}
             <Button
@@ -365,13 +369,17 @@ export default function GamePage() {
                 borderWidth: '2px',
                 borderColor: 'rgba(255, 255, 255, 0.3)',
                 color: 'white',
+                minWidth: { xs: 'auto', sm: 'auto' },
+                px: { xs: 1, sm: 2 },
                 '&:hover': {
                   borderColor: 'rgba(255, 255, 255, 0.5)',
                   backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 },
               }}
             >
-              {t('gameActions.newGame', locale)}
+              <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                {t('gameActions.newGame', locale)}
+              </Box>
             </Button>
             <Button
               color="inherit"
