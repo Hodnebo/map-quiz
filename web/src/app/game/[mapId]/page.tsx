@@ -277,7 +277,7 @@ export default function GamePage() {
   }, [geojson, state, settings, seed]);
 
   return (
-    <div className="min-h-screen grid grid-rows-[auto_1fr]">
+    <div className="h-screen overflow-hidden grid grid-rows-[auto_1fr]">
       <AppBar
         position="static"
         elevation={0}
@@ -286,7 +286,11 @@ export default function GamePage() {
           borderBottom: 'none',
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{
+          pt: 'env(safe-area-inset-top)',
+          pl: 'env(safe-area-inset-left)',
+          pr: 'env(safe-area-inset-right)'
+        }}>
           <IconButton
             onClick={() => router.push('/')}
             color="inherit"
@@ -399,13 +403,13 @@ export default function GamePage() {
           </Box>
         </Toolbar>
       </AppBar>
-      <div className="relative h-full">
+      <div className="relative h-full overflow-hidden">
         {loading && <div className="absolute inset-0 flex items-center justify-center">{t('gameActions.loadingMap', locale)}</div>}
         {error && <div className="absolute inset-0 flex items-center justify-center text-red-600">{error}</div>}
         {state.status === "playing" && targetName && settings.gameMode !== 'reverse_quiz' && (
           <div
             className={
-              "pointer-events-none absolute top-3 left-1/2 -translate-x-1/2 z-10 px-4 py-2 rounded-full shadow-md border " +
+              "pointer-events-none absolute top-3 left-1/2 -translate-x-1/2 z-10 max-w-[calc(100vw-2rem)] px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-md border break-words " +
               (feedback === "correct"
                  ? " feedback-correct"
                  : feedback === "wrong" || feedbackMessage
@@ -414,16 +418,16 @@ export default function GamePage() {
             }
             aria-live="polite"
           >
-            <span className={(feedback === "correct" ? "animate-correct " : feedback === "wrong" ? "animate-wrong " : "") + "inline-flex items-center gap-2"}>
-              <span className="text-xs text-white" style={{ opacity: feedback ? 0.9 : 0.9 }}>
+            <span className={(feedback === "correct" ? "animate-correct " : feedback === "wrong" ? "animate-wrong " : "") + "inline-flex items-center gap-1 sm:gap-2 flex-wrap justify-center"}>
+              <span className="text-[0.65rem] sm:text-xs text-white" style={{ opacity: feedback ? 0.9 : 0.9 }}>
                 {feedback ? (feedback === "correct" ? "Riktig" : "Feil") : feedbackMessage ? "" : "Finn"}
               </span>
-              <span className="font-semibold text-white">
+              <span className="font-semibold text-white text-sm sm:text-base">
                 {feedback === "wrong" && attemptsLeft <= 0 ? `Riktig svar: ${targetName}` : targetName}
               </span>
             </span>
             {feedbackMessage && (
-              <div className="mt-1 text-xs text-white text-center" style={{ opacity: 0.95 }}>
+              <div className="mt-1 text-[0.65rem] sm:text-xs text-white text-center" style={{ opacity: 0.95 }}>
                 {feedbackMessage}
               </div>
             )}

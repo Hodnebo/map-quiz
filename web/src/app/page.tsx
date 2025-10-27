@@ -81,7 +81,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 grid grid-rows-[auto_1fr]">
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 grid grid-rows-[auto_1fr]">
       <AppBar
         position="static"
         elevation={0}
@@ -90,7 +90,11 @@ export default function LandingPage() {
           borderBottom: 'none',
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{
+          pt: 'env(safe-area-inset-top)',
+          pl: 'env(safe-area-inset-left)',
+          pr: 'env(safe-area-inset-right)'
+        }}>
           <Typography
             variant="h1"
             component="h1"
@@ -137,7 +141,7 @@ export default function LandingPage() {
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="lg" sx={{ py: { xs: 4, sm: 6, md: 8 } }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 4, sm: 6, md: 8 }, overflowY: 'auto', height: '100%' }}>
         <Box sx={{ textAlign: 'center', mb: 6 }}>
           <Typography
             variant="h2"

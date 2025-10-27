@@ -19,10 +19,14 @@
     }
 }
 
-body {
+html, body {
+    overflow: hidden;
+    height: 100%;
     background: var(--background);
     color: var(--foreground);
     font-family: Arial, Helvetica, sans-serif;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
 }
 
 @keyframes pulse-correct {
@@ -102,4 +106,31 @@ body {
     100% {
         transform: translateX(230%);
     }
+}
+
+/* Mobile-specific fixes */
+@media (max-width: 640px) {
+  #__next {
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  /* Prevent zoom on input focus */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  
+  /* Prevent elastic scrolling on iOS */
+  body {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* Fix for iOS Safari viewport height issues */
+@supports (-webkit-touch-callout: none) {
+  .h-screen {
+    height: -webkit-fill-available;
+  }
 }

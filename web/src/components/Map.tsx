@@ -407,7 +407,15 @@ export default function MapView(props: MapProps) {
   }, [focusBounds, focusPadding]);
 
 
-  return <div ref={containerRef} className="w-full h-full" aria-label="Kart over Oslo bydeler" role="region" />;
+  return (
+    <div 
+      ref={containerRef} 
+      className="w-full h-full" 
+      style={{ touchAction: 'pan-x pan-y' }}
+      aria-label="Kart over Oslo bydeler" 
+      role="region" 
+    />
+  );
 }
 
 function turfBBox(geojson: any): [number, number, number, number] | null {
