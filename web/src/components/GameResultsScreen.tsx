@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
-import { Box, Card, CardContent, Typography, Button, Fade, Zoom } from '@mui/material';
-import { Refresh as RefreshIcon, Settings as SettingsIcon, EmojiEvents as TrophyIcon, Star as StarIcon } from '@mui/icons-material';
+import { useMemo, useEffect } from 'react';
+import { Box, Card, CardContent, Typography, Button, Fade, Zoom, IconButton } from '@mui/material';
+import { Refresh as RefreshIcon, Settings as SettingsIcon, EmojiEvents as TrophyIcon, Star as StarIcon, Close as CloseIcon } from '@mui/icons-material';
 import { t } from '@/i18n';
 import type { Locale } from '@/i18n/config';
 
@@ -12,6 +12,7 @@ interface GameResultsScreenProps {
   totalRounds: number;
   onRestart: () => void;
   onNewGame: () => void;
+  onClose?: () => void;
   locale: Locale;
 }
 
@@ -21,8 +22,22 @@ export default function GameResultsScreen({
   totalRounds,
   onRestart,
   onNewGame,
+  onClose,
   locale,
 }: GameResultsScreenProps) {
+  // Handle ESC key to close
+  useEffect(() => {
+    if (!onClose) return;
+    
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [onClose]);
   // Calculate percentage
   const percentage = useMemo(() => {
     if (totalRounds === 0) return 0;
@@ -71,9 +86,29 @@ export default function GameResultsScreen({
               boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
               borderRadius: 4,
               overflow: 'visible',
+              position: 'relative',
             }}
           >
             <CardContent sx={{ p: { xs: 3, sm: 4 }, textAlign: 'center' }}>
+              {/* Close Button */}
+              {onClose && (
+                <IconButton
+                  onClick={onClose}
+                  sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    color: 'white',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    },
+                  }}
+                  aria-label="Close results"
+                >
+                  <CloseIcon />
+                </IconButton>
+              )}
               {/* Trophy Icon */}
               <Box
                 sx={{

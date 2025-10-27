@@ -500,6 +500,7 @@ export default function GamePage() {
             totalRounds={state.settings.rounds}
             onRestart={doRestart}
             onNewGame={handleNewGame}
+            onClose={() => setState((s) => ({ ...s, status: 'idle' }))}
             locale={locale}
           />
         )}
