@@ -121,5 +121,21 @@
       "name": "Flervalgsspørsmål",
       "description": "Velg riktig område fra flere alternativer"
     }
+  },
+  "results": {
+    "title": "Spillet er fullført!",
+    "score": "Sluttpoeng",
+    "correctAnswers": "Riktige svar",
+    "outOf": "av",
+    "accuracy": "Nøyaktighet",
+    "congratulations": {
+      "excellent": "Utmerket! 🌟",
+      "great": "Flott jobbet! 👏",
+      "good": "Bra jobbet! 👍",
+      "notBad": "Ikke verst! Fortsett sånn! 💪",
+      "keepPracticing": "Fortsett å øve! 📚"
+    },
+    "restart": "Spill igjen",
+    "newGame": "Nytt spill"
   }
 }

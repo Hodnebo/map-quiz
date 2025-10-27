@@ -55,18 +55,3 @@ export interface GameModeStrategy {
     showTimer?: boolean;
   };
 }
-
-export interface ModeSettingsProps {
-  settings: GameSettings;
-  effectiveSettings: any;
-  onChange: (settings: GameSettings) => void;
-  allIdsLength: number;
-}
-
-export interface ModeOverlayProps {
-  state: GameState;
-  settings: GameSettings;
-  effectiveSettings: any;
-  targetName?: string | null;
-  attemptsLeft?: number;
-}

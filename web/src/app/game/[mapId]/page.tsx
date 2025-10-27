@@ -22,6 +22,7 @@ import type { Locale } from "@/i18n/config";
 import GameOverlay from "@/components/GameOverlay";
 import ReverseQuizOverlay from "@/components/ReverseQuizOverlay";
 import { GameModeModal } from "@/components/GameModeModal";
+import GameResultsScreen from "@/components/GameResultsScreen";
 
 const QuizMap = dynamic(() => import("@/components/Map"), { ssr: false });
 
@@ -481,6 +482,17 @@ export default function GamePage() {
               setLastAnswerExhaustedAttempts(false);
               setLastCorrectAnswerName("");
             }}
+          />
+        )}
+
+        {state.status === "ended" && (
+          <GameResultsScreen
+            score={state.score}
+            correctAnswers={state.correctAnswers}
+            totalRounds={state.settings.rounds}
+            onRestart={doRestart}
+            onNewGame={handleNewGame}
+            locale={locale}
           />
         )}
 

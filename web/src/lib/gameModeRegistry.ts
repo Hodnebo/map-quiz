@@ -20,26 +20,6 @@ class GameModeRegistry {
   getAllModes(): GameModeStrategy[] {
     return Array.from(this.modes.values());
   }
-
-  getModeIds(): string[] {
-    return Array.from(this.modes.keys());
-  }
-
-  hasMode(id: string): boolean {
-    return this.modes.has(id);
-  }
-
-  setDefaultMode(id: string): void {
-    if (this.modes.has(id)) {
-      this.defaultModeId = id;
-    } else {
-      console.warn(`Cannot set default mode to '${id}' - mode not registered`);
-    }
-  }
-
-  getDefaultMode(): GameModeStrategy {
-    return this.getMode(this.defaultModeId);
-  }
 }
 
 // Create singleton instance

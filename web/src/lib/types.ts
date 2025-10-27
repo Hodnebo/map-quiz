@@ -33,16 +33,6 @@ export interface MapConfig {
   subcategory?: string; // e.g., 'countries', 'districts', 'municipalities'
 }
 
-// Map metadata for UI display
-export interface MapMetadata {
-  description: string;
-  featureCount: number;
-  language: string;
-  region: string;
-  previewImage?: string;
-  difficulty?: "easy" | "medium" | "hard";
-}
-
 export interface GameMode {
   id: string;
   name: string;
@@ -77,6 +67,7 @@ export interface GameState {
   currentRound: number;
   currentTargetId: string | null;
   answeredIds: string[];
+  correctAnswers: number;
   settings: GameSettings;
   attemptsThisRound?: number;
   revealedIds?: string[];

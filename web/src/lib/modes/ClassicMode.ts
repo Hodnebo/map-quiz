@@ -110,6 +110,7 @@ export class ClassicMode extends BaseGameMode {
       ...state,
       score: newScore,
       streak: newStreak,
+      correctAnswers: wasCorrect ? state.correctAnswers + 1 : state.correctAnswers,
       answeredIds: answeredTargets,
       currentRound: hasMoreRounds && nextTarget ? state.currentRound + 1 : state.currentRound,
       currentTargetId: nextTarget,

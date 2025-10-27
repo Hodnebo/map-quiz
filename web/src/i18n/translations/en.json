@@ -129,5 +129,21 @@
       "name": "Norwegian Counties",
       "description": "Test your knowledge of all 15 Norwegian counties"
     }
+  },
+  "results": {
+    "title": "Game Complete!",
+    "score": "Final Score",
+    "correctAnswers": "Correct Answers",
+    "outOf": "out of",
+    "accuracy": "Accuracy",
+    "congratulations": {
+      "excellent": "Excellent work! 🌟",
+      "great": "Great job! 👏",
+      "good": "Good work! 👍",
+      "notBad": "Not bad! Keep going! 💪",
+      "keepPracticing": "Keep practicing! 📚"
+    },
+    "restart": "Play Again",
+    "newGame": "New Game"
   }
 }
