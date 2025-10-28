@@ -1,4 +1,4 @@
-import type { GameMode } from './types';
+import type { GameMode, GameSettings } from './types';
 import { gameModeRegistry } from './gameModeRegistry';
 
 // Import modes to register them
@@ -27,7 +27,7 @@ export function getGameMode(id: string): GameMode {
   };
 }
 
-export function getEffectiveSettings(gameSettings: { gameMode: string; difficulty?: string; alternativesCount?: number | null; maxAttempts?: number; timerSeconds?: number | null }) {
+export function getEffectiveSettings(gameSettings: GameSettings): Partial<GameSettings> {
   const mode = gameModeRegistry.getMode(gameSettings.gameMode);
   const defaultSettings = mode.getDefaultSettings();
 

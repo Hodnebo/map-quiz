@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useRegionData } from "@/hooks/useRegionData";
-import type { GameSettings, GameState } from "@/lib/types";
+import type { GameSettings, GameState, GameMode } from "@/lib/types";
 import { createInitialState, startGame, answer } from "@/lib/game";
 import { load, save, hasSeenModal, markModalAsSeen } from "@/lib/persistence";
 import { XorShift32 } from "@/lib/rng";
@@ -50,7 +50,15 @@ export default function GamePage() {
   const { regions: bydeler, geojson, loading, error } = useRegionData(mapId);
   const { isDarkMode, toggleTheme } = useTheme();
   const [locale, setLocale] = useState<Locale>(() => load(`locale:${mapId}`, "no" as Locale));
-  const [settings, setSettings] = useState<GameSettings>(() => load(`settings:${mapId}`, DEFAULT_SETTINGS));
+  const [settings, setSettings] = useState<GameSettings>(() => {
+    const loaded = load(`settings:${mapId}`, DEFAULT_SETTINGS);
+    // Ensure the loaded settings have the correct type structure
+    return {
+      ...DEFAULT_SETTINGS,
+      ...loaded,
+      difficulty: loaded.difficulty as GameSettings['difficulty'] ?? DEFAULT_SETTINGS.difficulty,
+    };
+  });
   const [seed, setSeed] = useState<number>(() => load(`seed:${mapId}`, Math.floor(Date.now() % 2 ** 31)));
   const [state, setState] = useState<GameState>(() => createInitialState(settings));
   const [feedback, setFeedback] = useState<null | "correct" | "wrong">(null);
@@ -142,11 +150,11 @@ export default function GamePage() {
     }
   }, [isFirstVisit]);
 
-  const handleStartGame = useCallback((mode: string, newSettings: any) => {
+  const handleStartGame = useCallback((mode: GameMode, newSettings: GameSettings) => {
     const updatedSettings = {
       ...settings,
       ...newSettings,
-      gameMode: mode as any,
+      gameMode: mode.id,
     };
     setSettings(updatedSettings);
     setWrongAnswerIds([]);
@@ -249,7 +257,7 @@ export default function GamePage() {
       }
       const res = answer(stateRef.current, userAnswer, allIds, seed, correctName);
       setFeedback(res.isCorrect ? "correct" : "wrong");
-      setLastAnswerExhaustedAttempts(res.revealedCorrect);
+      setLastAnswerExhaustedAttempts(res.revealedCorrect ?? false);
       if (res.revealedCorrect) {
         setLastCorrectAnswerName(correctName);
       }

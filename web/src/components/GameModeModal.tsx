@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import { GameMode, GameSettings } from '@/lib/types';
 import { gameModeRegistry } from '@/lib/gameModeRegistry';
+import { GAME_MODES } from '@/lib/gameModes';
 import '@/lib/modes'; // Import to ensure modes are registered
 import { t } from '@/i18n';
 import type { Locale } from '@/i18n/config';
@@ -29,7 +30,7 @@ interface GameModeModalProps {
   open: boolean;
   onClose: () => void;
   onStartGame: (mode: GameMode, settings: GameSettings) => void;
-  currentMode?: GameMode;
+  currentMode?: string;
   currentSettings?: GameSettings;
   totalEntries?: number;
   locale?: Locale;
@@ -44,11 +45,12 @@ export function GameModeModal({
   totalEntries = 15,
   locale = 'no',
 }: GameModeModalProps) {
-  const [selectedMode, setSelectedMode] = useState<GameMode>('classic');
+  const [selectedMode, setSelectedMode] = useState<string>('classic');
   const [settings, setSettings] = useState<GameSettings>(() => ({
+    gameMode: currentMode ?? 'classic',
     rounds: currentSettings?.rounds ?? 10,
     maxAttempts: currentSettings?.maxAttempts ?? 3,
-    difficulty: currentSettings?.difficulty ?? 'medium',
+    difficulty: currentSettings?.difficulty ?? 'normal',
     alternativesCount: currentSettings?.alternativesCount ?? 4,
   }));
 
@@ -62,13 +64,14 @@ export function GameModeModal({
     }
   }, [currentMode, currentSettings]);
 
-  const handleModeChange = (mode: GameMode) => {
-    setSelectedMode(mode);
+  const handleModeChange = (modeId: string) => {
+    setSelectedMode(modeId);
     // Reset settings to defaults for the new mode, but preserve existing fields
-    const modeStrategy = gameModeRegistry.getMode(mode);
+    const modeStrategy = gameModeRegistry.getMode(modeId);
     const defaultSettings = modeStrategy.getDefaultSettings();
     setSettings(prev => ({
       ...prev,
+      gameMode: modeId,
       ...defaultSettings,
     }));
   };
@@ -81,8 +84,11 @@ export function GameModeModal({
   };
 
   const handleStartGame = () => {
-    onStartGame(selectedMode, settings);
-    onClose();
+    const mode = GAME_MODES[selectedMode];
+    if (mode) {
+      onStartGame(mode, settings);
+      onClose();
+    }
   };
 
   const selectedModeStrategy = gameModeRegistry.getMode(selectedMode);
@@ -124,7 +130,7 @@ export function GameModeModal({
                 <Chip
                   key={strategy.id}
                   label={t(strategy.name, locale)}
-                  onClick={() => handleModeChange(strategy.id as GameMode)}
+                  onClick={() => handleModeChange(strategy.id)}
                   variant={isSelected ? 'filled' : 'outlined'}
                   sx={{
                     backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : 'transparent',
