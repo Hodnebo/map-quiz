@@ -1,3 +1,4 @@
+import React from 'react';
 import { getAllMapIds } from '@/config/maps';
 
 export function generateStaticParams() {

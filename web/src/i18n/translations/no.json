@@ -33,7 +33,7 @@
   "maps": {
     "oslo": {
       "name": "Oslo Bydeler",
-      "description": "Test dine kjennskap til Oslos del-bydeler"
+      "description": "Test dine kjennskap til Oslos bydeler"
     },
     "fylker": {
       "name": "Norske Fylker",
@@ -78,7 +78,7 @@
     "streak": "Streak",
     "round": "Runde",
     "finished": "Ferdig! 🎉",
-    "totalDistricts": "Totalt {count} bydeler tilgjengelig"
+    "totalRegions": "Totalt {count} regioner tilgjengelig"
   },
   "modal": {
     "title": "🗺️ Velg spillmodus",
@@ -89,8 +89,9 @@
     "maxAttempts": "Maks forsøk per runde",
     "difficulty": "Vanskelighet",
     "alternatives": "Antall alternativer",
+    "training": "Trening",
     "easy": "Lett",
-    "medium": "Middels",
+    "normal": "Normal",
     "hard": "Vanskelig",
     "expert": "Ekspert",
     "full": "Alle {count} (full)",

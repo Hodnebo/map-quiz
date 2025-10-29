@@ -11,7 +11,7 @@ class GameModeRegistry {
   getMode(id: string): GameModeStrategy {
     const mode = this.modes.get(id);
     if (!mode) {
-      console.warn(`Game mode '${id}' not found, falling back to '${this.defaultModeId}'`);
+      // Game mode not found, using default
       return this.modes.get(this.defaultModeId) || this.modes.values().next().value;
     }
     return mode;

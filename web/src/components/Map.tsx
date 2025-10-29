@@ -47,10 +47,10 @@ export default function MapView(props: MapProps) {
   const dataRef = useRef<any | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
 
-  const sourceId = useMemo(() => "bydeler-source", []);
-  const fillLayerId = useMemo(() => "bydeler-fill", []);
-  const lineLayerId = useMemo(() => "bydeler-line", []);
-  const hoverLineLayerId = useMemo(() => "bydeler-hover-line", []);
+  const sourceId = useMemo(() => "regions-source", []);
+  const fillLayerId = useMemo(() => "regions-fill", []);
+  const lineLayerId = useMemo(() => "regions-line", []);
+  const hoverLineLayerId = useMemo(() => "regions-hover-line", []);
   const correctFillId = useMemo(() => "correct-fill", []);
   const wrongFillId = useMemo(() => "wrong-fill", []);
   const candidatesFillId = useMemo(() => "candidates-fill", []);
@@ -283,7 +283,7 @@ export default function MapView(props: MapProps) {
       markersRef.current = [];
       map.remove();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line
   }, [geojsonUrl, hideBasemapLabels, mapStyle, isDarkMode]);
 
   // Update revealed filters when list changes
@@ -399,10 +399,10 @@ export default function MapView(props: MapProps) {
       ) {
         map.fitBounds(focusBounds, { padding: focusPadding, duration: 300 });
       } else {
-        console.warn('Invalid bounds coordinates:', focusBounds);
+        // Invalid bounds coordinates detected
       }
-    } catch (error) {
-      console.warn('Error fitting bounds:', error);
+    } catch {
+      // Error fitting bounds - silently ignore
     }
   }, [focusBounds, focusPadding]);
 
@@ -412,7 +412,7 @@ export default function MapView(props: MapProps) {
       ref={containerRef} 
       className="w-full h-full" 
       style={{ touchAction: 'pan-x pan-y' }}
-      aria-label="Kart over Oslo bydeler" 
+      aria-label="Kart over regioner" 
       role="region" 
     />
   );

@@ -47,19 +47,11 @@ export default function GamePage() {
   }
 
   const mapConfig = getMapConfig(mapId);
-  const { regions: bydeler, geojson, loading, error } = useRegionData(mapId);
+  const { regions, geojson, loading, error } = useRegionData(mapId);
   const { isDarkMode, toggleTheme } = useTheme();
   const [locale, setLocale] = useState<Locale>(() => load(`locale:${mapId}`, "no" as Locale));
-  const [settings, setSettings] = useState<GameSettings>(() => {
-    const loaded = load(`settings:${mapId}`, DEFAULT_SETTINGS);
-    // Ensure the loaded settings have the correct type structure
-    return {
-      ...DEFAULT_SETTINGS,
-      ...loaded,
-      difficulty: loaded.difficulty as GameSettings['difficulty'] ?? DEFAULT_SETTINGS.difficulty,
-    };
-  });
-  const [seed, setSeed] = useState<number>(() => load(`seed:${mapId}`, Math.floor(Date.now() % 2 ** 31)));
+  const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS); // Default to prevent hydration mismatch
+  const [seed, setSeed] = useState<number>(Math.floor(Date.now() % 2 ** 31)); // Default to prevent hydration mismatch
   const [state, setState] = useState<GameState>(() => createInitialState(settings));
   const [feedback, setFeedback] = useState<null | "correct" | "wrong">(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string>("");
@@ -68,12 +60,32 @@ export default function GamePage() {
   const [lastCorrectAnswerName, setLastCorrectAnswerName] = useState<string>('');
   const [showModal, setShowModal] = useState<boolean>(false);
   const [isFirstVisit, setIsFirstVisit] = useState<boolean>(false);
-  const answerLockRef = useRef(false);
+  // answerLockRef removed - not used
   const stateRef = useRef(state);
   const settingsRef = useRef(settings);
-  const answerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const answerTimeoutRef = useRef<number | null>(null);
   useEffect(() => { stateRef.current = state; }, [state]);
   useEffect(() => { settingsRef.current = settings; }, [settings]);
+
+  // Load data after hydration to prevent hydration mismatch
+  useEffect(() => {
+    const loadedLocale = load(`locale:${mapId}`, 'no' as Locale);
+    setLocale(loadedLocale);
+  }, [mapId]);
+
+  useEffect(() => {
+    const loadedSettings = load(`settings:${mapId}`, DEFAULT_SETTINGS);
+    setSettings({
+      ...DEFAULT_SETTINGS,
+      ...loadedSettings,
+      difficulty: loadedSettings.difficulty as GameSettings['difficulty'] ?? DEFAULT_SETTINGS.difficulty,
+    });
+  }, [mapId]);
+
+  useEffect(() => {
+    const loadedSeed = load(`seed:${mapId}`, Math.floor(Date.now() % 2 ** 31));
+    setSeed(loadedSeed);
+  }, [mapId]);
 
   useEffect(() => save(`locale:${mapId}`, locale), [locale, mapId]);
   useEffect(() => save(`settings:${mapId}`, settings), [settings, mapId]);
@@ -110,7 +122,7 @@ export default function GamePage() {
     }
   }, [settings.gameMode, settings]);
 
-  const allIds = useMemo(() => (bydeler ? bydeler.map((b) => b.id) : []), [bydeler]);
+  const allIds = useMemo(() => (regions ? regions.map((r) => r.id) : []), [regions]);
   const canPlay = !!geojson && allIds.length > 0;
   const effectiveSettings = useMemo(() => getEffectiveSettings(settings), [settings]);
 
@@ -216,10 +228,9 @@ export default function GamePage() {
       const res = answer(stateRef.current, id, allIds, seed);
       setFeedback(res.isCorrect ? "correct" : "wrong");
       if (!res.isCorrect) {
-        const targetName = bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? "området";
-        const guessedName = bydeler?.find((b) => b.id === id)?.name ?? id;
-        console.log('Debug - bydeler:', bydeler?.length, 'id:', id, 'guessedName:', guessedName);
-        console.log('Debug - bydeler IDs:', bydeler?.map(b => b.id));
+        // targetName removed - not used in this context
+        const guessedName = regions?.find((r) => r.id === id)?.name ?? id;
+        // Debug logs removed for production
         setFeedbackMessage(`Det var ${guessedName}`);
       } else {
         setFeedbackMessage("");
@@ -246,7 +257,7 @@ export default function GamePage() {
         answerTimeoutRef.current = null;
       }, res.isCorrect ? 450 : 2000);
     },
-    [allIds, seed, bydeler, state.currentTargetId]
+    [allIds, seed, regions, state.currentTargetId]
   );
 
   const onReverseQuizAnswer = useCallback(
@@ -289,7 +300,7 @@ export default function GamePage() {
     [allIds, seed]
   );
 
-  const targetName = useMemo(() => bydeler?.find((b) => b.id === state.currentTargetId)?.name ?? null, [bydeler, state.currentTargetId]);
+  const targetName = useMemo(() => regions?.find((r) => r.id === state.currentTargetId)?.name ?? null, [regions, state.currentTargetId]);
   const attemptsLeft = useMemo(() => {
     return (effectiveSettings.maxAttempts ?? 3) - (state.attemptsThisRound ?? 0);
   }, [effectiveSettings.maxAttempts, state.attemptsThisRound]);
@@ -499,7 +510,7 @@ export default function GamePage() {
           locale={locale}
         />
 
-        {settings.gameMode === 'reverse_quiz' && bydeler && (
+        {settings.gameMode === 'reverse_quiz' && regions && (
           <ReverseQuizOverlay
             state={state}
             settings={settings}
@@ -507,7 +518,7 @@ export default function GamePage() {
             targetId={state.currentTargetId}
             attemptsLeft={lastAnswerExhaustedAttempts ? 0 : attemptsLeft}
             lastCorrectAnswerName={lastCorrectAnswerName}
-            bydeler={bydeler}
+            regions={regions}
             onAnswer={onReverseQuizAnswer}
             feedback={feedback}
             feedbackMessage={feedbackMessage}

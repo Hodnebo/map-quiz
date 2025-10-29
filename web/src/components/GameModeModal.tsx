@@ -14,8 +14,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  FormControlLabel,
-  Switch,
   Chip,
   Stack,
 } from '@mui/material';
@@ -184,7 +182,7 @@ export function GameModeModal({
                 })}
               </Select>
               <Typography variant="caption" sx={{ mt: 0.5, opacity: 0.8, fontSize: '0.75rem' }}>
-                {t('game.totalDistricts', locale, { count: totalEntries })}
+                {t('game.totalRegions', locale, { count: totalEntries })}
               </Typography>
             </FormControl>
 
@@ -237,9 +235,11 @@ export function GameModeModal({
                     },
                   }}
                 >
+                  <MenuItem value="training">{t('modal.training', locale)}</MenuItem>
                   <MenuItem value="easy">{t('modal.easy', locale)}</MenuItem>
-                  <MenuItem value="medium">{t('modal.medium', locale)}</MenuItem>
+                  <MenuItem value="normal">{t('modal.normal', locale)}</MenuItem>
                   <MenuItem value="hard">{t('modal.hard', locale)}</MenuItem>
+                  <MenuItem value="expert">{t('modal.expert', locale)}</MenuItem>
                 </Select>
               </FormControl>
             )}

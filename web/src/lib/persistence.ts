@@ -4,7 +4,9 @@ export function save<T>(key: string, value: T) {
   try {
     if (typeof window === "undefined") return;
     localStorage.setItem(`${NS}:${key}`, JSON.stringify(value));
-  } catch {}
+  } catch {
+    // Ignore errors - silently continue
+  }
 }
 
 export function load<T>(key: string, fallback: T): T {

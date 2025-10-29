@@ -1,13 +1,5 @@
 export type Coordinates = [number, number];
 
-export interface Bydel {
-  id: string;
-  name: string;
-  centroid: Coordinates;
-  areaKm2: number;
-  slug: string;
-}
-
 // Generic region type for multi-map support
 export interface Region {
   id: string;
@@ -16,6 +8,9 @@ export interface Region {
   areaKm2: number;
   slug: string;
 }
+
+// Legacy alias for backward compatibility
+export type Bydel = Region;
 
 // Map configuration interface
 export interface MapConfig {

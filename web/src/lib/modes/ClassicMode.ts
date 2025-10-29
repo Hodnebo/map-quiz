@@ -64,7 +64,8 @@ export class ClassicMode extends BaseGameMode {
 
   getMapConfig(state: GameState, settings: GameSettings, geojson: any, seed: number): MapConfig {
     const difficulty = settings.difficulty ?? 'normal';
-    const zoomEnabled = difficulty !== 'hard';
+    // Disable zoom for hard and expert difficulties
+    const zoomEnabled = difficulty !== 'hard' && difficulty !== 'expert';
     
     if (!zoomEnabled || !state.currentTargetId) {
       return this.createMapConfig(false);
@@ -145,18 +146,18 @@ export class ClassicMode extends BaseGameMode {
     if (!feat) return null;
 
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    let coordCount = 0;
+    // coordCount removed - not used
     let invalidCoordCount = 0;
     const walk = (coords: any) => {
       if (typeof coords[0] === "number") {
         const [x, y] = coords as [number, number];
-        coordCount++;
+        // coordCount removed - not used
         
         // Check for invalid coordinates
         if (x < -180 || x > 180 || y < -90 || y > 90 || isNaN(x) || isNaN(y) || !isFinite(x) || !isFinite(y)) {
           invalidCoordCount++;
           if (invalidCoordCount <= 5) { // Only log first 5 invalid coordinates
-            console.warn(`Invalid coordinate in ${feat.properties?.name}: [${x}, ${y}]`);
+            // Invalid coordinate detected but not logged in production
           }
         }
         
@@ -172,38 +173,36 @@ export class ClassicMode extends BaseGameMode {
     if (minX === Infinity) return null;
     
     // Log coordinate statistics
-    console.log(`Bounds calculation for ${feat.properties?.name}: ${coordCount} coordinates, ${invalidCoordCount} invalid`);
-    console.log(`Raw min/max values: minX=${minX}, minY=${minY}, maxX=${maxX}, maxY=${maxY}`);
+    // Debug bounds calculation removed for production
 
     const rawBounds: [[number, number], [number, number]] = [[minX, minY], [maxX, maxY]];
     
     // Debug logging for invalid bounds
     if (minX < -180 || maxX > 180 || minY < -90 || maxY > 90) {
-      console.warn(`Invalid bounds for feature ${targetId}:`, {
-        minX, minY, maxX, maxY,
-        bounds: rawBounds,
-        featureName: feat.properties?.name,
-        interpretation: `minLng=${minX}, minLat=${minY}, maxLng=${maxX}, maxLat=${maxY}`,
-        coordCount,
-        invalidCoordCount
-      });
+      // Invalid bounds detected but not logged in production
     }
     
-    console.log(`Before padding: rawBounds=${JSON.stringify(rawBounds)}`);
     const paddedBounds = this.padBounds(rawBounds, this.getPaddingFactor(difficulty), 0.02, 0.015);
-    console.log(`After padding: paddedBounds=${JSON.stringify(paddedBounds)}`);
     
     if (!randomizeZoomLocation) {
       return paddedBounds;
     }
     
     const rng = new XorShift32((seed + round * 1337) >>> 0);
+    
+    // Check if this is a very large feature (like Russia) and reduce shift factor
+    const [[paddedMinX, paddedMinY], [paddedMaxX, paddedMaxY]] = paddedBounds;
+    const width = paddedMaxX - paddedMinX;
+    const height = paddedMaxY - paddedMinY;
+    const isVeryLarge = width > 60 || height > 30; // More than 60 degrees longitude or 30 degrees latitude
+    
+    const baseShiftFactor = this.getShiftFactor(difficulty);
+    const shiftFactor = isVeryLarge ? baseShiftFactor * 0.3 : baseShiftFactor;
+    
     const jx = (rng.next() - 0.5) * 2;
     const jy = (rng.next() - 0.5) * 2;
     
-    console.log(`Shifting bounds: jx=${jx}, jy=${jy}, shiftFactor=${this.getShiftFactor(difficulty)}`);
-    const finalBounds = this.shiftBounds(paddedBounds, jx * this.getShiftFactor(difficulty), jy * this.getShiftFactor(difficulty));
-    console.log(`Final bounds: ${JSON.stringify(finalBounds)}`);
+    const finalBounds = this.shiftBounds(paddedBounds, jx * shiftFactor, jy * shiftFactor);
     return finalBounds;
   }
 
@@ -267,41 +266,34 @@ export class ClassicMode extends BaseGameMode {
     // If bounds were clamped, log a warning
     if (clampedMinX !== newMinX || clampedMinY !== newMinY || 
         clampedMaxX !== newMaxX || clampedMaxY !== newMaxY) {
-      console.warn(`Bounds were clamped: original=${JSON.stringify(shiftedBounds)}, clamped=${JSON.stringify([[clampedMinX, clampedMinY], [clampedMaxX, clampedMaxY]])}`);
+      // Bounds were clamped but not logged in production
     }
     
     return [[clampedMinX, clampedMinY], [clampedMaxX, clampedMaxY]];
   }
 
+  private getDifficultySettings(difficulty: string) {
+    const settings = {
+      training: { paddingFactor: 1.2, shiftFactor: 0.3, focusPadding: 28 },
+      easy: { paddingFactor: 1.5, shiftFactor: 0.6, focusPadding: 32 },
+      normal: { paddingFactor: 2.0, shiftFactor: 0.8, focusPadding: 40 },
+      medium: { paddingFactor: 2.0, shiftFactor: 0.8, focusPadding: 40 },
+      hard: { paddingFactor: 2.5, shiftFactor: 1.0, focusPadding: 24 },
+      expert: { paddingFactor: 3.0, shiftFactor: 1.0, focusPadding: 24 },
+    };
+    
+    return settings[difficulty as keyof typeof settings] || settings.normal;
+  }
+
   private getPaddingFactor(difficulty: string): number {
-    switch (difficulty) {
-      case "training": return 1.2;
-      case "easy": return 1.5;
-      case "normal": 
-      case "medium": return 2.0;
-      case "hard": return 2.5;
-      case "expert": return 3.0;
-      default: return 1.5;
-    }
+    return this.getDifficultySettings(difficulty).paddingFactor;
   }
 
   private getShiftFactor(difficulty: string): number {
-    switch (difficulty) {
-      case "training": return 0.3;
-      case "easy": return 0.6;
-      case "normal": return 0.8;
-      case "hard": return 1.0;
-      default: return 0.8;
-    }
+    return this.getDifficultySettings(difficulty).shiftFactor;
   }
 
   private getFocusPadding(difficulty: string): number {
-    switch (difficulty) {
-      case "training": return 28;
-      case "easy": return 32;
-      case "normal": return 40;
-      case "hard": return 24;
-      default: return 24;
-    }
+    return this.getDifficultySettings(difficulty).focusPadding;
   }
 }

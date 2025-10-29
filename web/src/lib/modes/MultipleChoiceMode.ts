@@ -34,7 +34,7 @@ export class MultipleChoiceMode extends BaseGameMode {
     };
   }
 
-  processAnswer(state: GameState, answer: string, allIds: string[], seed: number, correctName?: string): AnswerResult {
+  processAnswer(state: GameState, answer: string, allIds: string[], seed: number): AnswerResult {
     if (state.status !== "playing") {
       return { 
         isCorrect: false, 
@@ -66,7 +66,7 @@ export class MultipleChoiceMode extends BaseGameMode {
     return this.advanceToNextQuestion(state, allIds, seed, true);
   }
 
-  getMapConfig(state: GameState, settings: GameSettings, geojson: any, seed: number): MapConfig {
+  getMapConfig(): MapConfig {
     return this.createMapConfig(
       false, // No zoom for multiple choice
       null,  // No focus bounds

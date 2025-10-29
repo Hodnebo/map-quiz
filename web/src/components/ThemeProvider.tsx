@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { ThemeProvider as MuiThemeProvider, CssBaseline } from '@mui/material';
 import { theme, darkTheme } from '@/lib/theme';
 import { ThemeContextProvider, useTheme } from '@/contexts/ThemeContext';
