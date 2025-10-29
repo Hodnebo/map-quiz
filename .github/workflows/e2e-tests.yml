@@ -1,0 +1,48 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: |
+        cd /workspace
+        make install
+    
+    - name: Build application
+      run: |
+        cd /workspace
+        make build
+    
+    - name: Install Playwright Browsers
+      run: |
+        cd /workspace/web
+        npx playwright install --with-deps
+    
+    - name: Run Playwright tests
+      run: |
+        cd /workspace/web
+        npm run test:e2e
+      env:
+        CI: true
+    
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report
+        path: /workspace/web/playwright-report/
+        retention-days: 30

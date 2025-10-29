@@ -52,7 +52,7 @@ clean: ## Remove build artifacts and generated data
 	@rm -f $(WEB_DIR)/public/data/world.geo.json $(WEB_DIR)/public/data/world_simplified.geo.json
 	@rm -f $(WEB_DIR)/public/data/europe.geo.json $(WEB_DIR)/public/data/europe_simplified.geo.json
 
-ci: ## Run CI steps (install, data, lint, build)
+ci: ## Run CI steps (install, data, lint, build, e2e)
 	@$(MAKE) install
 	@$(MAKE) data
 	@$(MAKE) data-kommuner
@@ -60,9 +60,10 @@ ci: ## Run CI steps (install, data, lint, build)
 	@$(MAKE) data-world
 	@$(MAKE) lint
 	@$(MAKE) build
+	@$(MAKE) e2e
 
 test: ## Run unit tests (if configured)
 	@-npm run test --prefix $(WEB_DIR)
 
-e2e: ## Run e2e tests (if configured)
-	@-npm run e2e --prefix $(WEB_DIR)
+e2e: ## Run e2e tests
+	@npm run test:e2e --prefix $(WEB_DIR)

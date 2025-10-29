@@ -413,7 +413,8 @@ export default function MapView(props: MapProps) {
       className="w-full h-full" 
       style={{ touchAction: 'pan-x pan-y' }}
       aria-label="Kart over regioner" 
-      role="region" 
+      role="region"
+      data-testid="map-container"
     />
   );
 }
