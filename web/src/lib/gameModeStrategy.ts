@@ -1,4 +1,4 @@
-import type { GameState, GameSettings, Bydel } from './types';
+import type { GameState, GameSettings } from './types';
 
 export interface MapConfig {
   zoomEnabled: boolean;

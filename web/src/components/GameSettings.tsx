@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardContent, Typography, Box, FormControl, InputLabel, Select, MenuItem, FormControlLabel, Checkbox, TextField, FormHelperText, Divider } from '@mui/material';
+import { Card, CardContent, Typography, Box, FormControl, InputLabel, Select, MenuItem, FormControlLabel, Checkbox, TextField, FormHelperText } from '@mui/material';
 import type { GameSettings } from '@/lib/types';
 import { GAME_MODES, getGameMode, getEffectiveSettings } from '@/lib/gameModes';
 import { gameModeRegistry } from '@/lib/gameModeRegistry';
@@ -13,7 +13,7 @@ interface GameSettingsProps {
   isGameActive?: boolean;
 }
 
-export default function GameSettings({ settings, effectiveSettings, onSettingsChange, allIdsLength }: GameSettingsProps) {
+export default function GameSettingsComponent({ settings, onSettingsChange, allIdsLength }: GameSettingsProps) {
   const updateSetting = <K extends keyof GameSettings>(key: K, value: GameSettings[K]) => {
     onSettingsChange({ ...settings, [key]: value });
   };

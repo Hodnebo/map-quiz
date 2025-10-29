@@ -78,7 +78,7 @@
     "streak": "Streak",
     "round": "Round",
     "finished": "Done! 🎉",
-    "totalDistricts": "Total {count} districts available"
+    "totalRegions": "Total {count} regions available"
   },
   "modal": {
     "title": "🗺️ Select Game Mode",
@@ -89,8 +89,9 @@
     "maxAttempts": "Max attempts per round",
     "difficulty": "Difficulty",
     "alternatives": "Number of alternatives",
+    "training": "Training",
     "easy": "Easy",
-    "medium": "Medium",
+    "normal": "Normal",
     "hard": "Hard",
     "expert": "Expert",
     "full": "All {count} (full)",

@@ -79,6 +79,8 @@ export class ReverseQuizMode extends BaseGameMode {
     // For reverse quiz, we want to show the highlighted area clearly
     // We can use a moderate zoom level
     const difficulty = settings.difficulty ?? 'normal';
+    // Disable zoom for hard and expert difficulties
+    const zoomEnabled = difficulty !== 'hard' && difficulty !== 'expert';
     
     if (!state.currentTargetId) {
       return this.createMapConfig(false);
@@ -88,7 +90,7 @@ export class ReverseQuizMode extends BaseGameMode {
     const focusPadding = this.getFocusPadding(difficulty);
 
     return this.createMapConfig(
-      true,  // Enable zoom
+      zoomEnabled,  // Enable zoom based on difficulty
       focusBounds,
       focusPadding,
       false, // Don't show candidates
@@ -159,18 +161,18 @@ export class ReverseQuizMode extends BaseGameMode {
     if (!feat) return null;
 
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    let coordCount = 0;
+    // coordCount removed - not used
     let invalidCoordCount = 0;
     const walk = (coords: any) => {
       if (typeof coords[0] === "number") {
         const [x, y] = coords as [number, number];
-        coordCount++;
+        // coordCount removed - not used
         
         // Check for invalid coordinates
         if (x < -180 || x > 180 || y < -90 || y > 90 || isNaN(x) || isNaN(y) || !isFinite(x) || !isFinite(y)) {
           invalidCoordCount++;
           if (invalidCoordCount <= 5) { // Only log first 5 invalid coordinates
-            console.warn(`Invalid coordinate in ${feat.properties?.name}: [${x}, ${y}]`);
+            // Invalid coordinate detected but not logged in production
           }
         }
         
@@ -186,21 +188,13 @@ export class ReverseQuizMode extends BaseGameMode {
     if (minX === Infinity) return null;
     
     // Log coordinate statistics
-    console.log(`Bounds calculation for ${feat.properties?.name}: ${coordCount} coordinates, ${invalidCoordCount} invalid`);
-    console.log(`Raw min/max values: minX=${minX}, minY=${minY}, maxX=${maxX}, maxY=${maxY}`);
+    // Debug bounds calculation removed for production
 
     const rawBounds: [[number, number], [number, number]] = [[minX, minY], [maxX, maxY]];
     
     // Debug logging for invalid bounds
     if (minX < -180 || maxX > 180 || minY < -90 || maxY > 90) {
-      console.warn(`Invalid bounds for feature ${targetId}:`, {
-        minX, minY, maxX, maxY,
-        bounds: rawBounds,
-        featureName: feat.properties?.name,
-        interpretation: `minLng=${minX}, minLat=${minY}, maxLng=${maxX}, maxLat=${maxY}`,
-        coordCount,
-        invalidCoordCount
-      });
+      // Invalid bounds detected but not logged in production
     }
     
     // For reverse quiz, use less aggressive padding since we want to show the area clearly
@@ -210,8 +204,7 @@ export class ReverseQuizMode extends BaseGameMode {
       // For reverse quiz, shift the bounds downward to account for the input card at the bottom
       // Shift the center point downward by about 20% of the bounds height
       const [[minX, minY], [maxX, maxY]] = paddedBounds;
-      const centerX = (minX + maxX) / 2;
-      const centerY = (minY + maxY) / 2;
+      // centerX and centerY removed - not used
       const height = maxY - minY;
       const shiftY = height * 0.2; // Shift downward by 20% of height
       
@@ -219,10 +212,20 @@ export class ReverseQuizMode extends BaseGameMode {
     }
     
     const rng = new XorShift32((seed + round * 1337) >>> 0);
+    
+    // Check if this is a very large feature (like Russia) and reduce shift factor
+    const [[paddedMinX, paddedMinY], [paddedMaxX, paddedMaxY]] = paddedBounds;
+    const width = paddedMaxX - paddedMinX;
+    const height = paddedMaxY - paddedMinY;
+    const isVeryLarge = width > 60 || height > 30; // More than 60 degrees longitude or 30 degrees latitude
+    
+    const baseShiftFactor = this.getShiftFactor(difficulty);
+    const shiftFactor = isVeryLarge ? baseShiftFactor * 0.3 : baseShiftFactor;
+    
     const jx = (rng.next() - 0.5) * 2;
     const jy = (rng.next() - 0.5) * 2;
     
-    return this.shiftBounds(paddedBounds, jx * this.getShiftFactor(difficulty), jy * this.getShiftFactor(difficulty));
+    return this.shiftBounds(paddedBounds, jx * shiftFactor, jy * shiftFactor);
   }
 
   private padBounds(
@@ -285,41 +288,34 @@ export class ReverseQuizMode extends BaseGameMode {
     // If bounds were clamped, log a warning
     if (clampedMinX !== newMinX || clampedMinY !== newMinY || 
         clampedMaxX !== newMaxX || clampedMaxY !== newMaxY) {
-      console.warn(`Bounds were clamped: original=${JSON.stringify(shiftedBounds)}, clamped=${JSON.stringify([[clampedMinX, clampedMinY], [clampedMaxX, clampedMaxY]])}`);
+      // Bounds were clamped but not logged in production
     }
     
     return [[clampedMinX, clampedMinY], [clampedMaxX, clampedMaxY]];
   }
 
+  private getDifficultySettings(difficulty: string) {
+    const settings = {
+      training: { paddingFactor: 1.2, shiftFactor: 0.1, focusPadding: 20 },
+      easy: { paddingFactor: 1.5, shiftFactor: 0.2, focusPadding: 24 },
+      normal: { paddingFactor: 2.0, shiftFactor: 0.3, focusPadding: 28 },
+      medium: { paddingFactor: 2.0, shiftFactor: 0.3, focusPadding: 28 },
+      hard: { paddingFactor: 2.5, shiftFactor: 0.4, focusPadding: 32 },
+      expert: { paddingFactor: 3.0, shiftFactor: 0.4, focusPadding: 32 },
+    };
+    
+    return settings[difficulty as keyof typeof settings] || settings.normal;
+  }
+
   private getPaddingFactor(difficulty: string): number {
-    switch (difficulty) {
-      case "training": return 1.2; // More padding for reverse quiz to show more context
-      case "easy": return 1.5;
-      case "normal": 
-      case "medium": return 2.0;
-      case "hard": return 2.5;
-      case "expert": return 3.0;
-      default: return 1.5;
-    }
+    return this.getDifficultySettings(difficulty).paddingFactor;
   }
 
   private getShiftFactor(difficulty: string): number {
-    switch (difficulty) {
-      case "training": return 0.1; // Less shift for reverse quiz
-      case "easy": return 0.2;
-      case "normal": return 0.3;
-      case "hard": return 0.4;
-      default: return 0.3;
-    }
+    return this.getDifficultySettings(difficulty).shiftFactor;
   }
 
   private getFocusPadding(difficulty: string): number {
-    switch (difficulty) {
-      case "training": return 20;
-      case "easy": return 24;
-      case "normal": return 28;
-      case "hard": return 32;
-      default: return 28;
-    }
+    return this.getDifficultySettings(difficulty).focusPadding;
   }
 }
