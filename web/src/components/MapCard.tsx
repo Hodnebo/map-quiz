@@ -37,6 +37,7 @@ const MapCard: React.FC<MapCardProps> = ({ map, locale = 'no' }) => {
 
   return (
     <Card
+      data-testid="map-card"
       sx={{
         height: '100%',
         display: 'flex',
@@ -70,10 +71,10 @@ const MapCard: React.FC<MapCardProps> = ({ map, locale = 'no' }) => {
       )}
       
       <CardContent sx={{ flexGrow: 1 }}>
-        <Typography variant="h5" component="h3" gutterBottom sx={{ fontWeight: 600 }}>
+        <Typography variant="h5" component="h3" gutterBottom sx={{ fontWeight: 600 }} data-testid="map-name">
           {t(map.nameKey, locale)}
         </Typography>
-        <Typography variant="body2" color="text.secondary" paragraph>
+        <Typography variant="body2" color="text.secondary" paragraph data-testid="map-description">
           {t(map.descriptionKey, locale)}
         </Typography>
         <Box

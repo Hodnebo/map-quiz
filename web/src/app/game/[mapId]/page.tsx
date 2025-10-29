@@ -31,6 +31,7 @@ const DEFAULT_SETTINGS: GameSettings = {
   rounds: 15,
   audioEnabled: true,
   mapStyle: "basic-v2",
+  difficulty: "normal",
 };
 
 export default function GamePage() {
@@ -403,6 +404,7 @@ export default function GamePage() {
               variant="outlined"
               startIcon={<SettingsIcon />}
               onClick={handleNewGame}
+              data-testid="settings-button"
               sx={{
                 borderWidth: '2px',
                 borderColor: 'rgba(255, 255, 255, 0.3)',
@@ -464,6 +466,7 @@ export default function GamePage() {
                    : " bg-blue-600 border-blue-700 text-white")
             }
             aria-live="polite"
+            data-testid="feedback-message"
           >
             <span className={(feedback === "correct" ? "animate-correct " : feedback === "wrong" ? "animate-wrong " : "") + "inline-flex items-center gap-1 sm:gap-2 flex-wrap justify-center"}>
               <span className="text-[0.65rem] sm:text-xs text-white" style={{ opacity: feedback ? 0.9 : 0.9 }}>

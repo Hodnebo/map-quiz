@@ -98,6 +98,7 @@ export function GameModeModal({
       onClose={onClose}
       maxWidth="sm"
       fullWidth
+      data-testid="game-mode-modal"
       PaperProps={{
         sx: {
           borderRadius: 2,
@@ -130,6 +131,7 @@ export function GameModeModal({
                   label={t(strategy.name, locale)}
                   onClick={() => handleModeChange(strategy.id)}
                   variant={isSelected ? 'filled' : 'outlined'}
+                  data-testid={`game-mode-${strategy.id}`}
                   sx={{
                     backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : 'transparent',
                     color: 'white',
@@ -222,6 +224,7 @@ export function GameModeModal({
                   value={settings.difficulty}
                   onChange={(e) => handleSettingChange('difficulty', e.target.value)}
                   label={t('modal.difficulty', locale)}
+                  data-testid="difficulty-select"
                   sx={{
                     color: 'white',
                     '& .MuiOutlinedInput-notchedOutline': {
@@ -295,6 +298,7 @@ export function GameModeModal({
         <Button
           onClick={handleStartGame}
           variant="contained"
+          data-testid="start-game-button"
           sx={{
             backgroundColor: 'rgba(255,255,255,0.2)',
             color: 'white',
