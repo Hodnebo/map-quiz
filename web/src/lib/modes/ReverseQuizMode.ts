@@ -79,6 +79,7 @@ export class ReverseQuizMode extends BaseGameMode {
     // For reverse quiz, we want to show the highlighted area clearly
     // We can use a moderate zoom level
     const difficulty = settings.difficulty ?? 'normal';
+    const zoomEnabled = difficulty !== 'hard';
     
     if (!state.currentTargetId) {
       return this.createMapConfig(false);
@@ -88,7 +89,7 @@ export class ReverseQuizMode extends BaseGameMode {
     const focusPadding = this.getFocusPadding(difficulty);
 
     return this.createMapConfig(
-      true,  // Enable zoom
+      zoomEnabled,  // Disable zoom for hard difficulty
       focusBounds,
       focusPadding,
       false, // Don't show candidates
