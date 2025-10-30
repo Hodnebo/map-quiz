@@ -252,6 +252,7 @@ export function GameModeModal({
               <FormControl fullWidth>
                 <InputLabel sx={{ color: 'white' }}>{t('modal.alternatives', locale)}</InputLabel>
                 <Select
+                  data-testid="alternatives-select"
                   value={settings.alternativesCount}
                   onChange={(e) => handleSettingChange('alternativesCount', Number(e.target.value))}
                   label={t('modal.alternatives', locale)}

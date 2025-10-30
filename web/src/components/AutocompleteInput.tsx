@@ -13,6 +13,7 @@ interface AutocompleteInputProps {
   placeholder?: string;
   disabled?: boolean;
   maxSuggestions?: number;
+  'data-testid'?: string;
   // currentTargetId removed - not used
 }
 
@@ -24,6 +25,7 @@ export default function AutocompleteInput({
   placeholder = "Skriv navnet på området...",
   disabled = false,
   maxSuggestions = 5,
+  'data-testid': dataTestId,
   // currentTargetId removed - not used
 }: AutocompleteInputProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -138,6 +140,7 @@ export default function AutocompleteInput({
     <Box sx={{ position: 'relative', width: '100%' }}>
       <TextField
         ref={inputRef}
+        data-testid={dataTestId || 'autocomplete-input'}
         fullWidth
         value={value}
         onChange={handleInputChange}
@@ -148,6 +151,9 @@ export default function AutocompleteInput({
         disabled={disabled}
         variant="outlined"
         size="small"
+        inputProps={{
+          'data-testid': dataTestId || 'autocomplete-input',
+        }}
         sx={{
           '& .MuiOutlinedInput-root': {
             backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
