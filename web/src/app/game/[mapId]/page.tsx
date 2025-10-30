@@ -7,13 +7,12 @@ import { useRegionData } from "@/hooks/useRegionData";
 import type { GameSettings, GameState, GameMode } from "@/lib/types";
 import { createInitialState, startGame, answer } from "@/lib/game";
 import { load, save, hasSeenModal, markModalAsSeen } from "@/lib/persistence";
-import { XorShift32 } from "@/lib/rng";
 import { playCorrectSound, playWrongSound, initializeAudio } from "@/lib/audio";
 import { getEffectiveSettings } from "@/lib/gameModes";
 import { gameModeRegistry } from "@/lib/gameModeRegistry";
 import "@/lib/modes"; // Import to ensure modes are registered
 import { getAssetUrl } from "@/lib/basePath";
-import { getMapConfig, hasMapConfig, type MapId } from "@/config/maps";
+import { getMapConfig, hasMapConfig } from "@/config/maps";
 import { Button, AppBar, Toolbar, Typography, Box, IconButton } from "@mui/material";
 import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, DarkMode as DarkModeIcon, LightMode as LightModeIcon, Settings as SettingsIcon, ArrowBack as ArrowBackIcon } from "@mui/icons-material";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -39,15 +38,8 @@ export default function GamePage() {
   const router = useRouter();
   const mapId = params.mapId as string;
 
-  if (!hasMapConfig(mapId)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Typography variant="h6">Map not found: {mapId}</Typography>
-      </div>
-    );
-  }
-
-  const mapConfig = getMapConfig(mapId);
+  // All hooks must be called before any conditional returns
+  const mapConfig = hasMapConfig(mapId) ? getMapConfig(mapId) : null;
   const { regions, geojson, loading, error } = useRegionData(mapId);
   const { isDarkMode, toggleTheme } = useTheme();
   const [locale, setLocale] = useState<Locale>(() => load(`locale:${mapId}`, "no" as Locale));
@@ -101,18 +93,19 @@ export default function GamePage() {
       }
       setShowModal(true);
     }
-  }, []);
+  }, [state.status, showModal]);
 
   const prevGameModeRef = useRef(settings.gameMode);
   useEffect(() => {
     if (prevGameModeRef.current !== settings.gameMode) {
       const mode = gameModeRegistry.getMode(settings.gameMode);
       const defaultSettings = mode.getDefaultSettings();
-      const updatedSettings = { ...settings };
+      const updatedSettings = { ...settings } as GameSettings;
       let hasChanges = false;
       Object.entries(defaultSettings).forEach(([key, value]) => {
         if (updatedSettings[key as keyof GameSettings] === undefined && value !== undefined) {
-          (updatedSettings as any)[key] = value;
+          // Type-safe assignment using Record type
+          (updatedSettings as Record<string, unknown>)[key] = value;
           hasChanges = true;
         }
       });
@@ -196,7 +189,7 @@ export default function GamePage() {
     if (state.status === 'playing' && state.currentTargetId) {
       setFeedbackMessage("");
     }
-  }, [state.currentTargetId, state.currentRound]);
+  }, [state.status, state.currentTargetId, state.currentRound]);
 
   useEffect(() => {
     if (state.status !== 'idle') {
@@ -258,7 +251,7 @@ export default function GamePage() {
         answerTimeoutRef.current = null;
       }, res.isCorrect ? 450 : 2000);
     },
-    [allIds, seed, regions, state.currentTargetId]
+    [allIds, seed, regions]
   );
 
   const onReverseQuizAnswer = useCallback(
@@ -311,6 +304,15 @@ export default function GamePage() {
     const mode = gameModeRegistry.getMode(state.settings.gameMode);
     return mode.getMapConfig(state, settings, geojson, seed);
   }, [geojson, state, settings, seed]);
+
+  // Early return after all hooks are called
+  if (!mapConfig) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Typography variant="h6">Map not found: {mapId}</Typography>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen overflow-hidden grid grid-rows-[auto_1fr]">

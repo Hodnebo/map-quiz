@@ -1,6 +1,7 @@
 import { BaseGameMode } from './BaseGameMode';
 import type { GameState, GameSettings } from '../types';
 import type { QuestionData, AnswerResult, MapConfig } from '../gameModeStrategy';
+import type { GeoJSON } from 'geojson';
 import { XorShift32 } from '../rng';
 
 export class ClassicMode extends BaseGameMode {
@@ -30,7 +31,7 @@ export class ClassicMode extends BaseGameMode {
     };
   }
 
-  processAnswer(state: GameState, answer: string, allIds: string[], seed: number, correctName?: string): AnswerResult {
+  processAnswer(state: GameState, answer: string, allIds: string[], seed: number): AnswerResult {
     if (state.status !== "playing") {
       return { 
         isCorrect: false, 
@@ -62,7 +63,7 @@ export class ClassicMode extends BaseGameMode {
     return this.advanceToNextQuestion(state, allIds, seed, true);
   }
 
-  getMapConfig(state: GameState, settings: GameSettings, geojson: any, seed: number): MapConfig {
+  getMapConfig(state: GameState, settings: GameSettings, geojson: GeoJSON.FeatureCollection, seed: number): MapConfig {
     const difficulty = settings.difficulty ?? 'normal';
     // Disable zoom for hard and expert difficulties
     const zoomEnabled = difficulty !== 'hard' && difficulty !== 'expert';
@@ -130,7 +131,7 @@ export class ClassicMode extends BaseGameMode {
   }
 
   private calculateFocusBounds(
-    geojson: any, 
+    geojson: GeoJSON.FeatureCollection, 
     targetId: string, 
     seed: number, 
     round: number, 
@@ -140,7 +141,7 @@ export class ClassicMode extends BaseGameMode {
     if (!geojson || !targetId) return null;
 
     const featuresArray = geojson?.features;
-    const feat = featuresArray?.find((f: any) => {
+    const feat = featuresArray?.find((f) => {
       return (f.id ?? f.properties?.id) === targetId;
     });
     if (!feat) return null;
@@ -148,7 +149,7 @@ export class ClassicMode extends BaseGameMode {
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     // coordCount removed - not used
     let invalidCoordCount = 0;
-    const walk = (coords: any) => {
+    const walk = (coords: number[] | number[][] | number[][][]): void => {
       if (typeof coords[0] === "number") {
         const [x, y] = coords as [number, number];
         // coordCount removed - not used

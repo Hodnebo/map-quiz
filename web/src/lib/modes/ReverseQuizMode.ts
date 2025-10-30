@@ -1,6 +1,7 @@
 import { BaseGameMode } from './BaseGameMode';
 import type { GameState, GameSettings } from '../types';
 import type { QuestionData, AnswerResult, MapConfig } from '../gameModeStrategy';
+import type { GeoJSON } from 'geojson';
 import { XorShift32 } from '../rng';
 
 export class ReverseQuizMode extends BaseGameMode {
@@ -75,7 +76,7 @@ export class ReverseQuizMode extends BaseGameMode {
     return this.advanceToNextQuestion(state, allIds, seed, true);
   }
 
-  getMapConfig(state: GameState, settings: GameSettings, geojson: any, seed: number): MapConfig {
+  getMapConfig(state: GameState, settings: GameSettings, geojson: GeoJSON.FeatureCollection, seed: number): MapConfig {
     // For reverse quiz, we want to show the highlighted area clearly
     // We can use a moderate zoom level
     const difficulty = settings.difficulty ?? 'normal';
@@ -145,7 +146,7 @@ export class ReverseQuizMode extends BaseGameMode {
   }
 
   private calculateFocusBounds(
-    geojson: any, 
+    geojson: GeoJSON.FeatureCollection, 
     targetId: string, 
     seed: number, 
     round: number, 
@@ -155,7 +156,7 @@ export class ReverseQuizMode extends BaseGameMode {
     if (!geojson || !targetId) return null;
 
     const featuresArray = geojson?.features;
-    const feat = featuresArray?.find((f: any) => {
+    const feat = featuresArray?.find((f) => {
       return (f.id ?? f.properties?.id) === targetId;
     });
     if (!feat) return null;
@@ -163,7 +164,7 @@ export class ReverseQuizMode extends BaseGameMode {
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     // coordCount removed - not used
     let invalidCoordCount = 0;
-    const walk = (coords: any) => {
+    const walk = (coords: number[] | number[][] | number[][][]): void => {
       if (typeof coords[0] === "number") {
         const [x, y] = coords as [number, number];
         // coordCount removed - not used

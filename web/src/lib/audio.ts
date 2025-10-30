@@ -7,7 +7,13 @@ function getAudioContext(): AudioContext | null {
 
   if (!audioContext) {
     try {
-      audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      // Handle webkitAudioContext for older browsers
+      const AudioContextClass = window.AudioContext || (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (AudioContextClass) {
+        audioContext = new AudioContextClass();
+      } else {
+        return null;
+      }
     } catch {
       // Web Audio API not supported
       return null;
