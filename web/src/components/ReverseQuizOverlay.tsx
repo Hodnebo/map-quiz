@@ -70,6 +70,7 @@ export default function ReverseQuizOverlay({
       }}
     >
       <Card
+        data-testid="reverse-quiz-overlay"
         sx={{
           backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.98)' : 'rgba(255, 255, 255, 0.98)',
           backdropFilter: 'blur(12px)',
@@ -120,6 +121,7 @@ export default function ReverseQuizOverlay({
           )}
           
           <AutocompleteInput
+            data-testid="reverse-quiz-input"
             value={inputValue}
             onChange={handleInputChange}
             onSubmit={handleSubmit}
