@@ -4,6 +4,8 @@ import { gameModeRegistry } from './gameModeRegistry';
 // Import modes to register them
 import './modes';
 
+import type { GameSettings } from './types';
+
 // Legacy compatibility - convert strategy to old GameMode format
 export const GAME_MODES: Record<string, GameMode> = {};
 
@@ -13,7 +15,7 @@ gameModeRegistry.getAllModes().forEach(mode => {
     id: mode.id,
     name: mode.name,
     description: mode.description,
-    settings: mode.getDefaultSettings() as any,
+    settings: mode.getDefaultSettings() as Partial<GameSettings>,
   };
 });
 
@@ -23,7 +25,7 @@ export function getGameMode(id: string): GameMode {
     id: strategy.id,
     name: strategy.name,
     description: strategy.description,
-    settings: strategy.getDefaultSettings() as any,
+    settings: strategy.getDefaultSettings() as Partial<GameSettings>,
   };
 }
 

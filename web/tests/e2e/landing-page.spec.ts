@@ -27,7 +27,7 @@ test.describe('Landing Page', () => {
     await firstPlayButton.click();
     
     // Should navigate to game page
-    await expect(page).toHaveURL(/\/game\/[^\/]+/);
+    await expect(page).toHaveURL(/\/game\/[^/]+/);
   });
 
   test('should display map metadata correctly', async ({ page }) => {

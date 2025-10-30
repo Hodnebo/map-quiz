@@ -1,5 +1,6 @@
 import type { GameModeStrategy, QuestionData, AnswerResult, MapConfig, ValidationResult } from '../gameModeStrategy';
 import type { GameState, GameSettings } from '../types';
+import type { GeoJSON } from 'geojson';
 import { XorShift32, shuffleInPlace, pickOne } from '../rng';
 
 export abstract class BaseGameMode implements GameModeStrategy {
@@ -20,7 +21,7 @@ export abstract class BaseGameMode implements GameModeStrategy {
   abstract generateQuestion(state: GameState, allIds: string[], seed: number): QuestionData;
   abstract processAnswer(state: GameState, answer: string, allIds: string[], seed: number): AnswerResult;
   abstract getDefaultSettings(): Partial<GameSettings>;
-  abstract getMapConfig(state: GameState, settings: GameSettings, geojson: any, seed: number): MapConfig;
+  abstract getMapConfig(state: GameState, settings: GameSettings, geojson: GeoJSON.FeatureCollection, seed: number): MapConfig;
 
   // Common validation logic
   validateSettings(settings: Partial<GameSettings>): ValidationResult {

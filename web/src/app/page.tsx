@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Button, AppBar, Toolbar, Typography, Box, IconButton, Container } from "@mui/material";
 import { DarkMode as DarkModeIcon, LightMode as LightModeIcon } from "@mui/icons-material";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -10,7 +9,6 @@ import { useState, useEffect, useMemo } from "react";
 import type { Locale } from "@/i18n/config";
 import { detectBrowserLocale } from "@/i18n/utils";
 import MapCategory from "@/components/MapCategory";
-import type { MapConfigWithMetadata } from "@/config/maps/types";
 
 export default function LandingPage() {
   // router removed - not used

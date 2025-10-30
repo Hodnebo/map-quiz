@@ -4,6 +4,8 @@ import { getAssetUrl } from '@/lib/basePath';
 import { getMapConfig } from '@/config/maps';
 import type { MapId } from '@/config/maps';
 
+import type { GeoJSON } from 'geojson';
+
 interface GeoFeatureProperties {
   id: string;
   name: string;
@@ -17,10 +19,7 @@ interface GeoJSONFeature {
   type: 'Feature';
   id?: string | number;
   properties: GeoFeatureProperties;
-  geometry: {
-    type: string;
-    coordinates: any;
-  };
+  geometry: GeoJSON.Geometry;
 }
 
 interface GeoJSON {
@@ -56,8 +55,11 @@ export function useRegionData(mapId: MapId) {
           slug: f.properties.slug ?? String(f.properties.name).toLowerCase().replace(/\s+/g, '-'),
         }));
         setRegions(mapped);
-      } catch (e: any) {
-        if (!cancelled) setError(e?.message ?? String(e));
+      } catch (e: unknown) {
+        if (!cancelled) {
+          const errorMessage = e instanceof Error ? e.message : String(e);
+          setError(errorMessage);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }

@@ -119,7 +119,7 @@ export default function AutocompleteInput({
   };
 
   // Handle input blur
-  const handleInputBlur = (event: React.FocusEvent) => {
+  const handleInputBlur = () => {
     // Delay closing to allow for suggestion clicks
     setTimeout(() => {
       if (!listRef.current?.contains(document.activeElement)) {

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import maplibregl, { Map as MlMap, LngLatLike, LngLatBoundsLike, StyleSpecification } from "maplibre-gl";
+import maplibregl, { Map as MlMap, LngLatLike, LngLatBoundsLike, StyleSpecification, FilterSpecification } from "maplibre-gl";
+import type { GeoJSON } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 interface MapProps {
@@ -44,7 +45,7 @@ export default function MapView(props: MapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MlMap | null>(null);
   const hasFitRef = useRef(false);
-  const dataRef = useRef<any | null>(null);
+  const dataRef = useRef<GeoJSON.FeatureCollection | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
 
   const sourceId = useMemo(() => "regions-source", []);
@@ -93,11 +94,11 @@ export default function MapView(props: MapProps) {
       layers: [
         { id: "carto", type: "raster", source: "carto" },
       ],
-    } as any;
+    };
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: (vectorStyleUrl ?? fallbackRasterStyle) as any,
+      style: vectorStyleUrl ?? fallbackRasterStyle,
       center: center,
       zoom: initialZoom,
       interactive: true,
@@ -112,12 +113,13 @@ export default function MapView(props: MapProps) {
         try {
           const layers = map.getStyle().layers ?? [];
           for (const lyr of layers) {
-            // @ts-ignore
-            if (lyr.type === "symbol") {
+            if ((lyr as { type?: string }).type === "symbol") {
               map.setLayoutProperty(lyr.id, "visibility", "none");
             }
           }
-        } catch {}
+        } catch {
+          // Ignore errors when hiding labels
+        }
       }
 
       // Source
@@ -196,7 +198,7 @@ export default function MapView(props: MapProps) {
       if (!map.getLayer(correctFillId)) {
         const listStr: string[] = (revealedIds ?? []).map((x) => String(x));
         const wrongStr: string[] = (wrongAnswerIds ?? []).map((x) => String(x));
-        const initialFilter: any = listStr.length > 0
+        const initialFilter: FilterSpecification = listStr.length > 0
           ? [
               "all",
               ["in", ["get", "id"], ["literal", listStr]],
@@ -218,7 +220,7 @@ export default function MapView(props: MapProps) {
       // Wrong fill layer (opaque red under lines)
       if (!map.getLayer(wrongFillId)) {
         const listStr: string[] = (wrongAnswerIds ?? []).map((x) => String(x));
-        const initialFilter: any = listStr.length > 0
+        const initialFilter: FilterSpecification = listStr.length > 0
           ? ["in", ["get", "id"], ["literal", listStr]]
           : ["==", ["get", "id"], "__none__"];
         map.addLayer({
@@ -236,7 +238,7 @@ export default function MapView(props: MapProps) {
       // Candidates fill layer (yellow, very light)
       if (!map.getLayer(candidatesFillId)) {
         const listStr: string[] = (candidateIds ?? []).map((x) => String(x));
-        const initialFilter: any = listStr.length > 0
+        const initialFilter: FilterSpecification = listStr.length > 0
           ? ["in", ["get", "id"], ["literal", listStr]]
           : ["==", ["get", "id"], "__none__"];
         map.addLayer({
@@ -252,10 +254,12 @@ export default function MapView(props: MapProps) {
       }
 
       // Store data for centroid-based HTML labels
-      try {
-        const response = await fetch(geojsonUrl);
-        dataRef.current = await response.json();
-      } catch {}
+        try {
+          const response = await fetch(geojsonUrl);
+          dataRef.current = await response.json() as GeoJSON.FeatureCollection;
+        } catch {
+          // Ignore errors when loading GeoJSON
+        }
 
       // Click handler (bind after layers exist)
       map.on("click", fillLayerId, (e) => {
@@ -274,7 +278,9 @@ export default function MapView(props: MapProps) {
             map.fitBounds([[bbox[0], bbox[1]], [bbox[2], bbox[3]]] as LngLatBoundsLike, { padding: 20, duration: 0 });
             hasFitRef.current = true;
           }
-        } catch {}
+        } catch {
+          // Ignore errors when fetching bounds
+        }
       }
     });
 
@@ -292,7 +298,7 @@ export default function MapView(props: MapProps) {
     if (!map) return;
     const listStr: string[] = (revealedIds ?? []).map((x) => String(x));
     const wrongStr: string[] = (wrongAnswerIds ?? []).map((x) => String(x));
-    const filter: any = listStr.length > 0
+    const filter: FilterSpecification = listStr.length > 0
       ? [
           "all",
           ["in", ["get", "id"], ["literal", listStr]],
@@ -308,7 +314,7 @@ export default function MapView(props: MapProps) {
     markersRef.current = [];
     const data = dataRef.current;
     if (!data || !Array.isArray(data.features)) return;
-    const featureById = new Map<string, any>();
+      const featureById = new Map<string, GeoJSON.Feature>();
     for (const f of data.features) {
       const k = String(f.id ?? f.properties?.id);
       featureById.set(k, f);
@@ -330,7 +336,7 @@ export default function MapView(props: MapProps) {
       el.style.boxShadow = "0 1px 2px rgba(0,0,0,0.2)";
       el.textContent = name;
       const marker = new maplibregl.Marker({ element: el, anchor: "center" })
-        .setLngLat(centroid as any)
+        .setLngLat(centroid)
         .addTo(map);
       markersRef.current.push(marker);
     }
@@ -341,7 +347,7 @@ export default function MapView(props: MapProps) {
     const map = mapRef.current;
     if (!map) return;
     const listStr: string[] = (wrongAnswerIds ?? []).map((x) => String(x));
-    const filter: any = listStr.length > 0
+    const filter: FilterSpecification = listStr.length > 0
       ? ["in", ["get", "id"], ["literal", listStr]]
       : ["==", ["get", "id"], "__none__"];
     if (map.getLayer(wrongFillId)) {
@@ -354,7 +360,7 @@ export default function MapView(props: MapProps) {
     const map = mapRef.current;
     if (!map) return;
     const listStr: string[] = (candidateIds ?? []).map((x) => String(x));
-    const filter: any = listStr.length > 0
+    const filter: FilterSpecification = listStr.length > 0
       ? ["in", ["get", "id"], ["literal", listStr]]
       : ["==", ["get", "id"], "__none__"];
     if (map.getLayer(candidatesFillId)) {
@@ -419,10 +425,10 @@ export default function MapView(props: MapProps) {
   );
 }
 
-function turfBBox(geojson: any): [number, number, number, number] | null {
+function turfBBox(geojson: GeoJSON.FeatureCollection | GeoJSON.Feature): [number, number, number, number] | null {
   try {
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    const walk = (coords: any) => {
+    const walk = (coords: number[] | number[][] | number[][][]): void => {
       if (typeof coords[0] === "number") {
         const [x, y] = coords as [number, number];
         if (x < minX) minX = x;

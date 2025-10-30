@@ -74,7 +74,7 @@ export function GameModeModal({
     }));
   };
 
-  const handleSettingChange = (key: keyof GameSettings, value: any) => {
+  const handleSettingChange = (key: keyof GameSettings, value: unknown) => {
     setSettings(prev => ({
       ...prev,
       [key]: value,
