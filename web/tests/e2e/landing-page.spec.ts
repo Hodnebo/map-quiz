@@ -8,11 +8,12 @@ test.describe('Landing Page', () => {
     await page.waitForLoadState('networkidle');
     
     // Check that map cards are visible
-    await expect(page.locator('[data-testid="map-card"]')).toBeVisible();
+    const mapCards = page.locator('[data-testid="map-card"]');
+    await expect(mapCards.first()).toBeVisible();
     
     // Check that we have multiple maps
-    const mapCards = page.locator('[data-testid="map-card"]');
-    await expect(mapCards).toHaveCountGreaterThan(1);
+    const count = await mapCards.count();
+    expect(count).toBeGreaterThan(1);
   });
 
   test('should navigate to game when clicking on a map card', async ({ page }) => {
@@ -21,9 +22,9 @@ test.describe('Landing Page', () => {
     // Wait for the page to load
     await page.waitForLoadState('networkidle');
     
-    // Click on the first map card
-    const firstMapCard = page.locator('[data-testid="map-card"]').first();
-    await firstMapCard.click();
+    // Click on the first map card's action button
+    const firstPlayButton = page.locator('[data-testid="map-card"] button').first();
+    await firstPlayButton.click();
     
     // Should navigate to game page
     await expect(page).toHaveURL(/\/game\/[^\/]+/);
@@ -35,10 +36,10 @@ test.describe('Landing Page', () => {
     // Wait for the page to load
     await page.waitForLoadState('networkidle');
     
-    // Check that map names are visible
-    await expect(page.locator('[data-testid="map-name"]')).toBeVisible();
+    // Check that at least one map name is visible
+    await expect(page.locator('[data-testid="map-name"]').first()).toBeVisible();
     
-    // Check that map descriptions are visible
-    await expect(page.locator('[data-testid="map-description"]')).toBeVisible();
+    // Check that at least one map description is visible
+    await expect(page.locator('[data-testid="map-description"]').first()).toBeVisible();
   });
 });

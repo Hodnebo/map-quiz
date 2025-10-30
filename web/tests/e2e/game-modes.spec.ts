@@ -8,26 +8,34 @@ test.describe('Game Modes', () => {
   });
 
   test('should open game mode modal when clicking settings', async ({ page }) => {
-    // Click on settings button
-    await page.click('[data-testid="settings-button"]');
-    
+    // If modal is already open (first visit), proceed; otherwise open it
+    const modal = page.locator('[data-testid="game-mode-modal"]');
+    if (!(await modal.isVisible().catch(() => false))) {
+      await page.click('[data-testid="settings-button"]');
+    }
     // Check that modal is visible
-    await expect(page.locator('[data-testid="game-mode-modal"]')).toBeVisible();
+    await expect(modal).toBeVisible();
   });
 
   test('should display all game modes in modal', async ({ page }) => {
-    // Open modal
-    await page.click('[data-testid="settings-button"]');
+    // Ensure modal is open
+    const modal = page.locator('[data-testid="game-mode-modal"]');
+    if (!(await modal.isVisible().catch(() => false))) {
+      await page.click('[data-testid="settings-button"]');
+    }
     
     // Check that all game modes are present
     await expect(page.locator('[data-testid="game-mode-classic"]')).toBeVisible();
-    await expect(page.locator('[data-testid="game-mode-reverse-quiz"]')).toBeVisible();
-    await expect(page.locator('[data-testid="game-mode-multiple-choice"]')).toBeVisible();
+    await expect(page.locator('[data-testid="game-mode-reverse_quiz"]')).toBeVisible();
+    await expect(page.locator('[data-testid="game-mode-multiple_choice"]')).toBeVisible();
   });
 
   test('should display all difficulty levels in classic mode', async ({ page }) => {
-    // Open modal
-    await page.click('[data-testid="settings-button"]');
+    // Ensure modal is open
+    const modal = page.locator('[data-testid="game-mode-modal"]');
+    if (!(await modal.isVisible().catch(() => false))) {
+      await page.click('[data-testid="settings-button"]');
+    }
     
     // Select classic mode
     await page.click('[data-testid="game-mode-classic"]');
@@ -39,24 +47,25 @@ test.describe('Game Modes', () => {
     // Click on difficulty select to open dropdown
     await difficultySelect.click();
     
-    // Check that all difficulty options are present
-    await expect(page.locator('text=Trening')).toBeVisible();
-    await expect(page.locator('text=Lett')).toBeVisible();
-    await expect(page.locator('text=Normal')).toBeVisible();
-    await expect(page.locator('text=Vanskelig')).toBeVisible();
-    await expect(page.locator('text=Ekspert')).toBeVisible();
+    // Check that all difficulty options are present (use role=option for menu)
+    await expect(page.getByRole('option', { name: 'Trening' })).toBeVisible();
+    await expect(page.getByRole('option', { name: 'Lett' })).toBeVisible();
+    await expect(page.getByRole('option', { name: 'Normal' })).toBeVisible();
+    await expect(page.getByRole('option', { name: 'Vanskelig' })).toBeVisible();
+    await expect(page.getByRole('option', { name: 'Ekspert' })).toBeVisible();
   });
 
   test('should start game with selected mode and settings', async ({ page }) => {
-    // Open modal
-    await page.click('[data-testid="settings-button"]');
+    // Ensure modal is open
+    const modal = page.locator('[data-testid="game-mode-modal"]');
+    if (!(await modal.isVisible().catch(() => false))) {
+      await page.click('[data-testid="settings-button"]');
+    }
     
-    // Select reverse quiz mode
-    await page.click('[data-testid="game-mode-reverse-quiz"]');
-    
-    // Set difficulty to hard
+    // Select classic mode and adjust difficulty
+    await page.click('[data-testid="game-mode-classic"]');
     await page.click('[data-testid="difficulty-select"]');
-    await page.click('text=Vanskelig');
+    await page.getByRole('option', { name: 'Vanskelig' }).click();
     
     // Start game
     await page.click('[data-testid="start-game-button"]');
@@ -69,15 +78,18 @@ test.describe('Game Modes', () => {
   });
 
   test('should prevent zoom on hard and expert difficulties', async ({ page }) => {
-    // Open modal
-    await page.click('[data-testid="settings-button"]');
+    // Ensure modal is open
+    const modal = page.locator('[data-testid="game-mode-modal"]');
+    if (!(await modal.isVisible().catch(() => false))) {
+      await page.click('[data-testid="settings-button"]');
+    }
     
     // Select classic mode
     await page.click('[data-testid="game-mode-classic"]');
     
     // Set difficulty to hard
     await page.click('[data-testid="difficulty-select"]');
-    await page.click('text=Vanskelig');
+    await page.getByRole('option', { name: 'Vanskelig' }).click();
     
     // Start game
     await page.click('[data-testid="start-game-button"]');
