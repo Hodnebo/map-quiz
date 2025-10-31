@@ -1,0 +1,102 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - button [ref=e5] [cursor=pointer]:
+          - img [ref=e6]
+        - heading [level=1] [ref=e8]: Oslo Bydeler
+        - generic [ref=e9]:
+          - button [ref=e10] [cursor=pointer]:
+            - img [ref=e12]
+            - generic [ref=e14]: Restart
+          - button [ref=e15] [cursor=pointer]:
+            - img [ref=e17]
+            - generic [ref=e19]: Nytt spill
+          - button [ref=e20] [cursor=pointer]: EN
+          - button [ref=e21] [cursor=pointer]:
+            - img [ref=e22]
+    - generic [ref=e24]:
+      - region [ref=e25]:
+        - region [ref=e26]
+        - generic:
+          - generic: Use Ctrl + scroll to zoom the map
+        - group [ref=e27]:
+          - generic [ref=e29]:
+            - text: © OpenStreetMap contributors, © CARTO |
+            - link [ref=e30] [cursor=pointer]:
+              - /url: https://maplibre.org/
+              - text: MapLibre
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - generic [ref=e34]:
+            - paragraph [ref=e35]: Poeng
+            - heading [level=6] [ref=e36]: "0"
+          - generic [ref=e38]:
+            - paragraph [ref=e39]: Streak
+            - heading [level=6] [ref=e40]: "0"
+        - generic [ref=e43]:
+          - paragraph [ref=e45]: ✓
+          - generic [ref=e46]:
+            - paragraph [ref=e47]: Riktige svar
+            - heading [level=6] [ref=e48]: 0 / 1
+          - heading [level=4] [ref=e49]: 0%
+        - paragraph [ref=e53]: Runde 1/15
+      - generic [ref=e56]:
+        - heading [level=6] [ref=e57]: Hva heter dette området?
+        - generic [ref=e60]:
+          - textbox [ref=e61]:
+            - /placeholder: Skriv navnet på området...
+          - group
+        - paragraph [ref=e62]: "Forsøk igjen: 3 igjen"
+  - generic [ref=e67] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e68]:
+      - img [ref=e69]
+    - generic [ref=e72]:
+      - button "Open issues overlay" [ref=e73]:
+        - generic [ref=e74]:
+          - generic [ref=e75]: "0"
+          - generic [ref=e76]: "1"
+        - generic [ref=e77]: Issue
+      - button "Collapse issues badge" [ref=e78]:
+        - img [ref=e79]
+  - alert [ref=e81]
+  - dialog "🗺️ Velg spillmodus Velg hvordan du vil spille Oslo-kartet" [ref=e84]:
+    - heading "🗺️ Velg spillmodus Velg hvordan du vil spille Oslo-kartet" [level=2] [ref=e85]:
+      - generic [ref=e86]: 🗺️ Velg spillmodus
+      - paragraph [ref=e87]: Velg hvordan du vil spille Oslo-kartet
+    - generic [ref=e89]:
+      - heading "Spillmodus" [level=6] [ref=e90]
+      - generic [ref=e91]:
+        - button "Klassisk" [ref=e92] [cursor=pointer]:
+          - generic [ref=e93]: Klassisk
+        - button "Flervalgsspørsmål" [ref=e94] [cursor=pointer]:
+          - generic [ref=e95]: Flervalgsspørsmål
+        - button "Omvendt Quiz" [ref=e96] [cursor=pointer]:
+          - generic [ref=e97]: Omvendt Quiz
+      - separator [ref=e98]
+      - heading "Innstillinger" [level=6] [ref=e99]
+      - generic [ref=e100]:
+        - generic [ref=e101]:
+          - generic [ref=e102]: Antall runder
+          - generic [ref=e103]:
+            - combobox [ref=e104] [cursor=pointer]: 15 runder
+            - textbox: "15"
+            - img
+            - group:
+              - generic: Antall runder
+          - generic [ref=e105]: Totalt 98 regioner tilgjengelig
+        - generic [ref=e106]:
+          - generic: Maks forsøk per runde
+          - generic [ref=e107]:
+            - combobox [ref=e108] [cursor=pointer]
+            - textbox
+            - img
+            - group:
+              - generic: Maks forsøk per runde
+    - generic [ref=e109]:
+      - button "Avbryt" [ref=e110] [cursor=pointer]
+      - button "Start spill" [ref=e111] [cursor=pointer]: Start spill
+```
