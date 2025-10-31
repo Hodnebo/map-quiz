@@ -1,0 +1,111 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - button [ref=e5] [cursor=pointer]:
+          - img [ref=e6]
+        - heading [level=1] [ref=e8]: Oslo Bydeler
+        - generic [ref=e9]:
+          - button [ref=e10] [cursor=pointer]:
+            - img [ref=e12]
+            - generic [ref=e14]: Restart
+          - button [ref=e15] [cursor=pointer]:
+            - img [ref=e17]
+            - generic [ref=e19]: Nytt spill
+          - button [ref=e20] [cursor=pointer]: EN
+          - button [ref=e21] [cursor=pointer]:
+            - img [ref=e22]
+    - generic [ref=e24]:
+      - generic:
+        - generic:
+          - generic: Finn
+          - generic: Sinsen
+      - region [ref=e25]:
+        - region [ref=e26]
+        - generic:
+          - generic: Use Ctrl + scroll to zoom the map
+        - group [ref=e27]:
+          - generic [ref=e29]:
+            - text: © OpenStreetMap contributors, © CARTO |
+            - link [ref=e30] [cursor=pointer]:
+              - /url: https://maplibre.org/
+              - text: MapLibre
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - generic [ref=e34]:
+            - paragraph [ref=e35]: Poeng
+            - heading [level=6] [ref=e36]: "0"
+          - generic [ref=e38]:
+            - paragraph [ref=e39]: Streak
+            - heading [level=6] [ref=e40]: "0"
+        - generic [ref=e43]:
+          - paragraph [ref=e45]: ✓
+          - generic [ref=e46]:
+            - paragraph [ref=e47]: Riktige svar
+            - heading [level=6] [ref=e48]: 0 / 1
+          - heading [level=4] [ref=e49]: 0%
+        - paragraph [ref=e53]: Runde 1/15
+        - generic [ref=e55]:
+          - paragraph [ref=e56]: Finn område
+          - paragraph [ref=e57]: Sinsen
+          - paragraph [ref=e58]: "Forsøk igjen: 3 igjen"
+  - generic [ref=e63] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e64]:
+      - img [ref=e65]
+    - generic [ref=e68]:
+      - button "Open issues overlay" [ref=e69]:
+        - generic [ref=e70]:
+          - generic [ref=e71]: "0"
+          - generic [ref=e72]: "1"
+        - generic [ref=e73]: Issue
+      - button "Collapse issues badge" [ref=e74]:
+        - img [ref=e75]
+  - alert [ref=e77]
+  - dialog "🗺️ Velg spillmodus Velg hvordan du vil spille Oslo-kartet" [ref=e80]:
+    - heading "🗺️ Velg spillmodus Velg hvordan du vil spille Oslo-kartet" [level=2] [ref=e81]:
+      - generic [ref=e82]: 🗺️ Velg spillmodus
+      - paragraph [ref=e83]: Velg hvordan du vil spille Oslo-kartet
+    - generic [ref=e85]:
+      - heading "Spillmodus" [level=6] [ref=e86]
+      - generic [ref=e87]:
+        - button "Klassisk" [ref=e88] [cursor=pointer]:
+          - generic [ref=e89]: Klassisk
+        - button "Flervalgsspørsmål" [ref=e90] [cursor=pointer]:
+          - generic [ref=e91]: Flervalgsspørsmål
+        - button "Omvendt Quiz" [ref=e92] [cursor=pointer]:
+          - generic [ref=e93]: Omvendt Quiz
+      - separator [ref=e94]
+      - heading "Innstillinger" [level=6] [ref=e95]
+      - generic [ref=e96]:
+        - generic [ref=e97]:
+          - generic [ref=e98]: Antall runder
+          - generic [ref=e99]:
+            - combobox [ref=e100] [cursor=pointer]: 15 runder
+            - textbox: "15"
+            - img
+            - group:
+              - generic: Antall runder
+          - generic [ref=e101]: Totalt 98 regioner tilgjengelig
+        - generic [ref=e102]:
+          - generic: Maks forsøk per runde
+          - generic [ref=e103]:
+            - combobox [ref=e104] [cursor=pointer]
+            - textbox
+            - img
+            - group:
+              - generic: Maks forsøk per runde
+        - generic [ref=e105]:
+          - generic [ref=e106]: Antall alternativer
+          - generic [ref=e107]:
+            - combobox [ref=e108] [cursor=pointer]: 2 alternativer
+            - textbox: "2"
+            - img
+            - group:
+              - generic: Antall alternativer
+    - generic [ref=e109]:
+      - button "Avbryt" [ref=e110] [cursor=pointer]
+      - button "Start spill" [ref=e111] [cursor=pointer]: Start spill
+```
