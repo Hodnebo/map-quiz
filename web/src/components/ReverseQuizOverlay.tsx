@@ -3,8 +3,8 @@
 import { useState, useCallback } from 'react';
 import { Box, Card, CardContent, Typography, useTheme } from '@mui/material';
 import AutocompleteInput from './AutocompleteInput';
-import type { GameState, GameSettings, Bydel } from '@/lib/types';
-import type { AnswerResult } from '@/lib/gameModeStrategy';
+import type { GameState, GameSettings, Region } from '@/lib/types';
+// AnswerResult removed - not used
 
 interface ReverseQuizOverlayProps {
   state: GameState;
@@ -13,7 +13,7 @@ interface ReverseQuizOverlayProps {
   targetId: string | null;
   attemptsLeft: number;
   lastCorrectAnswerName: string;
-  bydeler: Bydel[];
+  regions: Region[];
   onAnswer: (answer: string, correctName: string) => void;
   feedback?: 'correct' | 'wrong' | null;
   feedbackMessage?: string;
@@ -22,15 +22,15 @@ interface ReverseQuizOverlayProps {
 
 export default function ReverseQuizOverlay({
   state,
-  settings,
+  // settings removed - not used
   targetName,
   targetId,
   attemptsLeft,
   lastCorrectAnswerName,
-  bydeler,
+  regions,
   onAnswer,
   feedback,
-  feedbackMessage,
+  // feedbackMessage removed - not used
   onClearFeedback
 }: ReverseQuizOverlayProps) {
   const [inputValue, setInputValue] = useState('');
@@ -70,6 +70,7 @@ export default function ReverseQuizOverlay({
       }}
     >
       <Card
+        data-testid="reverse-quiz-overlay"
         sx={{
           backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.98)' : 'rgba(255, 255, 255, 0.98)',
           backdropFilter: 'blur(12px)',
@@ -120,10 +121,11 @@ export default function ReverseQuizOverlay({
           )}
           
           <AutocompleteInput
+            data-testid="reverse-quiz-input"
             value={inputValue}
             onChange={handleInputChange}
             onSubmit={handleSubmit}
-            suggestions={bydeler}
+            suggestions={regions}
             placeholder="Skriv navnet på området..."
             disabled={state.status !== 'playing'}
             maxSuggestions={5}

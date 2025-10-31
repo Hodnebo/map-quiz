@@ -17,7 +17,7 @@ export function ThemeContextProvider({ children }: ThemeContextProviderProps) {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    // Check for saved theme preference or default to system preference
+    // Initialize theme from localStorage or system preference
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
       setIsDarkMode(savedTheme === 'dark');

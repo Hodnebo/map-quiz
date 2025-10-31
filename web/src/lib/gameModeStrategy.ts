@@ -1,4 +1,6 @@
-import type { GameState, GameSettings, Bydel } from './types';
+import type { GameState, GameSettings } from './types';
+
+import type { GeoJSON } from 'geojson';
 
 export interface MapConfig {
   zoomEnabled: boolean;
@@ -45,7 +47,7 @@ export interface GameModeStrategy {
   validateSettings(settings: Partial<GameSettings>): ValidationResult;
   
   // UI behavior
-  getMapConfig(state: GameState, settings: GameSettings, geojson: any, seed: number): MapConfig;
+  getMapConfig(state: GameState, settings: GameSettings, geojson: GeoJSON.FeatureCollection, seed: number): MapConfig;
   
   // Component props
   getSettingsProps(): {

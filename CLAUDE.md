@@ -161,6 +161,11 @@ To add a new map to the application:
 - **Properties**: `navn`, `bydelsnummer`, `areal_km2`
 
 ### Norwegian Municipalities (`kommuner`)
+- **Features**: 357 Norwegian municipalities
+- **Difficulty**: Expert
+- **Data Source**: Local GeoJSON data
+- **Center**: Norway center (65.0°N, 10.75°E)
+- **Properties**: `name`, `id`, `slug`, `area_km2`, `centroid`
 
 ### Norwegian Counties (`fylker`)
 - **Features**: 15 Norwegian counties (fylker)
@@ -171,11 +176,7 @@ To add a new map to the application:
 - **File**: `web/public/data/fylker_simplified.geo.json`
 - **Script**: `scripts/scripts/fetch_fylker_geo.ts`
 - **Route**: `/game/fylker`
-- **Description**: Test your knowledge of all 15 Norwegian counties- **Features**: 357 Norwegian municipalities
-- **Difficulty**: Expert
-- **Data Source**: Local GeoJSON data
-- **Center**: Norway center (65.0°N, 10.75°E)
-- **Properties**: `name`, `id`, `slug`, `area_km2`, `centroid`
+- **Description**: Test your knowledge of all 15 Norwegian counties
 
 ## Multi-Map State Isolation
 
@@ -185,3 +186,36 @@ Each map maintains isolated state using localStorage keys scoped by mapId:
 - `seed:{mapId}` - Random seed for consistent question selection per map
 
 This prevents settings from one map affecting another map during gameplay.
+
+## Recent Improvements and Fixes
+
+### Code Quality Improvements
+- **ESLint Configuration**: Fixed ESLint configuration to properly handle TypeScript files and browser/Node.js globals
+- **Console Log Cleanup**: Removed all debug console logs from production code
+- **Unused Code Removal**: Cleaned up unused imports, variables, and functions throughout the codebase
+- **Type Safety**: Improved TypeScript type definitions and removed `any` types where possible
+
+### Generic Naming Refactoring
+- **Region Type**: Replaced Oslo-specific `Bydel` type with generic `Region` type for better multi-map support
+- **Component Updates**: Updated all components to use generic `Region` terminology instead of Oslo-specific terms
+- **Translation Updates**: Updated translation keys to use generic terms (e.g., `totalRegions` instead of `totalDistricts`)
+
+### Gameplay Improvements
+- **Zoom Behavior**: Disabled zoom for hard and expert difficulty levels to increase challenge
+- **Large Country Handling**: Improved bounds calculation for very large countries (like Russia) to prevent zooming off the map
+- **Difficulty Options**: Fixed missing difficulty levels in classic mode dropdown (now includes all 5 levels: training, easy, normal, hard, expert)
+
+### Hydration Error Fixes
+- **localStorage Access**: Fixed hydration mismatches by deferring localStorage access to useEffect hooks
+- **Theme Initialization**: Improved theme context to prevent hydration errors
+- **State Initialization**: Updated game state initialization to use default values and load from localStorage after hydration
+
+### Code Structure Improvements
+- **Difficulty Settings**: Refactored difficulty settings into centralized configuration objects for better maintainability
+- **Bounds Calculation**: Improved bounds calculation logic with better handling of edge cases
+- **Error Handling**: Enhanced error handling throughout the application
+
+### Performance Optimizations
+- **Build Process**: Optimized build process and removed unnecessary dependencies
+- **Code Splitting**: Maintained efficient code splitting for better performance
+- **Memory Management**: Improved memory management in game state and map rendering

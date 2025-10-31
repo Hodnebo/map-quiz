@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Button, AppBar, Toolbar, Typography, Box, IconButton, Container } from "@mui/material";
 import { DarkMode as DarkModeIcon, LightMode as LightModeIcon } from "@mui/icons-material";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -10,24 +9,30 @@ import { useState, useEffect, useMemo } from "react";
 import type { Locale } from "@/i18n/config";
 import { detectBrowserLocale } from "@/i18n/utils";
 import MapCategory from "@/components/MapCategory";
-import type { MapConfigWithMetadata } from "@/config/maps/types";
 
 export default function LandingPage() {
-  const router = useRouter();
+  // router removed - not used
   const { isDarkMode, toggleTheme } = useTheme();
-  const [locale, setLocale] = useState<Locale>(() => {
-    // Initialize from localStorage or browser detection
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('landing_locale');
-      if (stored === 'en' || stored === 'no') return stored;
-      return detectBrowserLocale();
-    }
-    return 'no';
-  });
+  const [locale, setLocale] = useState<Locale>('no'); // Default to 'no' to prevent hydration mismatch
   const maps = getAllMapConfigs();
 
   useEffect(() => {
-    localStorage.setItem('landing_locale', locale);
+    // Initialize from localStorage or browser detection after hydration
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('landing_locale');
+      if (stored === 'en' || stored === 'no') {
+        setLocale(stored);
+      } else {
+        setLocale(detectBrowserLocale());
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save to localStorage when locale changes
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('landing_locale', locale);
+    }
   }, [locale]);
 
   const toggleLocale = () => {

@@ -7,22 +7,28 @@ function getAudioContext(): AudioContext | null {
 
   if (!audioContext) {
     try {
-      audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    } catch (e) {
-      console.warn('Web Audio API not supported');
+      // Handle webkitAudioContext for older browsers
+      const AudioContextClass = window.AudioContext || (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (AudioContextClass) {
+        audioContext = new AudioContextClass();
+      } else {
+        return null;
+      }
+    } catch {
+      // Web Audio API not supported
       return null;
     }
   }
 
   // Resume context if it's suspended (required for user interaction)
   if (audioContext.state === 'suspended') {
-    audioContext.resume().catch(console.warn);
+    audioContext.resume().catch(() => {});
   }
 
   return audioContext;
 }
 
-function createTone(frequency: number, duration: number, type: OscillatorType = 'sine'): void {
+function createTone(frequency: number, duration: number, type: 'sine' | 'square' | 'sawtooth' | 'triangle' = 'sine'): void {
   const ctx = getAudioContext();
   if (!ctx) return;
 

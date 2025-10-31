@@ -82,7 +82,7 @@ export default function GameOverlay({
                 <Typography variant="caption" sx={{ fontSize: '0.5rem', lineHeight: 1, color: '#4caf50', minWidth: 20 }}>
                   ✓
                 </Typography>
-                <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 700, lineHeight: 1, color: '#1a1a1a' }}>
+                <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 700, lineHeight: 1, color: '#1a1a1a' }} data-testid="score-display">
                   {state.correctAnswers}/{state.currentRound}
                 </Typography>
               </Box>
@@ -92,7 +92,7 @@ export default function GameOverlay({
                 <Typography variant="caption" sx={{ fontSize: '0.5rem', lineHeight: 1, color: '#999', minWidth: 20 }}>
                   {t('game.round', locale).charAt(0).toUpperCase()}
                 </Typography>
-                <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 700, lineHeight: 1, color: '#1a1a1a' }}>
+                <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 700, lineHeight: 1, color: '#1a1a1a' }} data-testid="round-counter">
                   {state.currentRound}/{settings.rounds}
                 </Typography>
               </Box>
@@ -288,6 +288,7 @@ export default function GameOverlay({
         {/* Current Target Info */}
         {state.status === "playing" && targetName && settings.gameMode !== 'reverse_quiz' && (
           <Card
+            data-testid="game-overlay"
             sx={{
               backgroundColor: 'rgba(255, 255, 255, 0.9)',
               backdropFilter: 'blur(12px)',
@@ -300,7 +301,7 @@ export default function GameOverlay({
               <Typography variant="body2" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' }, mb: 0.5, color: '#666', fontWeight: 500 }}>
                 {t('map.findArea', locale)}
               </Typography>
-              <Typography variant="body1" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' }, fontWeight: 600, mb: 0.5, color: '#1a1a1a' }}>
+              <Typography variant="body1" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' }, fontWeight: 600, mb: 0.5, color: '#1a1a1a' }} data-testid="question-text">
                 {targetName}
               </Typography>
               {attemptsLeft !== undefined && (

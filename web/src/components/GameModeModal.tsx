@@ -14,8 +14,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  FormControlLabel,
-  Switch,
   Chip,
   Stack,
 } from '@mui/material';
@@ -75,7 +73,7 @@ export function GameModeModal({
     }));
   };
 
-  const handleSettingChange = (key: keyof GameSettings, value: any) => {
+  const handleSettingChange = (key: keyof GameSettings, value: unknown) => {
     setSettings(prev => ({
       ...prev,
       [key]: value,
@@ -106,6 +104,7 @@ export function GameModeModal({
       onClose={onClose}
       maxWidth="sm"
       fullWidth
+      data-testid="game-mode-modal"
       PaperProps={{
         sx: {
           borderRadius: 2,
@@ -138,6 +137,7 @@ export function GameModeModal({
                   label={t(strategy.name, locale)}
                   onClick={() => handleModeChange(strategy.id)}
                   variant={isSelected ? 'filled' : 'outlined'}
+                  data-testid={`game-mode-${strategy.id}`}
                   sx={{
                     backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : 'transparent',
                     color: 'white',
@@ -190,7 +190,7 @@ export function GameModeModal({
                 })}
               </Select>
               <Typography variant="caption" sx={{ mt: 0.5, opacity: 0.8, fontSize: '0.75rem' }}>
-                {t('game.totalDistricts', locale, { count: totalEntries })}
+                {t('game.totalRegions', locale, { count: totalEntries })}
               </Typography>
             </FormControl>
 
@@ -230,6 +230,7 @@ export function GameModeModal({
                   value={settings.difficulty}
                   onChange={(e) => handleSettingChange('difficulty', e.target.value)}
                   label={t('modal.difficulty', locale)}
+                  data-testid="difficulty-select"
                   sx={{
                     color: 'white',
                     '& .MuiOutlinedInput-notchedOutline': {
@@ -243,9 +244,11 @@ export function GameModeModal({
                     },
                   }}
                 >
+                  <MenuItem value="training">{t('modal.training', locale)}</MenuItem>
                   <MenuItem value="easy">{t('modal.easy', locale)}</MenuItem>
-                  <MenuItem value="medium">{t('modal.medium', locale)}</MenuItem>
+                  <MenuItem value="normal">{t('modal.normal', locale)}</MenuItem>
                   <MenuItem value="hard">{t('modal.hard', locale)}</MenuItem>
+                  <MenuItem value="expert">{t('modal.expert', locale)}</MenuItem>
                 </Select>
               </FormControl>
             )}
@@ -255,6 +258,7 @@ export function GameModeModal({
               <FormControl fullWidth>
                 <InputLabel sx={{ color: 'white' }}>{t('modal.alternatives', locale)}</InputLabel>
                 <Select
+                  data-testid="alternatives-select"
                   value={settings.alternativesCount}
                   onChange={(e) => handleSettingChange('alternativesCount', Number(e.target.value))}
                   label={t('modal.alternatives', locale)}
@@ -301,6 +305,7 @@ export function GameModeModal({
         <Button
           onClick={handleStartGame}
           variant="contained"
+          data-testid="start-game-button"
           sx={{
             backgroundColor: 'rgba(255,255,255,0.2)',
             color: 'white',

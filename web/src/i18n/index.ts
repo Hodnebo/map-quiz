@@ -22,9 +22,13 @@ export function getTranslations(locale: Locale = defaultLocale) {
 export function t(path: string, locale: Locale = defaultLocale, variables?: Record<string, string | number>): string {
   const translations = getTranslations(locale);
 
-  let current: any = translations;
+  let current: unknown = translations;
   for (const segment of path.split('.')) {
-    current = current?.[segment];
+    if (current && typeof current === 'object' && segment in current) {
+      current = (current as Record<string, unknown>)[segment];
+    } else {
+      current = undefined;
+    }
   }
 
   if (typeof current !== 'string') {

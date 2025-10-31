@@ -1,19 +1,20 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { TextField, Box, Paper, List, ListItem, ListItemText, Typography, useTheme } from '@mui/material';
-import type { Bydel } from '@/lib/types';
+import type { Region } from '@/lib/types';
 
 interface AutocompleteInputProps {
   value: string;
   onChange: (value: string) => void;
   onSubmit: (value: string) => void;
-  suggestions: Bydel[];
+  suggestions: Region[];
   placeholder?: string;
   disabled?: boolean;
   maxSuggestions?: number;
-  currentTargetId?: string | null;
+  'data-testid'?: string;
+  // currentTargetId removed - not used
 }
 
 export default function AutocompleteInput({
@@ -24,7 +25,8 @@ export default function AutocompleteInput({
   placeholder = "Skriv navnet på området...",
   disabled = false,
   maxSuggestions = 5,
-  currentTargetId = null
+  'data-testid': dataTestId,
+  // currentTargetId removed - not used
 }: AutocompleteInputProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -34,15 +36,15 @@ export default function AutocompleteInput({
   const isDarkMode = theme.palette.mode === 'dark';
 
   // Filter suggestions based on input value - show suggestions that start with input, or contain it if no starts-with matches
-  const startsWithSuggestions = suggestions.filter(bydel => 
-    bydel.name.toLowerCase().startsWith(value.toLowerCase()) && 
-    bydel.name.toLowerCase() !== value.toLowerCase()
+  const startsWithSuggestions = suggestions.filter(region => 
+    region.name.toLowerCase().startsWith(value.toLowerCase()) && 
+    region.name.toLowerCase() !== value.toLowerCase()
   );
   
-  const containsSuggestions = suggestions.filter(bydel => 
-    bydel.name.toLowerCase().includes(value.toLowerCase()) && 
-    bydel.name.toLowerCase() !== value.toLowerCase() &&
-    !startsWithSuggestions.some(s => s.id === bydel.id)
+  const containsSuggestions = suggestions.filter(region => 
+    region.name.toLowerCase().includes(value.toLowerCase()) && 
+    region.name.toLowerCase() !== value.toLowerCase() &&
+    !startsWithSuggestions.some(s => s.id === region.id)
   );
   
   const filteredSuggestions = [...startsWithSuggestions, ...containsSuggestions].slice(0, maxSuggestions);
@@ -109,7 +111,7 @@ export default function AutocompleteInput({
   };
 
   // Handle suggestion click
-  const handleSuggestionClick = (suggestion: Bydel) => {
+  const handleSuggestionClick = (suggestion: Region) => {
     onChange(suggestion.name);
     onSubmit(suggestion.name);
     setIsOpen(false);
@@ -117,7 +119,7 @@ export default function AutocompleteInput({
   };
 
   // Handle input blur
-  const handleInputBlur = (event: React.FocusEvent) => {
+  const handleInputBlur = () => {
     // Delay closing to allow for suggestion clicks
     setTimeout(() => {
       if (!listRef.current?.contains(document.activeElement)) {
@@ -138,6 +140,7 @@ export default function AutocompleteInput({
     <Box sx={{ position: 'relative', width: '100%' }}>
       <TextField
         ref={inputRef}
+        data-testid={dataTestId || 'autocomplete-input'}
         fullWidth
         value={value}
         onChange={handleInputChange}
@@ -148,6 +151,9 @@ export default function AutocompleteInput({
         disabled={disabled}
         variant="outlined"
         size="small"
+        inputProps={{
+          'data-testid': dataTestId || 'autocomplete-input',
+        }}
         sx={{
           '& .MuiOutlinedInput-root': {
             backgroundColor: isDarkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
