@@ -85,6 +85,22 @@ export abstract class BaseGameMode implements GameModeStrategy {
     return currentScore + 1 + Math.floor((streak + 1) / 3);
   }
 
+  /**
+   * Calculate maximum possible score for a given number of rounds
+   * Assumes perfect answers with maximum streak bonuses
+   */
+  protected calculateMaxScore(rounds: number): number {
+    let maxScore = 0;
+    let streak = 0;
+    for (let round = 1; round <= rounds; round++) {
+      const basePoints = 1;
+      const streakBonus = Math.floor((streak + 1) / 3);
+      maxScore += basePoints + streakBonus;
+      streak++;
+    }
+    return maxScore;
+  }
+
   protected createMapConfig(
     zoomEnabled: boolean = true,
     focusBounds?: [[number, number], [number, number]] | null,

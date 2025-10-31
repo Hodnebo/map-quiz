@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, Typography, Box, IconButton, Drawer } from '@mui/material';
 import { Settings as SettingsIcon, Close as CloseIcon } from '@mui/icons-material';
 import GameSettings from './GameSettings';
@@ -8,6 +8,19 @@ import type { GameSettings as GameSettingsType, GameState } from '@/lib/types';
 import { getEffectiveSettings } from '@/lib/gameModes';
 import { t } from '@/i18n';
 import type { Locale } from '@/i18n/config';
+
+// Helper function to calculate maximum possible score
+function calculateMaxScore(rounds: number): number {
+  let maxScore = 0;
+  let streak = 0;
+  for (let round = 1; round <= rounds; round++) {
+    const basePoints = 1;
+    const streakBonus = Math.floor((streak + 1) / 3);
+    maxScore += basePoints + streakBonus;
+    streak++;
+  }
+  return maxScore;
+}
 
 interface GameOverlayProps {
   state: GameState;
@@ -34,6 +47,16 @@ export default function GameOverlay({
 }: GameOverlayProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [mobileStatsExpanded, setMobileStatsExpanded] = useState(false);
+
+  // Calculate maximum possible score
+  const maxScore = useMemo(() => calculateMaxScore(settings.rounds), [settings.rounds]);
+
+  // Calculate percentage based on answered questions only (not current round)
+  const answeredRounds = state.currentRound > 0 ? state.currentRound - 1 : 0;
+  const percentage = useMemo(() => {
+    if (answeredRounds === 0) return 0;
+    return Math.round((state.correctAnswers / answeredRounds) * 100);
+  }, [state.correctAnswers, answeredRounds]);
 
   return (
     <>
@@ -73,7 +96,7 @@ export default function GameOverlay({
                   {t('game.points', locale).charAt(0).toUpperCase()}
                 </Typography>
                 <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 700, lineHeight: 1, color: '#1a1a1a' }}>
-                  {state.score}
+                  {state.score}/{maxScore}
                 </Typography>
               </Box>
               
@@ -83,7 +106,7 @@ export default function GameOverlay({
                   ✓
                 </Typography>
                 <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 700, lineHeight: 1, color: '#1a1a1a' }} data-testid="score-display">
-                  {state.correctAnswers}/{state.currentRound}
+                  {state.correctAnswers}/{answeredRounds > 0 ? answeredRounds : state.currentRound}
                 </Typography>
               </Box>
               
@@ -107,7 +130,7 @@ export default function GameOverlay({
                     {t('game.points', locale)}
                   </Typography>
                   <Typography variant="h6" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#1a1a1a', lineHeight: 1.2 }}>
-                    {state.score}
+                    {state.score}/{maxScore}
                   </Typography>
                 </Box>
                 <Box sx={{ flex: 1, textAlign: 'center', p: 1, backgroundColor: 'rgba(103, 126, 234, 0.1)', borderRadius: 1 }}>
@@ -130,12 +153,12 @@ export default function GameOverlay({
                         {t('results.correctAnswers', locale)}
                       </Typography>
                       <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 700, color: '#1b5e20', lineHeight: 1.2 }}>
-                        {state.correctAnswers} / {state.currentRound}
+                        {state.correctAnswers} / {answeredRounds > 0 ? answeredRounds : state.currentRound}
                       </Typography>
                     </Box>
                   </Box>
-                  <Typography variant="h5" sx={{ fontSize: '1.5rem', fontWeight: 700, color: state.currentRound > 0 ? `rgba(76, 175, 80, ${Math.max(0.3, state.correctAnswers / state.currentRound)})` : 'rgba(76, 175, 80, 0.3)' }}>
-                    {state.currentRound > 0 ? Math.round((state.correctAnswers / state.currentRound) * 100) : 0}%
+                  <Typography variant="h5" sx={{ fontSize: '1.5rem', fontWeight: 700, color: answeredRounds > 0 ? `rgba(76, 175, 80, ${Math.max(0.3, state.correctAnswers / answeredRounds)})` : 'rgba(76, 175, 80, 0.3)' }}>
+                    {percentage}%
                   </Typography>
                 </Box>
               </Box>
@@ -181,7 +204,7 @@ export default function GameOverlay({
                 {t('game.points', locale)}
               </Typography>
               <Typography variant="h6" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' }, fontWeight: 600, lineHeight: 1, color: '#1a1a1a' }}>
-                {state.score}
+                {state.score}/{maxScore}
               </Typography>
             </CardContent>
           </Card>
@@ -236,7 +259,7 @@ export default function GameOverlay({
                   {t('results.correctAnswers', locale)}
                 </Typography>
                 <Typography variant="h6" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' }, fontWeight: 600, lineHeight: 1.2, color: '#1b5e20' }}>
-                  {state.correctAnswers} / {state.currentRound}
+                  {state.correctAnswers} / {answeredRounds > 0 ? answeredRounds : state.currentRound}
                 </Typography>
               </Box>
               <Typography 
@@ -251,7 +274,7 @@ export default function GameOverlay({
                   textAlign: 'right',
                 }}
               >
-                {state.currentRound > 0 ? Math.round((state.correctAnswers / state.currentRound) * 100) : 0}%
+                {percentage}%
               </Typography>
             </Box>
           </CardContent>

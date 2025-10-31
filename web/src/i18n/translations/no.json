@@ -103,7 +103,9 @@
   },
   "settings": {
     "title": "Innstillinger",
-    "close": "Lukk"
+    "close": "Lukk",
+    "soundOn": "Slå på lyd",
+    "soundOff": "Slå av lyd"
   },
   "gameModes": {
     "classic": {
@@ -115,7 +117,7 @@
       "description": "Test dine kunnskaper om alle 15 norske fylker"
     },
     "reverse_quiz": {
-      "name": "Omvendt Quiz",
+      "name": "Hva heter dette området?",
       "description": "Skriv navnet på det markerte området"
     },
     "multiple_choice": {

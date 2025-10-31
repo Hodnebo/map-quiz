@@ -14,7 +14,7 @@ import "@/lib/modes"; // Import to ensure modes are registered
 import { getAssetUrl } from "@/lib/basePath";
 import { getMapConfig, hasMapConfig } from "@/config/maps";
 import { Button, AppBar, Toolbar, Typography, Box, IconButton } from "@mui/material";
-import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, DarkMode as DarkModeIcon, LightMode as LightModeIcon, Settings as SettingsIcon, ArrowBack as ArrowBackIcon } from "@mui/icons-material";
+import { PlayArrow as PlayArrowIcon, Refresh as RefreshIcon, DarkMode as DarkModeIcon, LightMode as LightModeIcon, Settings as SettingsIcon, ArrowBack as ArrowBackIcon, VolumeUp as VolumeUpIcon, VolumeOff as VolumeOffIcon } from "@mui/icons-material";
 import { useTheme } from "@/contexts/ThemeContext";
 import { t } from "@/i18n";
 import type { Locale } from "@/i18n/config";
@@ -219,6 +219,20 @@ export default function GamePage() {
       if (stateRef.current.settings.gameMode === 'reverse_quiz') {
         return;
       }
+      
+      // In multiple-choice mode, only allow clicking on candidate areas
+      if (stateRef.current.settings.gameMode === 'multiple_choice') {
+        const candidateIds = stateRef.current.candidateIds ?? [];
+        if (!candidateIds.includes(id)) {
+          return; // Ignore clicks on non-candidate areas
+        }
+      }
+      
+      // Prevent clicking on already answered areas
+      if (stateRef.current.answeredIds.includes(id)) {
+        return; // Ignore clicks on already answered areas
+      }
+      
       const res = answer(stateRef.current, id, allIds, seed);
       setFeedback(res.isCorrect ? "correct" : "wrong");
       if (!res.isCorrect) {
@@ -438,6 +452,19 @@ export default function GamePage() {
             >
               {locale === 'no' ? 'EN' : 'NO'}
             </Button>
+            <IconButton
+              onClick={() => setSettings(prev => ({ ...prev, audioEnabled: !prev.audioEnabled }))}
+              color="inherit"
+              aria-label={settings.audioEnabled ? t('settings.soundOff', locale) : t('settings.soundOn', locale)}
+              sx={{
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                },
+              }}
+            >
+              {settings.audioEnabled ?? true ? <VolumeUpIcon /> : <VolumeOffIcon />}
+            </IconButton>
             <IconButton
               onClick={toggleTheme}
               color="inherit"

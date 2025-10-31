@@ -103,7 +103,9 @@
   },
   "settings": {
     "title": "Settings",
-    "close": "Close"
+    "close": "Close",
+    "soundOn": "Turn sound on",
+    "soundOff": "Turn sound off"
   },
   "gameModes": {
     "classic": {
@@ -115,7 +117,7 @@
       "description": "Test your knowledge of all 15 Norwegian counties"
     },
     "reverse_quiz": {
-      "name": "Reverse Quiz",
+      "name": "What is this area called?",
       "description": "Write the name of the highlighted area"
     },
     "fylker": {
