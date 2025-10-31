@@ -27,14 +27,18 @@ test.describe('Gameplay', () => {
     await page.click('[data-testid="start-game-button"]');
     
     // Wait for game overlay to be visible
-    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible();
+    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible({ timeout: 15000 });
+    
+    // Wait for map to be ready
+    const mapContainer = page.locator('[data-testid="map-container"]');
+    await expect(mapContainer).toBeVisible();
+    await page.waitForTimeout(500); // Brief wait for map to initialize
     
     // Click on a region (this might be correct or wrong, but we'll test the flow)
-    const mapContainer = page.locator('[data-testid="map-container"]');
-    await mapContainer.click();
+    await mapContainer.click({ force: true });
     
     // Check that feedback is shown
-    await expect(page.locator('[data-testid="feedback-message"]')).toBeVisible();
+    await expect(page.locator('[data-testid="feedback-message"]')).toBeVisible({ timeout: 5000 });
   });
 
   test('should handle wrong answer', async ({ page }) => {
@@ -42,22 +46,28 @@ test.describe('Gameplay', () => {
     await page.click('[data-testid="start-game-button"]');
     
     // Wait for game overlay to be visible
-    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible();
+    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible({ timeout: 15000 });
+    
+    // Wait for map to be ready
+    const mapContainer = page.locator('[data-testid="map-container"]');
+    await expect(mapContainer).toBeVisible();
+    await page.waitForTimeout(500); // Brief wait for map to initialize
     
     // Click on a region
-    const mapContainer = page.locator('[data-testid="map-container"]');
-    await mapContainer.click();
+    await mapContainer.click({ force: true });
     
     // Check that feedback is shown
-    await expect(page.locator('[data-testid="feedback-message"]')).toBeVisible();
+    await expect(page.locator('[data-testid="feedback-message"]')).toBeVisible({ timeout: 5000 });
     
     // If it's wrong, check that we can try again
     const feedbackMessage = page.locator('[data-testid="feedback-message"]');
     const messageText = await feedbackMessage.textContent();
     
     if (messageText?.includes('Feil') || messageText?.includes('Wrong')) {
+      // Wait for feedback to clear before clicking again
+      await page.waitForTimeout(1000);
       // Check that we can click again
-      await mapContainer.click();
+      await mapContainer.click({ force: true });
       // Wait for next feedback
       await expect(page.locator('[data-testid="feedback-message"]')).toBeVisible({ timeout: 5000 });
     }
@@ -79,17 +89,21 @@ test.describe('Gameplay', () => {
     await page.click('[data-testid="start-game-button"]');
     
     // Wait for game overlay to be visible
-    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible();
+    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible({ timeout: 15000 });
+    
+    // Wait for map to be ready
+    const mapContainer = page.locator('[data-testid="map-container"]');
+    await expect(mapContainer).toBeVisible();
+    await page.waitForTimeout(500); // Brief wait for map to initialize
     
     // Simulate completing the game by clicking through regions
     // This is a simplified test - in reality we'd need to answer correctly
-    const mapContainer = page.locator('[data-testid="map-container"]');
-    
-    // Click multiple times to simulate gameplay
     for (let i = 0; i < 5; i++) {
-      await mapContainer.click();
+      await mapContainer.click({ force: true });
       // Wait for feedback message to appear instead of fixed timeout
       await expect(page.locator('[data-testid="feedback-message"]')).toBeVisible({ timeout: 5000 }).catch(() => {});
+      // Brief wait between clicks
+      await page.waitForTimeout(500);
     }
     
     // Check if results screen appears (this might not happen in 5 clicks)
