@@ -57,6 +57,7 @@ export default function GamePage() {
   const stateRef = useRef(state);
   const settingsRef = useRef(settings);
   const answerTimeoutRef = useRef<number | null>(null);
+  const isRestartingRef = useRef(false); // Track if we're restarting to prevent modal from opening
   useEffect(() => { stateRef.current = state; }, [state]);
   useEffect(() => { settingsRef.current = settings; }, [settings]);
 
@@ -86,7 +87,9 @@ export default function GamePage() {
   useEffect(() => initializeAudio(), []);
 
   useEffect(() => {
-    if (state.status === 'idle' && !showModal) {
+    // Only show modal when transitioning to idle from a non-playing state
+    // This prevents modal from opening when restarting (which goes idle -> playing)
+    if (state.status === 'idle' && !showModal && !isRestartingRef.current) {
       const hasSeen = hasSeenModal();
       if (!hasSeen) {
         setIsFirstVisit(true);
@@ -136,16 +139,23 @@ export default function GamePage() {
 
   const doRestart = useCallback(() => {
     if (!canPlay) return;
+    isRestartingRef.current = true; // Set flag to prevent modal from opening
     const newSeed = Math.floor(Math.random() * 2 ** 31);
     setSeed(newSeed);
     const settingsWithEffective = { ...settings, ...effectiveSettings };
-    setState(createInitialState(settingsWithEffective));
+    // Create initial state and immediately start the game without going through 'idle'
+    // This prevents the modal from opening
+    const initialState = createInitialState(settingsWithEffective);
+    const newState = startGame(initialState, allIds, newSeed);
+    setState(newState);
     setWrongAnswerIds([]);
     setFeedback(null);
     setFeedbackMessage("");
+    setShowModal(false); // Ensure modal is closed
+    // Reset flag after state update completes
     setTimeout(() => {
-      setState((s) => startGame(s, allIds, newSeed));
-    }, 0);
+      isRestartingRef.current = false;
+    }, 100);
   }, [allIds, canPlay, settings, effectiveSettings]);
 
   const handleModalClose = useCallback(() => {
