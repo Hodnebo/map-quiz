@@ -123,9 +123,9 @@ function validateAndNormalize(gj: any) {
       id,
       properties: {
         id,
-        navn: name,
+        name,
         slug: slugify(String(name)),
-        areal_km2: Number(areaKm2.toFixed(3)),
+        area_km2: Number(areaKm2.toFixed(3)),
         centroid: c.geometry.coordinates,
       },
       geometry: f.geometry,

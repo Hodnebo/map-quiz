@@ -4,10 +4,7 @@ test.describe('Landing Page', () => {
   test('should display map cards', async ({ page }) => {
     await page.goto('/');
     
-    // Wait for the page to load
-    await page.waitForLoadState('networkidle');
-    
-    // Check that map cards are visible
+    // Wait for map cards to be visible instead of network idle
     const mapCards = page.locator('[data-testid="map-card"]');
     await expect(mapCards.first()).toBeVisible();
     
@@ -19,8 +16,8 @@ test.describe('Landing Page', () => {
   test('should navigate to game when clicking on a map card', async ({ page }) => {
     await page.goto('/');
     
-    // Wait for the page to load
-    await page.waitForLoadState('networkidle');
+    // Wait for map cards to be visible
+    await expect(page.locator('[data-testid="map-card"]').first()).toBeVisible();
     
     // Click on the first map card's action button
     const firstPlayButton = page.locator('[data-testid="map-card"] button').first();
@@ -33,8 +30,8 @@ test.describe('Landing Page', () => {
   test('should display map metadata correctly', async ({ page }) => {
     await page.goto('/');
     
-    // Wait for the page to load
-    await page.waitForLoadState('networkidle');
+    // Wait for map cards to be visible
+    await expect(page.locator('[data-testid="map-card"]').first()).toBeVisible();
     
     // Check that at least one map name is visible
     await expect(page.locator('[data-testid="map-name"]').first()).toBeVisible();
