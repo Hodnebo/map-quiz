@@ -20,7 +20,7 @@ export default defineConfig({
     timeout: 10 * 1000,
   },
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: process.env.CI ? [['html'], ['github']] : 'html',
+  reporter: process.env.CI ? [['html'], ['github']] : [['html', { open: 'never' }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */

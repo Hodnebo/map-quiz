@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { Box, Card, CardContent, Typography, Button, Fade, Zoom, IconButton } from '@mui/material';
 import { Refresh as RefreshIcon, Settings as SettingsIcon, EmojiEvents as TrophyIcon, Star as StarIcon, Close as CloseIcon } from '@mui/icons-material';
 import { t } from '@/i18n';
@@ -25,6 +25,8 @@ export default function GameResultsScreen({
   onClose,
   locale,
 }: GameResultsScreenProps) {
+  const [showFanfare, setShowFanfare] = useState(false);
+  
   // Handle ESC key to close
   useEffect(() => {
     if (!onClose) return;
@@ -38,10 +40,21 @@ export default function GameResultsScreen({
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onClose]);
+  
   // Calculate percentage
   const percentage = useMemo(() => {
     if (totalRounds === 0) return 0;
     return Math.round((correctAnswers / totalRounds) * 100);
+  }, [correctAnswers, totalRounds]);
+
+  // Show fanfare if all questions answered correctly
+  useEffect(() => {
+    if (correctAnswers === totalRounds && totalRounds > 0) {
+      setShowFanfare(true);
+      // Hide fanfare after animation duration
+      const timer = setTimeout(() => setShowFanfare(false), 3000);
+      return () => clearTimeout(timer);
+    }
   }, [correctAnswers, totalRounds]);
 
   // Determine congratulations message based on percentage
@@ -76,8 +89,79 @@ export default function GameResultsScreen({
           justifyContent: 'center',
           padding: { xs: 2, sm: 3 },
         }}
-      >
-        <Zoom in timeout={400}>
+        >
+          {/* Fanfare Animation */}
+          {showFanfare && (
+            <>
+              <style>{`
+                @keyframes glitter {
+                  0% {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                  }
+                  100% {
+                    opacity: 0;
+                    transform: translateY(-300px) scale(0) rotate(360deg);
+                  }
+                }
+                @keyframes pulse {
+                  0%, 100% {
+                    transform: translate(-50%, -50%) scale(1);
+                  }
+                  50% {
+                    transform: translate(-50%, -50%) scale(1.1);
+                  }
+                }
+              `}</style>
+              <Box
+                sx={{
+                  position: 'fixed',
+                  inset: 0,
+                  zIndex: 1001,
+                  pointerEvents: 'none',
+                  overflow: 'hidden',
+                }}
+              >
+                {Array.from({ length: 50 }).map((_, i) => {
+                  const colors = ['#FFD700', '#FFA500', '#FF6347', '#FF1493', '#00CED1'];
+                  const delay = Math.random() * 0.5;
+                  const duration = 2 + Math.random() * 2;
+                  const left = Math.random() * 100;
+                  const top = Math.random() * 100;
+                  return (
+                    <Box
+                      key={i}
+                      sx={{
+                        position: 'absolute',
+                        left: `${left}%`,
+                        top: `${top}%`,
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: colors[Math.floor(Math.random() * colors.length)],
+                        animation: `glitter ${duration}s ease-out ${delay}s forwards`,
+                      }}
+                    />
+                  );
+                })}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    fontSize: { xs: '3rem', sm: '4rem' },
+                    fontWeight: 700,
+                    color: '#FFD700',
+                    textShadow: '0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.6)',
+                    animation: 'pulse 1s ease-in-out infinite',
+                  }}
+                >
+                  ?? Perfect! ??
+                </Box>
+              </Box>
+            </>
+          )}
+          <Zoom in timeout={400}>
           <Card
             sx={{
               maxWidth: 500,
