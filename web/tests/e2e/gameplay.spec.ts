@@ -4,7 +4,8 @@ test.describe('Gameplay', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to a game page
     await page.goto('/game/oslo');
-    await page.waitForLoadState('networkidle');
+    // Wait for the map container to be visible instead of network idle
+    await expect(page.locator('[data-testid="map-container"]')).toBeVisible({ timeout: 15000 });
   });
 
   test('should start game and display question', async ({ page }) => {
@@ -25,8 +26,8 @@ test.describe('Gameplay', () => {
     // Start game
     await page.click('[data-testid="start-game-button"]');
     
-    // Wait for game to load
-    await page.waitForSelector('[data-testid="game-overlay"]');
+    // Wait for game overlay to be visible
+    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible();
     
     // Click on a region (this might be correct or wrong, but we'll test the flow)
     const mapContainer = page.locator('[data-testid="map-container"]');
@@ -40,8 +41,8 @@ test.describe('Gameplay', () => {
     // Start game
     await page.click('[data-testid="start-game-button"]');
     
-    // Wait for game to load
-    await page.waitForSelector('[data-testid="game-overlay"]');
+    // Wait for game overlay to be visible
+    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible();
     
     // Click on a region
     const mapContainer = page.locator('[data-testid="map-container"]');
@@ -57,6 +58,8 @@ test.describe('Gameplay', () => {
     if (messageText?.includes('Feil') || messageText?.includes('Wrong')) {
       // Check that we can click again
       await mapContainer.click();
+      // Wait for next feedback
+      await expect(page.locator('[data-testid="feedback-message"]')).toBeVisible({ timeout: 5000 });
     }
   });
 
@@ -64,8 +67,8 @@ test.describe('Gameplay', () => {
     // Start game
     await page.click('[data-testid="start-game-button"]');
     
-    // Wait for game to load
-    await page.waitForSelector('[data-testid="game-overlay"]');
+    // Wait for game overlay to be visible
+    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible();
     
     // Check that score is present
     await expect(page.locator('[data-testid="score-display"]')).toBeAttached();
@@ -75,8 +78,8 @@ test.describe('Gameplay', () => {
     // Start game
     await page.click('[data-testid="start-game-button"]');
     
-    // Wait for game to load
-    await page.waitForSelector('[data-testid="game-overlay"]');
+    // Wait for game overlay to be visible
+    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible();
     
     // Simulate completing the game by clicking through regions
     // This is a simplified test - in reality we'd need to answer correctly
@@ -85,7 +88,8 @@ test.describe('Gameplay', () => {
     // Click multiple times to simulate gameplay
     for (let i = 0; i < 5; i++) {
       await mapContainer.click();
-      await page.waitForTimeout(1000); // Wait for feedback
+      // Wait for feedback message to appear instead of fixed timeout
+      await expect(page.locator('[data-testid="feedback-message"]')).toBeVisible({ timeout: 5000 }).catch(() => {});
     }
     
     // Check if results screen appears (this might not happen in 5 clicks)

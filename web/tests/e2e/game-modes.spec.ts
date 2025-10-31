@@ -4,7 +4,8 @@ test.describe('Game Modes', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to a game page
     await page.goto('/game/oslo');
-    await page.waitForLoadState('networkidle');
+    // Wait for the map container to be visible instead of network idle
+    await expect(page.locator('[data-testid="map-container"]')).toBeVisible({ timeout: 15000 });
   });
 
   test('should open game mode modal when clicking settings', async ({ page }) => {
@@ -94,14 +95,15 @@ test.describe('Game Modes', () => {
     // Start game
     await page.click('[data-testid="start-game-button"]');
     
-    // Wait for map to load
-    await page.waitForSelector('[data-testid="map-container"]');
+    // Wait for game overlay to be visible
+    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible();
     
     // Try to zoom in (should be disabled)
     const mapContainer = page.locator('[data-testid="map-container"]');
-    await mapContainer.hover();
+    await expect(mapContainer).toBeVisible();
     
     // Try to scroll to zoom (should not work)
+    await mapContainer.hover();
     await page.mouse.wheel(0, -100);
     
     // The map should not have zoomed significantly
@@ -122,9 +124,8 @@ test.describe('Game Modes', () => {
     // Start game
     await page.click('[data-testid="start-game-button"]');
     
-    // Wait for game to start
-    await page.waitForSelector('[data-testid="map-container"]');
-    await page.waitForTimeout(1000); // Wait for game to initialize
+    // Wait for game overlay to be visible
+    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible();
     
     // Check that input field is visible (using test ID on input element)
     const inputField = page.locator('input[data-testid="reverse-quiz-input"]');
@@ -148,9 +149,8 @@ test.describe('Game Modes', () => {
     // Start game
     await page.click('[data-testid="start-game-button"]');
     
-    // Wait for game to start
-    await page.waitForSelector('[data-testid="map-container"]');
-    await page.waitForTimeout(1000); // Wait for game to initialize
+    // Wait for game overlay to be visible
+    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible();
     
     // Check that question text is visible (shows target name)
     const questionText = page.locator('[data-testid="question-text"]');
@@ -160,9 +160,6 @@ test.describe('Game Modes', () => {
     const questionContent = await questionText.textContent();
     expect(questionContent).toBeTruthy();
     expect(questionContent?.trim().length).toBeGreaterThan(0);
-    
-    // Verify the game overlay is visible
-    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible();
   });
 
   test('should highlight target in reverse quiz mode', async ({ page }) => {
@@ -178,9 +175,8 @@ test.describe('Game Modes', () => {
     // Start game
     await page.click('[data-testid="start-game-button"]');
     
-    // Wait for map to load
-    await page.waitForSelector('[data-testid="map-container"]');
-    await page.waitForTimeout(1500); // Wait for map to render and highlight
+    // Wait for game overlay to be visible
+    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible();
     
     // The map should have a highlighted feature (green highlight)
     // We verify this by checking that the map container is interactive
@@ -209,19 +205,13 @@ test.describe('Game Modes', () => {
     // Start game
     await page.click('[data-testid="start-game-button"]');
     
-    // Wait for game to start
-    await page.waitForSelector('[data-testid="map-container"]');
-    await page.waitForTimeout(1500); // Wait for map to render and show candidates
+    // Wait for game overlay to be visible
+    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible();
     
     // In multiple choice mode, candidates should be highlighted on the map
     // We verify this by checking that the map is interactive
     const mapContainer = page.locator('[data-testid="map-container"]');
     await expect(mapContainer).toBeVisible();
-    
-    // Multiple choice mode should not show the question text overlay (only shows on click)
-    // But we verify the game is running
-    const gameOverlay = page.locator('[data-testid="game-overlay"]');
-    await expect(gameOverlay).toBeVisible();
   });
 
   test('should work with different difficulty levels in classic mode', async ({ page }) => {
@@ -232,6 +222,7 @@ test.describe('Game Modes', () => {
       const modal = page.locator('[data-testid="game-mode-modal"]');
       if (!(await modal.isVisible().catch(() => false))) {
         await page.click('[data-testid="settings-button"]');
+        await expect(modal).toBeVisible();
       }
       
       // Select classic mode
@@ -244,17 +235,16 @@ test.describe('Game Modes', () => {
       // Start game
       await page.click('[data-testid="start-game-button"]');
       
-      // Wait for game to start
-      await page.waitForSelector('[data-testid="map-container"]');
-      await page.waitForTimeout(1000);
+      // Wait for game overlay to be visible
+      await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible();
       
       // Verify question is shown
       const questionText = page.locator('[data-testid="question-text"]');
       await expect(questionText).toBeVisible();
       
-      // Restart for next iteration
+      // Restart for next iteration - wait for modal to be visible
       await page.click('[data-testid="settings-button"]');
-      await page.waitForTimeout(500);
+      await expect(modal).toBeVisible();
     }
   });
 
@@ -266,35 +256,33 @@ test.describe('Game Modes', () => {
       const modal = page.locator('[data-testid="game-mode-modal"]');
       if (!(await modal.isVisible().catch(() => false))) {
         await page.click('[data-testid="settings-button"]');
+        await expect(modal).toBeVisible();
       }
       
       // Select multiple choice mode
       await page.click('[data-testid="game-mode-multiple_choice"]');
       
-      // Wait a bit for the alternatives selector to appear
-      await page.waitForTimeout(500);
+      // Wait for alternatives selector to appear
+      const alternativesSelect = page.locator('[data-testid="alternatives-select"]');
+      await expect(alternativesSelect).toBeVisible();
       
       // Find and select alternative count
-      const alternativesSelect = page.locator('[data-testid="alternatives-select"]');
-      if (await alternativesSelect.isVisible().catch(() => false)) {
-        await alternativesSelect.click();
-        await page.getByRole('option', { name: new RegExp(`${count}`, 'i') }).click();
-      }
+      await alternativesSelect.click();
+      await page.getByRole('option', { name: new RegExp(`${count}`, 'i') }).click();
       
       // Start game
       await page.click('[data-testid="start-game-button"]');
       
-      // Wait for game to start
-      await page.waitForSelector('[data-testid="map-container"]');
-      await page.waitForTimeout(1500);
+      // Wait for game overlay to be visible
+      await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible();
       
       // Verify map is visible and game is running
       const mapContainer = page.locator('[data-testid="map-container"]');
       await expect(mapContainer).toBeVisible();
       
-      // Restart for next iteration
+      // Restart for next iteration - wait for modal to be visible
       await page.click('[data-testid="settings-button"]');
-      await page.waitForTimeout(500);
+      await expect(modal).toBeVisible();
     }
   });
 
@@ -311,17 +299,13 @@ test.describe('Game Modes', () => {
     // Start game
     await page.click('[data-testid="start-game-button"]');
     
-    // Wait for game to start
-    await page.waitForSelector('[data-testid="map-container"]');
-    await page.waitForTimeout(1500); // Wait for game to initialize
+    // Wait for game overlay to be visible
+    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible();
     
     // Find input field - use the data-testid directly on the input element
     const inputField = page.locator('input[data-testid="reverse-quiz-input"]');
-    await expect(inputField).toBeVisible({ timeout: 10000 });
-    await expect(inputField).toBeEnabled({ timeout: 5000 });
-    
-    // Wait a bit more to ensure it's fully ready
-    await page.waitForTimeout(500);
+    await expect(inputField).toBeVisible();
+    await expect(inputField).toBeEnabled();
     
     // Type a test answer
     await inputField.click(); // Click to focus
@@ -334,12 +318,8 @@ test.describe('Game Modes', () => {
     // Submit the answer (press Enter)
     await inputField.press('Enter');
     
-    // Wait for feedback
-    await page.waitForTimeout(1000); // Wait for feedback to appear
-    
-    // Verify feedback is shown (either correct or wrong)
-    const feedbackExists = await page.locator('text=/Riktig|Feil/').isVisible().catch(() => false);
-    expect(feedbackExists).toBeTruthy();
+    // Wait for feedback to appear
+    await expect(page.locator('text=/Riktig|Feil/')).toBeVisible({ timeout: 5000 });
   });
 
   test('should switch between game modes correctly', async ({ page }) => {
@@ -350,6 +330,7 @@ test.describe('Game Modes', () => {
       const modal = page.locator('[data-testid="game-mode-modal"]');
       if (!(await modal.isVisible().catch(() => false))) {
         await page.click('[data-testid="settings-button"]');
+        await expect(modal).toBeVisible();
       }
       
       // Select the mode
@@ -358,9 +339,8 @@ test.describe('Game Modes', () => {
       // Start game
       await page.click('[data-testid="start-game-button"]');
       
-      // Wait for game to start
-      await page.waitForSelector('[data-testid="map-container"]');
-      await page.waitForTimeout(1000);
+      // Wait for game overlay to be visible
+      await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible();
       
       // Verify mode-specific elements
       if (mode === 'reverse_quiz') {
@@ -375,9 +355,9 @@ test.describe('Game Modes', () => {
         await expect(mapContainer).toBeVisible();
       }
       
-      // Restart for next iteration
+      // Restart for next iteration - wait for modal to be visible
       await page.click('[data-testid="settings-button"]');
-      await page.waitForTimeout(500);
+      await expect(modal).toBeVisible();
     }
   });
 });
