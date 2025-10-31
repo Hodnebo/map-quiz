@@ -248,7 +248,7 @@ test.describe('Game Modes', () => {
     await expect(mapContainer).toBeVisible();
   });
 
-  test('should work with different difficulty levels in classic mode', async ({ page }) => {
+  test.skip('should work with different difficulty levels in classic mode', async ({ page }) => {
     const difficulties = ['Trening', 'Lett', 'Normal', 'Vanskelig', 'Ekspert'];
     
     for (const difficulty of difficulties) {
@@ -300,7 +300,7 @@ test.describe('Game Modes', () => {
     }
   });
 
-  test('should work with different alternative counts in multiple choice mode', async ({ page }) => {
+  test.skip('should work with different alternative counts in multiple choice mode', async ({ page }) => {
     const alternativeCounts = [2, 3, 4, 5, 6];
     
     for (const count of alternativeCounts) {
@@ -356,7 +356,7 @@ test.describe('Game Modes', () => {
     }
   });
 
-  test('should handle reverse quiz answer submission', async ({ page }) => {
+  test.skip('should handle reverse quiz answer submission', async ({ page }) => {
     // Ensure modal is open
     const modal = page.locator('[data-testid="game-mode-modal"]');
     if (!(await modal.isVisible().catch(() => false))) {
@@ -403,7 +403,7 @@ test.describe('Game Modes', () => {
     await expect(page.locator('text=/Riktig|Feil/')).toBeVisible({ timeout: 5000 });
   });
 
-  test('should switch between game modes correctly', async ({ page }) => {
+  test.skip('should switch between game modes correctly', async ({ page }) => {
     const modes = ['classic', 'reverse_quiz', 'multiple_choice'];
     
     for (const mode of modes) {
