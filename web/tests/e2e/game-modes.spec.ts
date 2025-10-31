@@ -175,7 +175,7 @@ test.describe('Game Modes', () => {
     
     // Verify the question text "Hva heter dette området?" is shown in the overlay
     const overlay = page.locator('[data-testid="reverse-quiz-overlay"]');
-    const questionText = overlay.locator('text=Hva heter dette området?');
+    const questionText = overlay.getByText('Hva heter dette området?');
     await expect(questionText).toBeVisible();
   });
 
