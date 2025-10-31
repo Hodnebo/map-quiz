@@ -173,8 +173,9 @@ test.describe('Game Modes', () => {
     const inputField = page.locator('input[data-testid="reverse-quiz-input"]');
     await expect(inputField).toBeVisible({ timeout: 10000 });
     
-    // Verify the question text "Hva heter dette området?" is shown
-    const questionText = page.locator('text=Hva heter dette området?');
+    // Verify the question text "Hva heter dette området?" is shown in the overlay
+    const overlay = page.locator('[data-testid="reverse-quiz-overlay"]');
+    const questionText = overlay.locator('text=Hva heter dette området?');
     await expect(questionText).toBeVisible();
   });
 

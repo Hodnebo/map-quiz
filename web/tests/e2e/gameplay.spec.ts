@@ -148,14 +148,21 @@ test.describe('Gameplay', () => {
     // Wait for game overlay to be visible
     await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible({ timeout: 15000 });
     
+    // Ensure modal is closed if it's still open
+    const modal = page.locator('[data-testid="game-mode-modal"]');
+    if (await modal.isVisible().catch(() => false)) {
+      await expect(modal).not.toBeVisible({ timeout: 10000 });
+    }
+    
     // Get the first question
     const questionText1 = page.locator('[data-testid="question-text"]');
     await expect(questionText1).toBeVisible();
     const firstQuestion = await questionText1.textContent();
     
     // Click restart button (should be visible when game is playing)
-    const restartButton = page.locator('button:has-text("Restart"), button:has-text("Restart")');
-    await restartButton.click();
+    // Use a more specific selector that matches the restart button in the header
+    const restartButton = page.locator('button').filter({ hasText: /Restart/i }).first();
+    await restartButton.click({ timeout: 10000 });
     
     // Wait for new question
     await page.waitForTimeout(1000);
@@ -207,19 +214,30 @@ test.describe('Gameplay', () => {
   });
 
   test('should toggle sound on/off', async ({ page }) => {
+    // Ensure modal is closed if it's open
+    const modal = page.locator('[data-testid="game-mode-modal"]');
+    if (await modal.isVisible().catch(() => false)) {
+      // Close modal by clicking outside or pressing Escape
+      await page.keyboard.press('Escape');
+      await expect(modal).not.toBeVisible({ timeout: 5000 });
+    }
+    
     // Check for sound toggle button in header
     // The button should have a volume icon
     const soundButton = page.locator('button[aria-label*="sound"], button[aria-label*="lyd"]').first();
     
+    // Wait for button to be visible and not intercepted
+    await expect(soundButton).toBeVisible({ timeout: 10000 });
+    
     // Click sound toggle
-    await soundButton.click();
+    await soundButton.click({ timeout: 10000 });
     
     // Verify button state changed (icon might change)
     // The button should still be visible
     await expect(soundButton).toBeVisible();
     
     // Click again to toggle back
-    await soundButton.click();
+    await soundButton.click({ timeout: 10000 });
     await expect(soundButton).toBeVisible();
   });
 });
