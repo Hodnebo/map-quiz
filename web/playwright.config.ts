@@ -35,6 +35,8 @@ export default defineConfig({
     /* Disable network idle waits - use specific element waits instead */
     navigationTimeout: 30 * 1000,
   },
+  /* Global timeout for each test */
+  timeout: 60000,
 
   /* Configure projects for major browsers */
   projects: [
