@@ -19,7 +19,6 @@ import {
 } from '@mui/material';
 import { GameMode, GameSettings } from '@/lib/types';
 import { gameModeRegistry } from '@/lib/gameModeRegistry';
-import { GAME_MODES } from '@/lib/gameModes';
 import '@/lib/modes'; // Import to ensure modes are registered
 import { t } from '@/i18n';
 import type { Locale } from '@/i18n/config';
@@ -82,8 +81,15 @@ export function GameModeModal({
   };
 
   const handleStartGame = () => {
-    const mode = GAME_MODES[selectedMode];
-    if (mode) {
+    const modeStrategy = gameModeRegistry.getMode(selectedMode);
+    if (modeStrategy) {
+      // Convert the strategy to GameMode format expected by onStartGame
+      const mode: GameMode = {
+        id: modeStrategy.id,
+        name: modeStrategy.name,
+        description: modeStrategy.description,
+        settings: modeStrategy.getDefaultSettings() as any,
+      };
       onStartGame(mode, settings);
       onClose();
     }
