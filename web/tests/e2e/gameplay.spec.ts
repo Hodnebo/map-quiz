@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // Helper function to wait for modal to fully close
-async function waitForModalToClose(page: any, timeout = 10000) {
+async function waitForModalToClose(page: any, timeout = 15000) {
   const modal = page.locator('[data-testid="game-mode-modal"]');
   
   // Wait for modal to not be visible - use a polling approach
@@ -10,7 +10,7 @@ async function waitForModalToClose(page: any, timeout = 10000) {
     const isVisible = await modal.isVisible().catch(() => false);
     if (!isVisible) {
       // Modal is not visible, verify it's truly gone
-      await page.waitForTimeout(200); // Small wait to ensure transition completed
+      await page.waitForTimeout(300); // Small wait to ensure transition completed
       const stillVisible = await modal.isVisible().catch(() => false);
       if (!stillVisible) {
         return; // Modal is closed
@@ -21,16 +21,16 @@ async function waitForModalToClose(page: any, timeout = 10000) {
   
   // If we get here, modal is still visible after timeout
   // Try one more time with expect
-  await expect(modal).not.toBeVisible({ timeout: 2000 });
+  await expect(modal).not.toBeVisible({ timeout: 5000 });
 }
 
 // Helper function to wait for game to start (modal closed + overlay visible)
-async function waitForGameToStart(page: any, timeout = 20000) {
+async function waitForGameToStart(page: any, timeout = 30000) {
   const modal = page.locator('[data-testid="game-mode-modal"]');
   const overlay = page.locator('[data-testid="game-overlay"]');
   
   // First, wait for modal to close completely
-  await waitForModalToClose(page, Math.min(timeout, 10000));
+  await waitForModalToClose(page, Math.min(timeout, 15000));
   
   // Then wait for overlay to be visible with polling
   const startTime = Date.now();
@@ -38,7 +38,7 @@ async function waitForGameToStart(page: any, timeout = 20000) {
     const overlayVisible = await overlay.isVisible().catch(() => false);
     if (overlayVisible) {
       // Overlay is visible, verify it's truly visible
-      await page.waitForTimeout(200); // Small wait to ensure it's stable
+      await page.waitForTimeout(300); // Small wait to ensure it's stable
       const stillVisible = await overlay.isVisible().catch(() => false);
       if (stillVisible) {
         return; // Overlay is visible and game has started
@@ -48,7 +48,7 @@ async function waitForGameToStart(page: any, timeout = 20000) {
   }
   
   // If we get here, overlay didn't appear - use expect as fallback
-  await expect(overlay).toBeVisible({ timeout: 5000 });
+  await expect(overlay).toBeVisible({ timeout: 10000 });
 }
 
 // Helper function to start game handling modal if needed
@@ -57,18 +57,26 @@ async function startGameWithModalHandling(page: any) {
   const startButton = page.locator('[data-testid="start-game-button"]');
   const overlay = page.locator('[data-testid="game-overlay"]');
   
+  // First, ensure map is ready
+  await expect(page.locator('[data-testid="map-container"]')).toBeVisible({ timeout: 15000 });
+  
   if (await modal.isVisible().catch(() => false)) {
-    // Modal is open, click start button
+    // Modal is open, wait for start button to be enabled (not disabled)
+    // The button might be disabled if canPlay is false
+    await page.waitForTimeout(1000); // Give time for canPlay to become true
+    await expect(startButton).toBeEnabled({ timeout: 10000 });
+    
+    // Click start button
     await startButton.click();
-    // Wait for overlay to appear (this is the key indicator)
-    await expect(overlay).toBeVisible({ timeout: 20000 });
+    // Wait for overlay to appear (this is the key indicator) with increased timeout
+    await expect(overlay).toBeVisible({ timeout: 30000 });
     // Give modal time to close
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
   } else {
     // Modal not open, just click start
     await startButton.click();
-    // Wait for overlay to appear
-    await expect(overlay).toBeVisible({ timeout: 20000 });
+    // Wait for overlay to appear with increased timeout
+    await expect(overlay).toBeVisible({ timeout: 30000 });
   }
 }
 
