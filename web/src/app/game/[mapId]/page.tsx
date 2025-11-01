@@ -89,12 +89,13 @@ export default function GamePage() {
   useEffect(() => {
     // Only show modal when transitioning to idle from a non-playing state
     // This prevents modal from opening when restarting (which goes idle -> playing)
+    // Don't show if modal was explicitly closed by user (hasSeenModal returns true)
     if (state.status === 'idle' && !showModal && !isRestartingRef.current) {
       const hasSeen = hasSeenModal();
       if (!hasSeen) {
         setIsFirstVisit(true);
+        setShowModal(true);
       }
-      setShowModal(true);
     }
   }, [state.status, showModal]);
 

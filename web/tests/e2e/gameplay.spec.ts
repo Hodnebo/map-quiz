@@ -68,10 +68,10 @@ async function startGameWithModalHandling(page: any) {
     
     // Click start button
     await startButton.click();
+    // Wait for modal to close first
+    await expect(modal).not.toBeVisible({ timeout: 5000 });
     // Wait for overlay to appear (this is the key indicator) with increased timeout
     await expect(overlay).toBeVisible({ timeout: 30000 });
-    // Give modal time to close
-    await page.waitForTimeout(2000);
   } else {
     // Modal not open, just click start
     await startButton.click();
