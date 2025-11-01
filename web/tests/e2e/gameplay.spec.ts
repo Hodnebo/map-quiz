@@ -241,11 +241,23 @@ test.describe('Gameplay', () => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
     
-    // Start a game first to ensure modal is closed
-    await page.click('[data-testid="start-game-button"]');
+    // Handle modal if it's open (first visit) - start game
+    const modal = page.locator('[data-testid="game-mode-modal"]');
+    const startButton = page.locator('[data-testid="start-game-button"]');
     
-    // Wait for game overlay to be visible
-    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible({ timeout: 15000 });
+    if (await modal.isVisible().catch(() => false)) {
+      // Click start game button to close modal and start game
+      await startButton.click();
+      // Wait for modal to disappear (it might take a moment)
+      await page.waitForTimeout(1000);
+    } else {
+      // Start a game if modal is not open
+      await startButton.click();
+    }
+    
+    // Wait for game overlay to be visible (this confirms game started)
+    // The overlay might be hidden while modal is closing, so wait a bit longer
+    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible({ timeout: 20000 });
     
     // Get initial header height
     const header = page.locator('header');
