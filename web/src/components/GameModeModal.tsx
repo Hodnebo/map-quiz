@@ -90,6 +90,8 @@ export function GameModeModal({
         description: modeStrategy.description,
         settings: modeStrategy.getDefaultSettings() as any,
       };
+      // Start game first, then close modal
+      // This ensures the game starts before the modal closes
       onStartGame(mode, settings);
       onClose();
     }
@@ -101,10 +103,18 @@ export function GameModeModal({
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={(event, reason) => {
+        // Handle backdrop click and ESC key
+        if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
+          onClose();
+        }
+      }}
       maxWidth="sm"
       fullWidth
       data-testid="game-mode-modal"
+      TransitionProps={{
+        timeout: 200, // Faster transition for better UX
+      }}
       PaperProps={{
         sx: {
           borderRadius: 2,
@@ -289,7 +299,10 @@ export function GameModeModal({
 
       <DialogActions sx={{ p: 3, pt: 0 }}>
         <Button
-          onClick={onClose}
+          onClick={() => {
+            // Close modal immediately
+            onClose();
+          }}
           variant="outlined"
           data-testid="cancel-button"
           sx={{
@@ -304,14 +317,21 @@ export function GameModeModal({
           {t('modal.cancel', locale)}
         </Button>
         <Button
-          onClick={handleStartGame}
+          onClick={() => {
+            handleStartGame();
+          }}
           variant="contained"
           data-testid="start-game-button"
+          disabled={!selectedModeStrategy}
           sx={{
             backgroundColor: 'rgba(255,255,255,0.2)',
             color: 'white',
             '&:hover': {
               backgroundColor: 'rgba(255,255,255,0.3)',
+            },
+            '&:disabled': {
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              color: 'rgba(255,255,255,0.5)',
             },
           }}
         >

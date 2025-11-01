@@ -4,24 +4,8 @@ import { test, expect } from '@playwright/test';
 async function waitForModalToClose(page: any, timeout = 15000) {
   const modal = page.locator('[data-testid="game-mode-modal"]');
   
-  // Wait for modal to not be visible - use a polling approach
-  const startTime = Date.now();
-  while (Date.now() - startTime < timeout) {
-    const isVisible = await modal.isVisible().catch(() => false);
-    if (!isVisible) {
-      // Modal is not visible, verify it's truly gone
-      await page.waitForTimeout(300); // Small wait to ensure transition completed
-      const stillVisible = await modal.isVisible().catch(() => false);
-      if (!stillVisible) {
-        return; // Modal is closed
-      }
-    }
-    await page.waitForTimeout(100); // Poll every 100ms
-  }
-  
-  // If we get here, modal is still visible after timeout
-  // Try one more time with expect
-  await expect(modal).not.toBeVisible({ timeout: 5000 });
+  // Wait for modal to not be visible
+  await expect(modal).not.toBeVisible({ timeout });
 }
 
 // Helper function to wait for game to start (modal closed + overlay visible)
@@ -130,12 +114,10 @@ test.describe('Game Modes', () => {
     await page.waitForTimeout(500); // Wait for click to register
     
     // Wait for modal to close (increased timeout)
-    try {
-      await waitForModalToClose(page, 15000);
-    } catch {
-      // If modal doesn't close immediately, check if it's at least not blocking
-      // Verify by checking if we can interact with other elements
-    }
+    await waitForModalToClose(page, 15000);
+    
+    // Additional wait to ensure backdrop transition completes (MUI Dialog keeps backdrop during transition)
+    await page.waitForTimeout(250);
     
     // Verify game didn't start - overlay should not be visible
     const overlay = page.locator('[data-testid="game-overlay"]');
@@ -204,14 +186,15 @@ test.describe('Game Modes', () => {
     const modal = page.locator('[data-testid="game-mode-modal"]');
     await expect(modal).toBeVisible({ timeout: 10000 });
     
-    // Cancel should work - verify game doesn't start
+    // Cancel should work - verify game doesn't start a new game
+    // The existing game should still be running (overlay visible)
     await page.click('[data-testid="cancel-button"]');
-    await page.waitForTimeout(2000); // Increased wait for cancel to register
+    await waitForModalToClose(page, 5000);
     
-    // Overlay should not be visible after cancel
-    await page.waitForTimeout(1000);
+    // Overlay should still be visible after cancel (game is still running)
+    await page.waitForTimeout(500);
     const overlayVisible = await overlay.isVisible().catch(() => false);
-    expect(overlayVisible).toBe(false);
+    expect(overlayVisible).toBe(true); // Game should still be running
     
     // Verify modal can be reopened
     await page.click('[data-testid="settings-button"]');
