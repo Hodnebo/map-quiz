@@ -7,7 +7,7 @@ import { useRegionData } from "@/hooks/useRegionData";
 import type { GameSettings, GameState, GameMode } from "@/lib/types";
 import { createInitialState, startGame, answer } from "@/lib/game";
 import { load, save, hasSeenModal, markModalAsSeen } from "@/lib/persistence";
-import { playCorrectSound, playWrongSound, initializeAudio } from "@/lib/audio";
+import { playCorrectSound, playWrongSound, initializeAudio, playGameCompletionSound } from "@/lib/audio";
 import { getEffectiveSettings } from "@/lib/gameModes";
 import { gameModeRegistry } from "@/lib/gameModeRegistry";
 import "@/lib/modes"; // Import to ensure modes are registered
@@ -58,6 +58,7 @@ export default function GamePage() {
   const settingsRef = useRef(settings);
   const answerTimeoutRef = useRef<number | null>(null);
   const isRestartingRef = useRef(false); // Track if we're restarting to prevent modal from opening
+  const prevStatusRef = useRef<GameState['status']>(state.status); // Track previous status for completion sound
   useEffect(() => { stateRef.current = state; }, [state]);
   useEffect(() => { settingsRef.current = settings; }, [settings]);
 
@@ -85,6 +86,17 @@ export default function GamePage() {
   useEffect(() => save(`settings:${mapId}`, settings), [settings, mapId]);
   useEffect(() => save(`seed:${mapId}`, seed), [seed, mapId]);
   useEffect(() => initializeAudio(), []);
+
+  // Play completion sound when game ends (only when transitioning from playing to ended)
+  useEffect(() => {
+    if (prevStatusRef.current === 'playing' && state.status === 'ended' && state.settings.rounds > 0) {
+      // Only play if audio is enabled
+      if (settings.audioEnabled ?? true) {
+        playGameCompletionSound(state.correctAnswers, state.settings.rounds);
+      }
+    }
+    prevStatusRef.current = state.status;
+  }, [state.status, state.correctAnswers, state.settings.rounds, settings.audioEnabled]);
 
   useEffect(() => {
     // Only show modal when transitioning to idle from a non-playing state
