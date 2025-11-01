@@ -100,15 +100,9 @@ export function GameModeModal({
   const selectedModeStrategy = gameModeRegistry.getMode(selectedMode);
   const settingsProps = selectedModeStrategy.getSettingsProps();
 
-  // Don't render Dialog at all when closed to prevent blocking interactions
-  if (!open) {
-    return null;
-  }
-
   return (
     <Dialog
-      key={open ? 'open' : 'closed'} // Force re-creation when state changes
-      open={true}
+      open={open}
       onClose={(event, reason) => {
         // Handle backdrop click and ESC key
         if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
@@ -118,6 +112,9 @@ export function GameModeModal({
       maxWidth="sm"
       fullWidth
       data-testid="game-mode-modal"
+      TransitionProps={{
+        timeout: 200, // Faster transition for better UX
+      }}
       PaperProps={{
         sx: {
           borderRadius: 2,
