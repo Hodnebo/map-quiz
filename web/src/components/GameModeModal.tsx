@@ -90,6 +90,8 @@ export function GameModeModal({
         description: modeStrategy.description,
         settings: modeStrategy.getDefaultSettings() as any,
       };
+      // Start game first, then close modal
+      // This ensures the game starts before the modal closes
       onStartGame(mode, settings);
       onClose();
     }
@@ -98,10 +100,21 @@ export function GameModeModal({
   const selectedModeStrategy = gameModeRegistry.getMode(selectedMode);
   const settingsProps = selectedModeStrategy.getSettingsProps();
 
+  // Don't render Dialog at all when closed to prevent blocking interactions
+  if (!open) {
+    return null;
+  }
+
   return (
     <Dialog
-      open={open}
-      onClose={onClose}
+      key={open ? 'open' : 'closed'} // Force re-creation when state changes
+      open={true}
+      onClose={(event, reason) => {
+        // Handle backdrop click and ESC key
+        if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
+          onClose();
+        }
+      }}
       maxWidth="sm"
       fullWidth
       data-testid="game-mode-modal"
@@ -289,7 +302,10 @@ export function GameModeModal({
 
       <DialogActions sx={{ p: 3, pt: 0 }}>
         <Button
-          onClick={onClose}
+          onClick={() => {
+            // Close modal immediately
+            onClose();
+          }}
           variant="outlined"
           data-testid="cancel-button"
           sx={{
@@ -304,14 +320,21 @@ export function GameModeModal({
           {t('modal.cancel', locale)}
         </Button>
         <Button
-          onClick={handleStartGame}
+          onClick={() => {
+            handleStartGame();
+          }}
           variant="contained"
           data-testid="start-game-button"
+          disabled={!selectedModeStrategy}
           sx={{
             backgroundColor: 'rgba(255,255,255,0.2)',
             color: 'white',
             '&:hover': {
               backgroundColor: 'rgba(255,255,255,0.3)',
+            },
+            '&:disabled': {
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              color: 'rgba(255,255,255,0.5)',
             },
           }}
         >

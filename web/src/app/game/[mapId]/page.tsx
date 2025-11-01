@@ -160,14 +160,25 @@ export default function GamePage() {
 
   const handleModalClose = useCallback(() => {
     setShowModal(false);
-    if (isFirstVisit) {
+    // Always mark modal as seen when user closes it (either cancel or start game)
+    // This prevents the modal from reopening immediately
+    if (!hasSeenModal()) {
       markModalAsSeen();
+    }
+    if (isFirstVisit) {
       setIsFirstVisit(false);
     }
   }, [isFirstVisit]);
 
   const handleStartGame = useCallback((mode: GameMode, newSettings: GameSettings) => {
     if (!canPlay) return;
+    
+    // Close modal first
+    setShowModal(false);
+    if (isFirstVisit) {
+      markModalAsSeen();
+      setIsFirstVisit(false);
+    }
     
     const updatedSettings = {
       ...settings,
@@ -178,19 +189,12 @@ export default function GamePage() {
     setWrongAnswerIds([]);
     setFeedback(null);
     setFeedbackMessage("");
-    setShowModal(false);
-    if (isFirstVisit) {
-      markModalAsSeen();
-      setIsFirstVisit(false);
-    }
     
-    // Use requestAnimationFrame to ensure state updates happen in the right order
-    requestAnimationFrame(() => {
-      const settingsWithEffective = { ...updatedSettings, ...getEffectiveSettings(updatedSettings) };
-      const initialState = createInitialState(settingsWithEffective);
-      const newState = startGame(initialState, allIds, seed);
-      setState(newState);
-    });
+    // Start game synchronously after closing modal
+    const settingsWithEffective = { ...updatedSettings, ...getEffectiveSettings(updatedSettings) };
+    const initialState = createInitialState(settingsWithEffective);
+    const newState = startGame(initialState, allIds, seed);
+    setState(newState);
   }, [settings, isFirstVisit, canPlay, allIds, seed]);
 
   const handleNewGame = useCallback(() => {
