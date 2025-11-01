@@ -90,10 +90,9 @@ export function GameModeModal({
         description: modeStrategy.description,
         settings: modeStrategy.getDefaultSettings() as any,
       };
-      // Start game first, then close modal
-      // This ensures the game starts before the modal closes
+      // onStartGame handles closing the modal and starting the game
+      // Don't call onClose() here to avoid double-closing and race conditions
       onStartGame(mode, settings);
-      onClose();
     }
   };
 
