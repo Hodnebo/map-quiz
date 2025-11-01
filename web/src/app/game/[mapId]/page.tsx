@@ -167,6 +167,8 @@ export default function GamePage() {
   }, [isFirstVisit]);
 
   const handleStartGame = useCallback((mode: GameMode, newSettings: GameSettings) => {
+    if (!canPlay) return;
+    
     const updatedSettings = {
       ...settings,
       ...newSettings,
@@ -181,14 +183,14 @@ export default function GamePage() {
       markModalAsSeen();
       setIsFirstVisit(false);
     }
-    setTimeout(() => {
-      if (!canPlay) return;
+    
+    // Use requestAnimationFrame to ensure state updates happen in the right order
+    requestAnimationFrame(() => {
       const settingsWithEffective = { ...updatedSettings, ...getEffectiveSettings(updatedSettings) };
-      setState(createInitialState(settingsWithEffective));
-      setTimeout(() => {
-        setState((s) => startGame(s, allIds, seed));
-      }, 0);
-    }, 0);
+      const initialState = createInitialState(settingsWithEffective);
+      const newState = startGame(initialState, allIds, seed);
+      setState(newState);
+    });
   }, [settings, isFirstVisit, canPlay, allIds, seed]);
 
   const handleNewGame = useCallback(() => {
@@ -375,11 +377,19 @@ export default function GamePage() {
               fontWeight: 'bold',
               color: 'white',
               textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              minWidth: 0,
+              maxWidth: '100%',
+              '@media (max-width: 600px)': {
+                fontSize: 'clamp(1rem, 4vw, 1.5rem)',
+              },
             }}
           >
             {t(mapConfig.nameKey, locale)}
           </Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexShrink: 0 }}>
             {state.status === "idle" ? (
               <Button
                 variant="contained"
@@ -455,6 +465,8 @@ export default function GamePage() {
                 textTransform: 'uppercase',
                 fontWeight: 600,
                 fontSize: '0.85rem',
+                minWidth: 'auto',
+                padding: { xs: '4px', sm: '8px' },
                 '&:hover': {
                   backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 },
@@ -466,8 +478,12 @@ export default function GamePage() {
               onClick={() => setSettings(prev => ({ ...prev, audioEnabled: !prev.audioEnabled }))}
               color="inherit"
               aria-label={settings.audioEnabled ? t('settings.soundOff', locale) : t('settings.soundOn', locale)}
+              data-testid="sound-toggle-button"
               sx={{
                 color: 'white',
+                flexShrink: 0,
+                width: { xs: 36, sm: 40 },
+                height: { xs: 36, sm: 40 },
                 '&:hover': {
                   backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 },
@@ -481,6 +497,9 @@ export default function GamePage() {
               aria-label="toggle theme"
               sx={{
                 color: 'white',
+                flexShrink: 0,
+                width: { xs: 36, sm: 40 },
+                height: { xs: 36, sm: 40 },
                 '&:hover': {
                   backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 },
