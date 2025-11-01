@@ -56,6 +56,75 @@ test.describe('Game Modes', () => {
     await expect(page.getByRole('option', { name: 'Ekspert' })).toBeVisible();
   });
 
+  test('should cancel modal and close it properly', async ({ page }) => {
+    // Ensure modal is open
+    const modal = page.locator('[data-testid="game-mode-modal"]');
+    if (!(await modal.isVisible().catch(() => false))) {
+      await page.click('[data-testid="settings-button"]');
+      await expect(modal).toBeVisible();
+    }
+    
+    // Click cancel button
+    const cancelButton = page.locator('[data-testid="cancel-button"]');
+    await expect(cancelButton).toBeVisible();
+    await cancelButton.click();
+    
+    // Modal should be closed
+    await expect(modal).not.toBeVisible({ timeout: 5000 });
+    
+    // Game should not have started (overlay should not be visible)
+    const overlay = page.locator('[data-testid="game-overlay"]');
+    await expect(overlay).not.toBeVisible();
+  });
+
+  test('should start game on first button press', async ({ page }) => {
+    // Ensure modal is open
+    const modal = page.locator('[data-testid="game-mode-modal"]');
+    if (!(await modal.isVisible().catch(() => false))) {
+      await page.click('[data-testid="settings-button"]');
+      await expect(modal).toBeVisible();
+    }
+    
+    // Click start game button once
+    const startButton = page.locator('[data-testid="start-game-button"]');
+    await expect(startButton).toBeVisible();
+    await startButton.click();
+    
+    // Game should start immediately (overlay should appear)
+    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible({ timeout: 20000 });
+    
+    // Modal should be closed
+    await expect(modal).not.toBeVisible({ timeout: 5000 });
+  });
+
+  test('should work consistently before and after first game start', async ({ page }) => {
+    // First game start
+    const modal = page.locator('[data-testid="game-mode-modal"]');
+    if (!(await modal.isVisible().catch(() => false))) {
+      await page.click('[data-testid="settings-button"]');
+      await expect(modal).toBeVisible();
+    }
+    
+    await page.click('[data-testid="start-game-button"]');
+    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible({ timeout: 20000 });
+    await expect(modal).not.toBeVisible({ timeout: 5000 });
+    
+    // After game ends or is restarted, modal should work again
+    // Click settings button to open modal again
+    await page.click('[data-testid="settings-button"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    
+    // Cancel should work
+    await page.click('[data-testid="cancel-button"]');
+    await expect(modal).not.toBeVisible({ timeout: 5000 });
+    
+    // Open again and start should work
+    await page.click('[data-testid="settings-button"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    await page.click('[data-testid="start-game-button"]');
+    await expect(page.locator('[data-testid="game-overlay"]')).toBeVisible({ timeout: 20000 });
+  });
+
   test('should start game with selected mode and settings', async ({ page }) => {
     // Ensure modal is open
     const modal = page.locator('[data-testid="game-mode-modal"]');

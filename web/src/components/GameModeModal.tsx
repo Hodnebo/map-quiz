@@ -291,6 +291,7 @@ export function GameModeModal({
         <Button
           onClick={onClose}
           variant="outlined"
+          data-testid="cancel-button"
           sx={{
             color: 'white',
             borderColor: 'rgba(255,255,255,0.3)',

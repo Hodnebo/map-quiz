@@ -47,15 +47,16 @@ export default function GameResultsScreen({
     return Math.round((correctAnswers / totalRounds) * 100);
   }, [correctAnswers, totalRounds]);
 
-  // Show fanfare if all questions answered correctly
+  // Show fanfare based on percentage - scale with performance
   useEffect(() => {
-    if (correctAnswers === totalRounds && totalRounds > 0) {
+    if (totalRounds > 0 && percentage > 0) {
       setShowFanfare(true);
-      // Hide fanfare after animation duration
-      const timer = setTimeout(() => setShowFanfare(false), 3000);
+      // Hide fanfare after animation duration (longer for better scores)
+      const duration = Math.max(2000, percentage * 40); // 2-4 seconds based on percentage
+      const timer = setTimeout(() => setShowFanfare(false), duration);
       return () => clearTimeout(timer);
     }
-  }, [correctAnswers, totalRounds]);
+  }, [correctAnswers, totalRounds, percentage]);
 
   // Determine congratulations message based on percentage
   const congratulationsKey = useMemo(() => {
@@ -90,26 +91,18 @@ export default function GameResultsScreen({
           padding: { xs: 2, sm: 3 },
         }}
         >
-          {/* Fanfare Animation */}
+          {/* Confetti Animation - scales with percentage */}
           {showFanfare && (
             <>
               <style>{`
-                @keyframes glitter {
+                @keyframes confetti-fall-${percentage} {
                   0% {
                     opacity: 1;
-                    transform: translateY(0) scale(1);
+                    transform: translateY(0) rotate(0deg);
                   }
                   100% {
                     opacity: 0;
-                    transform: translateY(-300px) scale(0) rotate(360deg);
-                  }
-                }
-                @keyframes pulse {
-                  0%, 100% {
-                    transform: translate(-50%, -50%) scale(1);
-                  }
-                  50% {
-                    transform: translate(-50%, -50%) scale(1.1);
+                    transform: translateY(100vh) rotate(720deg);
                   }
                 }
               `}</style>
@@ -122,42 +115,34 @@ export default function GameResultsScreen({
                   overflow: 'hidden',
                 }}
               >
-                {Array.from({ length: 50 }).map((_, i) => {
-                  const colors = ['#FFD700', '#FFA500', '#FF6347', '#FF1493', '#00CED1'];
+                {Array.from({ length: Math.floor(percentage * 0.8) }).map((_, i) => {
+                  const colors = ['#FFD700', '#FFA500', '#FF6347', '#FF1493', '#00CED1', '#32CD32', '#FF69B4', '#00BFFF'];
+                  const color = colors[Math.floor(Math.random() * colors.length)];
                   const delay = Math.random() * 0.5;
                   const duration = 2 + Math.random() * 2;
                   const left = Math.random() * 100;
-                  const top = Math.random() * 100;
+                  const size = 6 + Math.random() * 8;
+                  const randomX = (Math.random() - 0.5) * 200;
+                  const shape = Math.random() > 0.5 ? 'circle' : 'square';
+                  
                   return (
                     <Box
                       key={i}
+                      component="div"
                       sx={{
                         position: 'absolute',
                         left: `${left}%`,
-                        top: `${top}%`,
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        backgroundColor: colors[Math.floor(Math.random() * colors.length)],
-                        animation: `glitter ${duration}s ease-out ${delay}s forwards`,
+                        top: '-10px',
+                        width: size,
+                        height: size,
+                        borderRadius: shape === 'circle' ? '50%' : '20%',
+                        backgroundColor: color,
+                        animation: `confetti-fall-${percentage} ${duration}s ease-out ${delay}s forwards`,
+                        transform: `translateX(${randomX}px)`,
                       }}
                     />
                   );
                 })}
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    fontSize: { xs: '3rem', sm: '4rem' },
-                    fontWeight: 700,
-                    color: '#FFD700',
-                    textShadow: '0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.6)',
-                    animation: 'pulse 1s ease-in-out infinite',
-                  }}
-                >
-                  ?? Perfect! ??
-                </Box>
               </Box>
             </>
           )}
