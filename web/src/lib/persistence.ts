@@ -19,10 +19,19 @@ export function load<T>(key: string, fallback: T): T {
   }
 }
 
-export function hasSeenModal(): boolean {
+export function hasSeenModal(mapId?: string): boolean {
+  if (mapId) {
+    return load(`hasSeenModal:${mapId}`, false);
+  }
+  // Legacy support: check global flag if no mapId provided
   return load('hasSeenModal', false);
 }
 
-export function markModalAsSeen(): void {
-  save('hasSeenModal', true);
+export function markModalAsSeen(mapId?: string): void {
+  if (mapId) {
+    save(`hasSeenModal:${mapId}`, true);
+  } else {
+    // Legacy support: save global flag if no mapId provided
+    save('hasSeenModal', true);
+  }
 }

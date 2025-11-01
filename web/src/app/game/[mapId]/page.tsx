@@ -90,14 +90,15 @@ export default function GamePage() {
     // Only show modal when transitioning to idle from a non-playing state
     // This prevents modal from opening when restarting (which goes idle -> playing)
     // Don't show if modal was explicitly closed by user (hasSeenModal returns true)
+    // Use per-map tracking: each map should show its own modal
     if (state.status === 'idle' && !showModal && !isRestartingRef.current) {
-      const hasSeen = hasSeenModal();
+      const hasSeen = hasSeenModal(mapId);
       if (!hasSeen) {
         setIsFirstVisit(true);
         setShowModal(true);
       }
     }
-  }, [state.status, showModal]);
+  }, [state.status, showModal, mapId]);
 
   const prevGameModeRef = useRef(settings.gameMode);
   useEffect(() => {
@@ -161,15 +162,16 @@ export default function GamePage() {
 
   const handleModalClose = useCallback(() => {
     setShowModal(false);
-    // Always mark modal as seen when user closes it (either cancel or start game)
-    // This prevents the modal from reopening immediately
-    if (!hasSeenModal()) {
-      markModalAsSeen();
+    // Mark modal as seen for this specific map when user closes it
+    // This prevents the modal from reopening immediately for this map
+    // But allows it to show for other maps
+    if (!hasSeenModal(mapId)) {
+      markModalAsSeen(mapId);
     }
     if (isFirstVisit) {
       setIsFirstVisit(false);
     }
-  }, [isFirstVisit]);
+  }, [isFirstVisit, mapId]);
 
   const handleStartGame = useCallback((mode: GameMode, newSettings: GameSettings) => {
     if (!canPlay) return;
@@ -177,7 +179,7 @@ export default function GamePage() {
     // Close modal first
     setShowModal(false);
     if (isFirstVisit) {
-      markModalAsSeen();
+      markModalAsSeen(mapId);
       setIsFirstVisit(false);
     }
     
@@ -196,7 +198,7 @@ export default function GamePage() {
     const initialState = createInitialState(settingsWithEffective);
     const newState = startGame(initialState, allIds, seed);
     setState(newState);
-  }, [settings, isFirstVisit, canPlay, allIds, seed]);
+  }, [settings, isFirstVisit, canPlay, allIds, seed, mapId]);
 
   const handleNewGame = useCallback(() => {
     setShowModal(true);
