@@ -59,7 +59,7 @@ export default function GameOverlay({
   }, [state.correctAnswers, answeredRounds]);
 
   return (
-    <>
+    <Box {...(state.status !== 'idle' ? { 'data-testid': 'game-overlay' } : {})} sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none' }}>
       {/* Mobile Stats - Expandable/Collapsible */}
       <Box
         sx={{
@@ -70,6 +70,7 @@ export default function GameOverlay({
           zIndex: 11,
           pr: 'env(safe-area-inset-right)',
           maxWidth: 180,
+          pointerEvents: 'auto',
         }}
         onClick={() => setMobileStatsExpanded(!mobileStatsExpanded)}
       >
@@ -186,6 +187,7 @@ export default function GameOverlay({
           gap: 1,
           maxWidth: 250,
           minWidth: 200,
+          pointerEvents: 'auto',
         }}
       >
         <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 } }}>
@@ -311,7 +313,6 @@ export default function GameOverlay({
         {/* Current Target Info */}
         {state.status === "playing" && targetName && settings.gameMode !== 'reverse_quiz' && (
           <Card
-            data-testid="game-overlay"
             sx={{
               backgroundColor: 'rgba(255, 255, 255, 0.9)',
               backdropFilter: 'blur(12px)',
@@ -380,6 +381,6 @@ export default function GameOverlay({
           />
         </Drawer>
       )}
-    </>
+    </Box>
   );
 }

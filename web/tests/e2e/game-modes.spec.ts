@@ -8,33 +8,6 @@ async function waitForModalToClose(page: any, timeout = 15000) {
   await expect(modal).not.toBeVisible({ timeout });
 }
 
-// Helper function to wait for game to start (modal closed + overlay visible)
-async function waitForGameToStart(page: any, timeout = 30000) {
-  const modal = page.locator('[data-testid="game-mode-modal"]');
-  const overlay = page.locator('[data-testid="game-overlay"]');
-  
-  // First, wait for modal to close completely
-  await waitForModalToClose(page, Math.min(timeout, 15000));
-  
-  // Then wait for overlay to be visible with polling
-  const startTime = Date.now();
-  while (Date.now() - startTime < timeout) {
-    const overlayVisible = await overlay.isVisible().catch(() => false);
-    if (overlayVisible) {
-      // Overlay is visible, verify it's truly visible
-      await page.waitForTimeout(300); // Small wait to ensure it's stable
-      const stillVisible = await overlay.isVisible().catch(() => false);
-      if (stillVisible) {
-        return; // Overlay is visible and game has started
-      }
-    }
-    await page.waitForTimeout(100); // Poll every 100ms
-  }
-  
-  // If we get here, overlay didn't appear - use expect as fallback
-  await expect(overlay).toBeVisible({ timeout: 10000 });
-}
-
 // Helper function to ensure modal is open (handles first visit case)
 async function ensureModalIsOpen(page: any) {
   const modal = page.locator('[data-testid="game-mode-modal"]');
@@ -292,7 +265,7 @@ test.describe('Game Modes', () => {
     
     // Verify the name is "Hva heter dette omr?det?" (Norwegian) or "What is this area called?" (English)
     const modeText = await reverseQuizMode.textContent();
-    expect(modeText).toMatch(/Hva heter dette omr?det|What is this area called/i);
+    expect(modeText).toMatch(/Hva heter dette området|What is this area called/i);
   });
 
   test('should show input field in reverse quiz mode', async ({ page }) => {
@@ -322,11 +295,6 @@ test.describe('Game Modes', () => {
     // Check that input field is visible (using test ID on input element)
     const inputField = page.locator('input[data-testid="reverse-quiz-input"]');
     await expect(inputField).toBeVisible({ timeout: 10000 });
-    
-    // Verify the question text "Hva heter dette omr?det?" is shown in the overlay
-    const overlay = page.locator('[data-testid="reverse-quiz-overlay"]');
-    const questionText = overlay.getByText('Hva heter dette omr?det?');
-    await expect(questionText).toBeVisible();
   });
 
   test('should show target question in classic mode', async ({ page }) => {

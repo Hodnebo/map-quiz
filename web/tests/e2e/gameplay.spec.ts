@@ -1,55 +1,5 @@
 import { test, expect } from '@playwright/test';
 
-// Helper function to wait for modal to fully close
-async function waitForModalToClose(page: any, timeout = 15000) {
-  const modal = page.locator('[data-testid="game-mode-modal"]');
-  
-  // Wait for modal to not be visible - use a polling approach
-  const startTime = Date.now();
-  while (Date.now() - startTime < timeout) {
-    const isVisible = await modal.isVisible().catch(() => false);
-    if (!isVisible) {
-      // Modal is not visible, verify it's truly gone
-      await page.waitForTimeout(300); // Small wait to ensure transition completed
-      const stillVisible = await modal.isVisible().catch(() => false);
-      if (!stillVisible) {
-        return; // Modal is closed
-      }
-    }
-    await page.waitForTimeout(100); // Poll every 100ms
-  }
-  
-  // If we get here, modal is still visible after timeout
-  // Try one more time with expect
-  await expect(modal).not.toBeVisible({ timeout: 5000 });
-}
-
-// Helper function to wait for game to start (modal closed + overlay visible)
-async function waitForGameToStart(page: any, timeout = 30000) {
-  const modal = page.locator('[data-testid="game-mode-modal"]');
-  const overlay = page.locator('[data-testid="game-overlay"]');
-  
-  // First, wait for modal to close completely
-  await waitForModalToClose(page, Math.min(timeout, 15000));
-  
-  // Then wait for overlay to be visible with polling
-  const startTime = Date.now();
-  while (Date.now() - startTime < timeout) {
-    const overlayVisible = await overlay.isVisible().catch(() => false);
-    if (overlayVisible) {
-      // Overlay is visible, verify it's truly visible
-      await page.waitForTimeout(300); // Small wait to ensure it's stable
-      const stillVisible = await overlay.isVisible().catch(() => false);
-      if (stillVisible) {
-        return; // Overlay is visible and game has started
-      }
-    }
-    await page.waitForTimeout(100); // Poll every 100ms
-  }
-  
-  // If we get here, overlay didn't appear - use expect as fallback
-  await expect(overlay).toBeVisible({ timeout: 10000 });
-}
 
 // Helper function to start game handling modal if needed
 async function startGameWithModalHandling(page: any) {
@@ -211,7 +161,7 @@ test.describe('Gameplay', () => {
     
     // Try to click on the same area again - it should not trigger another answer
     // We verify this by checking that the score/round counter doesn't change unexpectedly
-    const scoreBefore = await page.locator('[data-testid="score-display"]').textContent();
+    await page.locator('[data-testid="score-display"]').textContent();
     await mapContainer.click({ force: true });
     
     // Wait a bit
@@ -241,7 +191,7 @@ test.describe('Gameplay', () => {
     // Get the first question
     const questionText1 = page.locator('[data-testid="question-text"]');
     await expect(questionText1).toBeVisible();
-    const firstQuestion = await questionText1.textContent();
+    await questionText1.textContent();
     
     // Click restart button (should be visible when game is playing)
     // Use a more specific selector that matches the restart button in the header
@@ -312,8 +262,7 @@ test.describe('Gameplay', () => {
       // Check for confetti elements (they should be present if percentage > 0)
       await page.waitForTimeout(1000); // Wait for confetti animation to start
       // Confetti elements are created dynamically, so we check for the animation container
-      const confettiContainer = page.locator('[data-testid="results-screen"]');
-      // The confetti animation should be visible if game ended
+      page.locator('[data-testid="results-screen"]');
     }
   });
 
