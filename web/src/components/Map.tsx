@@ -17,6 +17,7 @@ interface MapProps {
   wrongAnswerIds?: string[];
   hideBasemapLabels?: boolean;
   candidateIds?: string[];
+  trainingModeIds?: string[]; // IDs to show labels for in training mode (neutral blue color)
   isDarkMode?: boolean;
   mapStyle?: "backdrop" | "dataviz" | "basic-v2";
   center?: LngLatLike;
@@ -37,6 +38,7 @@ export default function MapView(props: MapProps) {
     wrongAnswerIds = [],
     hideBasemapLabels = true,
     candidateIds = [],
+    trainingModeIds = [],
     mapStyle = "basic-v2",
     center = [10.7522, 59.9139] as LngLatLike, // Default to Oslo
     initialZoom = 10,
@@ -319,6 +321,8 @@ export default function MapView(props: MapProps) {
       const k = String(f.id ?? f.properties?.id);
       featureById.set(k, f);
     }
+    
+    // Show labels for revealedIds (game answers - green/red)
     for (const id of listStr) {
       const f = featureById.get(id);
       if (!f) continue;
@@ -340,7 +344,34 @@ export default function MapView(props: MapProps) {
         .addTo(map);
       markersRef.current.push(marker);
     }
-  }, [revealedIds, wrongAnswerIds, correctFillId]);
+    
+    // Show labels for trainingModeIds that aren't already revealed (blue)
+    const trainingStr: string[] = (trainingModeIds ?? []).map((x) => String(x));
+    const revealedSet = new Set(listStr);
+    for (const id of trainingStr) {
+      // Skip if already shown as revealed (green/red)
+      if (revealedSet.has(id)) continue;
+      
+      const f = featureById.get(id);
+      if (!f) continue;
+      const name = String(f.properties?.name ?? id);
+      const centroid = f.properties?.centroid as [number, number] | undefined;
+      if (!centroid || !Array.isArray(centroid)) continue;
+      const el = document.createElement("div");
+      // Blue background for training mode labels
+      el.style.background = "#3b82f6"; // blue-500
+      el.style.color = "white";
+      el.style.padding = "2px 6px";
+      el.style.borderRadius = "4px";
+      el.style.fontSize = "12px";
+      el.style.boxShadow = "0 1px 2px rgba(0,0,0,0.2)";
+      el.textContent = name;
+      const marker = new maplibregl.Marker({ element: el, anchor: "center" })
+        .setLngLat(centroid)
+        .addTo(map);
+      markersRef.current.push(marker);
+    }
+  }, [revealedIds, wrongAnswerIds, trainingModeIds, correctFillId]);
 
   // Update wrong fill filters when list changes
   useEffect(() => {

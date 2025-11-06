@@ -65,8 +65,8 @@ export class ClassicMode extends BaseGameMode {
 
   getMapConfig(state: GameState, settings: GameSettings, geojson: GeoJSON.FeatureCollection, seed: number): MapConfig {
     const difficulty = settings.difficulty ?? 'normal';
-    // Disable zoom for hard and expert difficulties
-    const zoomEnabled = difficulty !== 'hard' && difficulty !== 'expert';
+    // Disable zoom for training, hard and expert difficulties
+    const zoomEnabled = difficulty !== 'training' && difficulty !== 'hard' && difficulty !== 'expert';
     
     if (!zoomEnabled || !state.currentTargetId) {
       return this.createMapConfig(false);

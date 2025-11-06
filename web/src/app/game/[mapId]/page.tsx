@@ -350,6 +350,14 @@ export default function GamePage() {
     return mode.getMapConfig(state, settings, geojson, seed);
   }, [geojson, state, settings, seed]);
 
+  // In training mode, show all labels with blue color; keep revealedIds for game logic
+  const trainingModeIdsForMap = useMemo(() => {
+    if (effectiveSettings.difficulty === 'training') {
+      return allIds;
+    }
+    return [];
+  }, [effectiveSettings.difficulty, allIds]);
+
   // Early return after all hooks are called
   if (!mapConfig) {
     return (
@@ -568,9 +576,10 @@ export default function GamePage() {
             disableHoverOutline={mapConfigForComponent.disableHoverOutline}
             focusBounds={mapConfigForComponent.focusBounds}
             focusPadding={mapConfigForComponent.focusPadding}
-            revealedIds={state.revealedIds}
+            revealedIds={state.revealedIds ?? []}
             wrongAnswerIds={wrongAnswerIds}
             candidateIds={state.candidateIds}
+            trainingModeIds={trainingModeIdsForMap}
             isDarkMode={isDarkMode}
             mapStyle={settings.mapStyle}
             center={mapConfig.center}
